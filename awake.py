@@ -104,27 +104,37 @@ print 'Mode Reg = 0x', format(IO.read_reg('CR?'), '02x')
 evt_file = None
 
 stop_flag = 0
+time_data = []
 x_pos_data = []
+y_pos_data = []
+s_data = []
+power_a_data = []
+power_b_data = []
+power_c_data = []
+power_d_data = []
+x_rms_data = []
+y_rms_data = []
 
 
 def await_stop():
     while True:
         stop_comm = raw_input('Enter "stop" to stop measuring data: ')
         if stop_comm == 'stop':
-            # data_lock.acquire()
             global stop_flag
             stop_flag = 1
-            # data_lock.release()
             break
         else:
             print 'The command entered is invalid'
 
 
 # Updates the graph
-def update(axes, data):
-    x_pos_data.append(data)
-    axes.clear()
-    axes.plot(x_pos_data)
+def update(axes, line, data):
+    # update the x/y data
+    line.set_data(time_data, data)
+    # recompute the data limits
+    axes.relim()
+    # scale the view based on the new data limits
+    axes.autoscale_view()
 
 
 while True:
@@ -264,13 +274,6 @@ while True:
         #         evt_id = packet[0]
         #         evt_no = packet[1] & 0xFFFF
         #         status_reg = packet[2] >> 16
-        #         x = s16(packet[3] >> 16)
-        #         y = s16(packet[3] & 0xFFFF)
-        #         s = s16(packet[4] >> 16)
-        #         PA = packet[5]
-        #         PB = packet[6]
-        #         PC = packet[7]
-        #         PD = packet[8]
 
         # x_his.append(x)
         # y_his.append(y)
@@ -299,21 +302,74 @@ while True:
 
         plt.ion()
         fig = plt.figure()
-        ax1 = fig.add_subplot(1, 1, 1)
 
+        # x pos
+        ax1 = fig.add_subplot(2, 1, 1)
+        # ax1.set_title('title')
+        ax1.set_ylabel('X position (um)')
+        line_x_pos, = ax1.plot(x_pos_data)
+
+        # y pos
+        ax2 = fig.add_subplot(2, 1, 2)
+        # ax2.set_title('title')
+        ax2.set_ylabel('Y position (um)')
+        line_y_pos, = ax2.plot(y_pos_data)
+        
+        # s
+        # ax3 = fig.add_subplot()
+
+        # time counter
+        t = 0
         while not stop_flag:
             samples_in_sfifo = IO.read_sfifo_wd()
             if samples_in_sfifo > 16:
+                t += 1
                 packet = IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
                 if packet[0] != PACKET_ID:
                     print "Packet ID error !"
+
+                # extract new data from packet
                 x = s16(packet[3] >> 16)
-                logging.debug(x)
-                update(ax1, x)
+                y = s16(packet[3] & 0xFFFF)
+                s = s16(packet[4] >> 16)
+                PA = packet[5]
+                PB = packet[6]
+                PC = packet[7]
+                PD = packet[8]
+
+                # add new data to old data
+                time_data.append(t)
+                x_pos_data.append(x)
+                y_pos_data.append(y)
+                s_data.append(s)
+                power_a_data.append(PA)
+                power_b_data.append(PB)
+                power_c_data.append(PC)
+                power_d_data.append(PD)
+
+                x_rms = int(rms(x_pos_data))
+                y_rms = int(rms(y_pos_data))
+                x_rms_data.append(x_rms)
+                y_rms_data.append(y_rms)
+
+                # update the axes
+                update(ax1, line_x_pos, x_pos_data)
+                update(ax2, line_y_pos, y_pos_data)
+                fig.canvas.draw()
                 plt.pause(0.05)
 
         plt.close()
         stop_flag = 0
+
+        # clear data
+        del time_data[:]
+        del x_pos_data[:]
+        del y_pos_data[:]
+        del s_data[:]
+        del power_a_data[:]
+        del power_b_data[:]
+        del power_c_data[:]
+        del power_d_data[:]
 
     else:
         print "Not a valid input!"
