@@ -103,7 +103,15 @@ print 'Mode Reg = 0x', format(IO.read_reg('CR?'), '02x')
 # ------------------------------------------------------
 evt_file = None
 
-stop_flag = 0
+DEFAULT_MODE = 'close'
+POSITION_MODE = 'position'
+INTENSITY_MODE = 'intensity'
+POWER_MODE = 'power'
+RMS_MODE = 'rms'
+STOP_MODE = 'stop'
+
+current_mode = DEFAULT_MODE
+
 time_data = []
 x_pos_data = []
 y_pos_data = []
@@ -116,13 +124,34 @@ x_rms_data = []
 y_rms_data = []
 
 
-def await_stop():
+def get_user_input():
     while True:
-        stop_comm = raw_input('Enter "stop" to stop measuring data: ')
-        if stop_comm == 'stop':
-            global stop_flag
-            stop_flag = 1
+        print """
+        Enter any of the following commands on the left
+        to do the corresponding action on the right:
+        stop        |   to stop measuring data
+        close       |   to close any open plots (but continue measuring data)
+        position    |   to view X/Y data
+        intensity   |   to view S (intensity) data
+        power       |   to view Power AB/CD data
+        rms         |   to view X/Y rms data
+        """
+        comm = raw_input('Your command: ')
+        global current_mode
+
+        if comm == 'stop':
+            current_mode = STOP_MODE
             break
+        elif comm == 'close':
+            current_mode = DEFAULT_MODE
+        elif comm == 'position':
+            current_mode = POSITION_MODE
+        elif comm == 'intensity':
+            current_mode = INTENSITY_MODE
+        elif comm == 'power':
+            current_mode = POWER_MODE
+        elif comm == 'rms':
+            current_mode = RMS_MODE
         else:
             print 'The command entered is invalid'
 
@@ -135,6 +164,67 @@ def update(axes, line, data):
     axes.relim()
     # scale the view based on the new data limits
     axes.autoscale_view()
+
+
+def update_plot():
+    ax1, ax2 = plt.gcf().get_axes()
+    if current_mode == POSITION_MODE:
+        ax1.get_lines()[0].set_data(time_data, x_pos_data)
+        ax2.get_lines()[0].set_data(time_data, y_pos_data)
+
+    elif current_mode == INTENSITY_MODE:
+        ax1.get_lines()[0].set_data(time_data, s_data)
+    elif current_mode == POWER_MODE:
+        ax1.get_lines()[0].set_data(time_data, power_a_data)
+        ax1.get_lines()[1].set_data(time_data, power_b_data)
+        ax2.get_lines()[0].set_data(time_data, power_c_data)
+        ax2.get_lines()[1].set_data(time_data, power_d_data)
+    elif current_mode == RMS_MODE:
+        ax1.get_lines()[0].set_data(time_data, x_rms_data)
+        ax2.get_lines()[0].set_data(time_data, y_rms_data)
+
+    ax1.relim()
+    ax1.autoscale_view()
+
+    if ax2:
+        ax2.relim()
+        ax2.autoscale_view()
+
+    plt.gcf().canvas.draw()
+    plt.pause(0.05)
+
+
+def setup_plot():
+    if current_mode == INTENSITY_MODE:
+        fig, ax = plt.subplots(1, 1)
+        ax.set_ylabel('S Intensity')
+        ax.set_xlabel('Time (s)')
+        ax.set_gid(current_mode)
+        line_s, = ax.plot(time_data, s_data)
+    else:
+        fig, (ax1, ax2) = plt.subplots(2, 1)
+        if current_mode == POSITION_MODE:
+            ax1.set_ylabel('X position (um)')
+            ax2.set_ylabel('Y position (um)')
+            line_x_pos, = ax1.plot(time_data, x_pos_data)
+            line_y_pos, = ax2.plot(time_data, y_pos_data)
+        elif current_mode == POWER_MODE:
+            ax1.set_ylabel('Power AB')
+            ax2.set_ylabel('Power CD')
+            line_power_a, = ax1.plot(time_data, power_a_data, 'bo', label='A')
+            line_power_b, = ax1.plot(time_data, power_b_data, 'ro', label='B')
+            line_power_c, = ax2.plot(time_data, power_c_data, 'bo', label='C')
+            line_power_d, = ax2.plot(time_data, power_d_data, 'ro', label='D')
+            plt.legend()
+        elif current_mode == RMS_MODE:
+            ax1.set_ylabel('X res. rms (um)')
+            ax2.set_ylabel('Y res. rms (um)')
+            line_x_rms, = ax1.plot(time_data, x_rms_data)
+            line_y_rms, = ax2.plot(time_data, y_rms_data)
+
+        # gid is only set for the first axes (it would be the same for the second)
+        ax1.set_gid(current_mode)
+        ax2.set_xlabel('Time(s)')
 
 
 while True:
@@ -238,7 +328,6 @@ while True:
         else:
             print "gain value not valid!"
 
-
     elif action == 9:  # exit
         break
 
@@ -297,32 +386,33 @@ while True:
 
 
         # spawn a thread for checking user input
-        user_input_thread = threading.Thread(target=await_stop)
+        user_input_thread = threading.Thread(target=get_user_input)
         user_input_thread.start()
 
         plt.ion()
-        fig = plt.figure()
+        # fig = plt.figure()
 
+        # this needs to be modified
         # x pos
-        ax1 = fig.add_subplot(2, 1, 1)
+        # ax1 = fig.add_subplot(2, 1, 1)
         # ax1.set_title('title')
-        ax1.set_ylabel('X position (um)')
-        line_x_pos, = ax1.plot(x_pos_data)
+        # ax1.set_ylabel('X position (um)')
+        # ax1.set_xlabel('Time (s)')
+        # line_x_pos, = ax1.plot(x_pos_data)
 
         # y pos
-        ax2 = fig.add_subplot(2, 1, 2)
+        # ax2 = fig.add_subplot(2, 1, 2)
         # ax2.set_title('title')
-        ax2.set_ylabel('Y position (um)')
-        line_y_pos, = ax2.plot(y_pos_data)
-        
-        # s
-        # ax3 = fig.add_subplot()
+        # ax2.set_ylabel('Y position (um)')
+        # ax2.set_xlabel('Time (s)')
+        # line_y_pos, = ax2.plot(y_pos_data)
 
         # time counter
         t = 0
-        while not stop_flag:
+        while current_mode != STOP_MODE:
             samples_in_sfifo = IO.read_sfifo_wd()
             if samples_in_sfifo > 16:
+                # print current_mode
                 t += 1
                 packet = IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
                 if packet[0] != PACKET_ID:
@@ -352,14 +442,28 @@ while True:
                 x_rms_data.append(x_rms)
                 y_rms_data.append(y_rms)
 
-                # update the axes
-                update(ax1, line_x_pos, x_pos_data)
-                update(ax2, line_y_pos, y_pos_data)
-                fig.canvas.draw()
-                plt.pause(0.05)
+                # this needs to be modified
+                # check here to update the appropriate plots based on the whichever plot the user wants to view
+                if current_mode == DEFAULT_MODE:
+                    plt.close()
+                elif (current_mode == POSITION_MODE or
+                              current_mode == INTENSITY_MODE or
+                              current_mode == POWER_MODE or
+                              current_mode == RMS_MODE):
+                    # check if either no window was open previously or the previous mode was different
+                    if not plt.get_fignums() or plt.gcf().get_axes()[0].get_gid() != current_mode:
+                        print 'Creating new plot!'
+                        setup_plot()
+                    else:  # update
+                        update_plot()
+
+                else:  # STOP_MODE
+                    break
+                    # fig.canvas.draw()
+                    # plt.pause(0.05)
+
 
         plt.close()
-        stop_flag = 0
 
         # clear data
         del time_data[:]
@@ -370,6 +474,11 @@ while True:
         del power_b_data[:]
         del power_c_data[:]
         del power_d_data[:]
+        del x_rms_data[:]
+        del y_rms_data[:]
+
+        # Set mode to default before finishing
+        current_mode = DEFAULT_MODE
 
     else:
         print "Not a valid input!"
