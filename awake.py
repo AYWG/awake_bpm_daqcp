@@ -12,13 +12,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import threading
-import logging
+
+# These are only used to suppress a warning
+import warnings
+import matplotlib.cbook
 
 # import csv
 
 import logging
-
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# suppress an irrelevant warning that gets printed to the console
+warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
+
 
 # DEBUG = False
 DEBUG = True
@@ -195,14 +201,21 @@ def update_plot():
 
 
 def setup_plot():
+    # clear the figure
+    fig = plt.gcf()
+    plt.clf()
+
     if current_mode == INTENSITY_MODE:
-        fig, ax = plt.subplots(1, 1)
+        # ax = plt.subplot(111)
+        ax = fig.add_subplot(111)
         ax.set_ylabel('S Intensity')
         ax.set_xlabel('Time (s)')
         ax.set_gid(current_mode)
         line_s, = ax.plot(time_data, s_data)
     else:
-        fig, (ax1, ax2) = plt.subplots(2, 1)
+        # fig, (ax1, ax2) = plt.subplots(2, 1)
+        ax1 = fig.add_subplot(211)
+        ax2 = fig.add_subplot(212)
         if current_mode == POSITION_MODE:
             ax1.set_ylabel('X position (um)')
             ax2.set_ylabel('Y position (um)')
@@ -211,11 +224,12 @@ def setup_plot():
         elif current_mode == POWER_MODE:
             ax1.set_ylabel('Power AB')
             ax2.set_ylabel('Power CD')
-            line_power_a, = ax1.plot(time_data, power_a_data, 'bo', label='A')
-            line_power_b, = ax1.plot(time_data, power_b_data, 'ro', label='B')
-            line_power_c, = ax2.plot(time_data, power_c_data, 'bo', label='C')
-            line_power_d, = ax2.plot(time_data, power_d_data, 'ro', label='D')
-            plt.legend()
+            line_power_a, = ax1.plot(time_data, power_a_data, 'b-', label='A')
+            line_power_b, = ax1.plot(time_data, power_b_data, 'r-', label='B')
+            line_power_c, = ax2.plot(time_data, power_c_data, 'b-', label='C')
+            line_power_d, = ax2.plot(time_data, power_d_data, 'r-', label='D')
+            ax1.legend()
+            ax2.legend()
         elif current_mode == RMS_MODE:
             ax1.set_ylabel('X res. rms (um)')
             ax2.set_ylabel('Y res. rms (um)')
@@ -452,16 +466,13 @@ while True:
                               current_mode == RMS_MODE):
                     # check if either no window was open previously or the previous mode was different
                     if not plt.get_fignums() or plt.gcf().get_axes()[0].get_gid() != current_mode:
-                        print 'Creating new plot!'
+                        # print 'Creating new plot!'
                         setup_plot()
                     else:  # update
                         update_plot()
 
                 else:  # STOP_MODE
                     break
-                    # fig.canvas.draw()
-                    # plt.pause(0.05)
-
 
         plt.close()
 
