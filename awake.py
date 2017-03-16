@@ -13,14 +13,14 @@ import numpy as np
 import time
 import threading
 
-# These are only used to suppress a warning
-import warnings
-import matplotlib.cbook
-
 # import csv
 
 import logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
+# These are only used to suppress a warning
+import warnings
+import matplotlib.cbook
 
 # suppress an irrelevant warning that gets printed to the console
 warnings.filterwarnings("ignore",category=matplotlib.cbook.mplDeprecation)
@@ -143,6 +143,7 @@ def get_user_input():
         rms         |   to view X/Y rms data
         """
         comm = raw_input('Your command: ')
+        print 'Your input is: ', comm
         global current_mode
 
         if comm == 'stop':
@@ -173,38 +174,40 @@ def update(axes, line, data):
 
 
 def update_plot():
-    ax1, ax2 = plt.gcf().get_axes()
-    if current_mode == POSITION_MODE:
-        ax1.get_lines()[0].set_data(time_data, x_pos_data)
-        ax2.get_lines()[0].set_data(time_data, y_pos_data)
-
-    elif current_mode == INTENSITY_MODE:
+    if current_mode == INTENSITY_MODE:
+        ax1, = plt.gcf().get_axes()
         ax1.get_lines()[0].set_data(time_data, s_data)
-    elif current_mode == POWER_MODE:
-        ax1.get_lines()[0].set_data(time_data, power_a_data)
-        ax1.get_lines()[1].set_data(time_data, power_b_data)
-        ax2.get_lines()[0].set_data(time_data, power_c_data)
-        ax2.get_lines()[1].set_data(time_data, power_d_data)
-    elif current_mode == RMS_MODE:
-        ax1.get_lines()[0].set_data(time_data, x_rms_data)
-        ax2.get_lines()[0].set_data(time_data, y_rms_data)
+    else:
+        ax1, ax2 = plt.gcf().get_axes()
+        if current_mode == POSITION_MODE:
+            ax1.get_lines()[0].set_data(time_data, x_pos_data)
+            ax2.get_lines()[0].set_data(time_data, y_pos_data)
+        elif current_mode == POWER_MODE:
+            ax1.get_lines()[0].set_data(time_data, power_a_data)
+            ax1.get_lines()[1].set_data(time_data, power_b_data)
+            ax2.get_lines()[0].set_data(time_data, power_c_data)
+            ax2.get_lines()[1].set_data(time_data, power_d_data)
+        elif current_mode == RMS_MODE:
+            ax1.get_lines()[0].set_data(time_data, x_rms_data)
+            ax2.get_lines()[0].set_data(time_data, y_rms_data)
 
     ax1.relim()
     ax1.autoscale_view()
 
-    if ax2:
+    # if ax2 is defined
+    if 'ax2' in locals():
         ax2.relim()
         ax2.autoscale_view()
 
-    plt.gcf().canvas.draw()
-    plt.pause(0.05)
+    plt.pause(0.1)
 
 
 def setup_plot():
     # clear the figure
     fig = plt.gcf()
+    logging.info('figure retrieved')
     plt.clf()
-
+    logging.info('figure cleared')
     if current_mode == INTENSITY_MODE:
         # ax = plt.subplot(111)
         ax = fig.add_subplot(111)
@@ -404,22 +407,6 @@ while True:
         user_input_thread.start()
 
         plt.ion()
-        # fig = plt.figure()
-
-        # this needs to be modified
-        # x pos
-        # ax1 = fig.add_subplot(2, 1, 1)
-        # ax1.set_title('title')
-        # ax1.set_ylabel('X position (um)')
-        # ax1.set_xlabel('Time (s)')
-        # line_x_pos, = ax1.plot(x_pos_data)
-
-        # y pos
-        # ax2 = fig.add_subplot(2, 1, 2)
-        # ax2.set_title('title')
-        # ax2.set_ylabel('Y position (um)')
-        # ax2.set_xlabel('Time (s)')
-        # line_y_pos, = ax2.plot(y_pos_data)
 
         # time counter
         t = 0
@@ -466,9 +453,10 @@ while True:
                               current_mode == RMS_MODE):
                     # check if either no window was open previously or the previous mode was different
                     if not plt.get_fignums() or plt.gcf().get_axes()[0].get_gid() != current_mode:
-                        # print 'Creating new plot!'
+                        logging.info('Creating new plot...')
                         setup_plot()
                     else:  # update
+                        logging.info('Updating current plot...')
                         update_plot()
 
                 else:  # STOP_MODE
