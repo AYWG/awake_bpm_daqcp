@@ -8,9 +8,12 @@
 # awake2.py: text + chart plot mode, not stable
 
 import time
-from multiprocessing import Process, Queue, Lock
-
+import multiprocessing
+# from multiprocessing import Process, Queue, Lock
+# import threading
+import Queue
 import logging
+import DataProcessor
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
@@ -22,7 +25,7 @@ import matplotlib.cbook
 warnings.filterwarnings("ignore", category=matplotlib.cbook.mplDeprecation)
 
 from TCP import *
-import DataProcessor
+
 
 
 def get_user_input(command_queue):
@@ -47,12 +50,6 @@ def get_user_input(command_queue):
 
 def process_data(host, port, command_queue, output_lock):
 
-    for i in range(0, 5):
-        print i
-
-    output_lock.acquire()
-    logging.debug("I got here!")
-    output_lock.release()
     DEFAULT_MODE = 'close'
     POSITION_MODE = 'position'
     INTENSITY_MODE = 'intensity'
@@ -60,14 +57,13 @@ def process_data(host, port, command_queue, output_lock):
     RMS_MODE = 'rms'
     STOP_MODE = 'stop'
 
-
     data_processor = DataProcessor.DataProcessor(host, port)
 
     output_lock.acquire()
     data_processor.init_config()
     output_lock.release()
 
-    logging.debug("I got here!")
+    # command_queue.put('setup done')
 
     while True:
         command = command_queue.get()
@@ -96,14 +92,11 @@ def process_data(host, port, command_queue, output_lock):
         elif command == '6':  # change trigger delay in unit of 10 ns
             pass
 
-        elif command == '9':  # exit
-            break
-
         # Change this!
-        elif (command > 9) and (command < 5001):  # Print/Save Packet in consecutive command number
+        elif (command == '10'):  # Print/Save Packet in consecutive command number
 
             # time counter
-            t = 0
+            current_time = 0
             while True:
                 try:
                     command = command_queue.get(block=False)
@@ -114,7 +107,8 @@ def process_data(host, port, command_queue, output_lock):
                 except Queue.Empty:
                     pass
 
-                if data_processor.read_data():
+                if data_processor.read_data(current_time):
+                    current_time += 1
                     current_mode = data_processor.get_mode()
                     if current_mode == DEFAULT_MODE:
                         data_processor.close_windows()
@@ -124,22 +118,24 @@ def process_data(host, port, command_queue, output_lock):
                                   current_mode == RMS_MODE):
                         # check if either no window was open previously or the previous mode was different
                         if data_processor.new_plot_needed():
-                            logging.info('Creating new plot...')
+                            # logging.info('Creating new plot...')
                             data_processor.setup_plot()
                         else:  # update
-                            logging.info('Updating current plot...')
+                            # logging.info('Updating current plot...')
                             data_processor.update_plot()
 
                     else:  # STOP_MODE
                         break
 
             data_processor.close_windows()
+            data_processor.clear_data()
 
             # Set mode to default before finishing
             data_processor.set_mode(DataProcessor.DataProcessor.DEFAULT_MODE)
 
         elif command == 'finish':
             data_processor.shutdown()
+            break
 
         else:
             print "Not a valid input!"
@@ -169,14 +165,18 @@ if __name__ == '__main__':
     print "the DSP IP addr is:", host
 
     # lock for printing to standard output (helps avoid jumbled output messages)
-    output_lock = Lock()
+    output_lock = multiprocessing.Lock()
+    # output_lock = threading.Lock()
 
     # Start subprocess here
-    command_queue = Queue()
-    p = Process(target=process_data, args=(host, port, command_queue, output_lock))
+    command_queue = multiprocessing.Queue()
+    # command_queue = Queue.Queue()
+    p = multiprocessing.Process(target=process_data, args=(host, port, command_queue, output_lock))
     p.start()
-    # time.sleep(5)
-    # Check for user input now
+    # data_thread = threading.Thread(target=process_data, args=(host, port, command_queue, output_lock))
+    # data_thread.start()
+
+    time.sleep(3)
     while True:
         try:
             command = raw_input(
@@ -296,5 +296,5 @@ if __name__ == '__main__':
     # tell process to finish
     command_queue.put('finish')
     p.join()
-
+    # data_thread.join()
 # ---- end of main --------------------------------------------------
