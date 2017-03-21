@@ -216,8 +216,11 @@ class DataProcessor:
 
         plt.pause(0.1)
 
-    # Looks at the slow fifo occupancy; if it is greater than 16, then a packet is read from the slow fifo
-    # and the appropriate data buffers (x, y, etc.) are updated
+    def new_plot_needed(self):
+        return not plt.get_fignums() or plt.gcf().get_axes()[0].get_gid() != self.current_mode
+
+    # Looks at the slow fifo occupancy; if it is greater than 16, then a packet is read from the slow fifo,
+    # appropriate data buffers (x, y, etc.) are updated, and True is returned. Otherwise, False is returned.
     def read_data(self, current_time):
         samples_in_sfifo = self.IO.read_sfifo_wd()
         if samples_in_sfifo > 16:
@@ -248,6 +251,10 @@ class DataProcessor:
             y_rms = int(TCP.rms(self.y_pos_data))
             self.x_rms_data.append(x_rms)
             self.y_rms_data.append(y_rms)
+
+            return True
+
+        return False
 
     def clear_data(self):
         del self.time_data[:]

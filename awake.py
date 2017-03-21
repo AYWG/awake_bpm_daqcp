@@ -47,11 +47,27 @@ def get_user_input(command_queue):
 
 def process_data(host, port, command_queue, output_lock):
 
+    for i in range(0, 5):
+        print i
+
+    output_lock.acquire()
+    logging.debug("I got here!")
+    output_lock.release()
+    DEFAULT_MODE = 'close'
+    POSITION_MODE = 'position'
+    INTENSITY_MODE = 'intensity'
+    POWER_MODE = 'power'
+    RMS_MODE = 'rms'
+    STOP_MODE = 'stop'
+
+
     data_processor = DataProcessor.DataProcessor(host, port)
 
     output_lock.acquire()
     data_processor.init_config()
     output_lock.release()
+
+    logging.debug("I got here!")
 
     while True:
         command = command_queue.get()
@@ -91,32 +107,33 @@ def process_data(host, port, command_queue, output_lock):
             while True:
                 try:
                     command = command_queue.get(block=False)
-
-                    if command == 'close':
-                        data_processor.close_windows()
+                    data_processor.set_mode(command)
+                    # if command == 'close':
+                    #     data_processor.set_mode('close')
+                    # elif command == 'position':
                 except Queue.Empty:
                     pass
 
-                # this needs to be modified
-                # check here to update the appropriate plots based on the whichever plot the user wants to view
-                if current_mode == DEFAULT_MODE:
-                    plt.close()
-                elif (current_mode == POSITION_MODE or
-                              current_mode == INTENSITY_MODE or
-                              current_mode == POWER_MODE or
-                              current_mode == RMS_MODE):
-                    # check if either no window was open previously or the previous mode was different
-                    if not plt.get_fignums() or plt.gcf().get_axes()[0].get_gid() != current_mode:
-                        logging.info('Creating new plot...')
-                        setup_plot()
-                    else:  # update
-                        logging.info('Updating current plot...')
-                        update_plot()
+                if data_processor.read_data():
+                    current_mode = data_processor.get_mode()
+                    if current_mode == DEFAULT_MODE:
+                        data_processor.close_windows()
+                    elif (current_mode == POSITION_MODE or
+                                  current_mode == INTENSITY_MODE or
+                                  current_mode == POWER_MODE or
+                                  current_mode == RMS_MODE):
+                        # check if either no window was open previously or the previous mode was different
+                        if data_processor.new_plot_needed():
+                            logging.info('Creating new plot...')
+                            data_processor.setup_plot()
+                        else:  # update
+                            logging.info('Updating current plot...')
+                            data_processor.update_plot()
 
-                else:  # STOP_MODE
-                    break
+                    else:  # STOP_MODE
+                        break
 
-            plt.close()
+            data_processor.close_windows()
 
             # Set mode to default before finishing
             data_processor.set_mode(DataProcessor.DataProcessor.DEFAULT_MODE)
@@ -158,7 +175,7 @@ if __name__ == '__main__':
     command_queue = Queue()
     p = Process(target=process_data, args=(host, port, command_queue, output_lock))
     p.start()
-
+    # time.sleep(5)
     # Check for user input now
     while True:
         try:
@@ -237,9 +254,9 @@ if __name__ == '__main__':
 
         # Change this!
         elif command == '10':  # Print/Save Packet in consecutive command number
-
-            get_user_input()
             command_queue.put(command)
+            get_user_input(command_queue)
+
 
             """
             plt.ion()
