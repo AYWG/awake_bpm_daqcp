@@ -8,6 +8,7 @@
 # awake2.py: text + chart plot mode, not stable
 
 import time
+import threading
 import multiprocessing
 import Queue
 import logging
@@ -27,19 +28,47 @@ warnings.filterwarnings("ignore", category=matplotlib.cbook.mplDeprecation)
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 
-def process_data(host, port, command_queue):
+# thread that reads from the FPGA and updates the plots
+def data_collector(data_processor, command_queue, lock):
+    while True:
+        if data_processor.is_new_data_rdy():
+            lock.acquire()
+            # check if we're still running
+            if data_processor.get_op_mode() == Modes.RUNNING:
+                data_processor.read_data()
+                lock.release()
+            else:
+                lock.release()
+                break
 
+            # data_processor.update_plot()
+            command_queue.put(Commands.UPDATE_PLOT)
+
+
+def process_data(host, port, command_queue):
     data_processor = DataProcessor.DataProcessor(host, port)
     data_processor.init_config()
+
+    op_mode_lock = threading.Lock()
 
     while True:
         command = command_queue.get()
 
         if command == Commands.START_MEASURING_DATA:
-            data_processor.set_op_mode(Modes.RUNNING)
+            # only take action if currently paused
+            if data_processor.get_op_mode() == Modes.PAUSED:
+                op_mode_lock.acquire()
+                data_processor.set_op_mode(Modes.RUNNING)
+                op_mode_lock.release()
+                t = threading.Thread(target=data_collector, args=(data_processor, command_queue, op_mode_lock))
+                t.start()
 
         elif command == Commands.PAUSE_MEASURING_DATA:
-            data_processor.set_op_mode(Modes.PAUSED)
+            # only take action if currently running
+            if data_processor.get_op_mode() == Modes.RUNNING:
+                op_mode_lock.acquire()
+                data_processor.set_op_mode(Modes.PAUSED)
+                op_mode_lock.release()
 
         elif command == Commands.CLEAR_DATA:
             data_processor.clear_data()
@@ -61,44 +90,12 @@ def process_data(host, port, command_queue):
             data_processor.setup_plot(Plots.POWER)
 
         elif command == Commands.CLOSE_WINDOWS:
-
-
-            # time counter
-            current_time = 0
-            while True:
-                try:
-                    command = command_queue.get(block=False)
-                    data_processor.set_mode(command)
-                except Queue.Empty:
-                    pass
-
-                if data_processor.read_data(current_time):
-                    current_time += 1
-                    current_mode = data_processor.get_mode()
-                    if current_mode == DEFAULT_MODE:
-                        data_processor.close_windows()
-                    elif (current_mode == POSITION_MODE or
-                                  current_mode == INTENSITY_MODE or
-                                  current_mode == POWER_MODE or
-                                  current_mode == RMS_MODE):
-                        # check if either no window was open previously or the previous mode was different
-                        if data_processor.new_plot_needed():
-                            # logging.info('Creating new plot...')
-                            data_processor.setup_plot()
-                        else:  # update
-                            # logging.info('Updating current plot...')
-                            data_processor.update_plot()
-
-                    else:  # STOP_MODE
-                        break
-
             data_processor.close_windows()
-            data_processor.clear_data()
 
-            # Set mode to default before finishing
-            data_processor.set_mode(DataProcessor.DataProcessor.DEFAULT_MODE)
+        elif command == Commands.UPDATE_PLOT:
+            data_processor.update_plot()
 
-        elif command == 'finish':
+        elif command == Commands.EXIT:
             data_processor.shutdown()
             break
 
@@ -160,11 +157,9 @@ if __name__ == '__main__':
         else:
             command_queue.put(command)
 
-        if command == 10:
+        if command == Commands.EXIT:
             break
 
     # -- end of while loop------------------------------------
-    # tell process to finish
-    # command_queue.put('finish')
     p.join()
 # ---- end of main --------------------------------------------------

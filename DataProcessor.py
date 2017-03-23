@@ -37,6 +37,7 @@ class DataProcessor:
         self.ChCD = 1
 
         # Data buffers
+        self.current_time = 0
         self.time_data = []
         self.x_pos_data = []
         self.y_pos_data = []
@@ -95,18 +96,6 @@ class DataProcessor:
         # This output can be removed
         # print 'AFE Ctrl Reg = 0x', format(self.IO.read_reg('AFE:CTRL?'), '02x')
         # print 'Mode Reg = 0x', format(self.IO.read_reg('CR?'), '02x')
-
-    # This method can be removed
-    def view_parameters(self):
-        print 'BPM Diameter (mm) = ', format(self.IO.read_reg('BPM:DIA?'), 'd')
-        print 'TRIG:TH =', format(self.IO.read_reg('TRIG:TH?'), 'd')
-        print 'TRIG:DT =', format(self.IO.read_reg('TRIG:DT?'), 'd')
-        print 'TRIG:DL =', format(self.IO.read_reg('TRIG:DL?'), 'd')
-        print 'EVT:LEN =', format(self.IO.read_reg('EVT:LEN?'), 'd')
-        print 'EVT:TAIL =', format(self.IO.read_reg('EVT:TAIL?'), 'd')
-        print 'BL:LEN =', format(self.IO.read_reg('BL:LEN?'), 'd')
-        print 'AFE Ctrl Reg = 0x', format(self.IO.read_reg('AFE:CTRL?'), '02x')
-        print 'Mode Reg = 0x', format(self.IO.read_reg('CR?'), '02x')
 
     def view_fifo_occupancy(self):
         print 'Fast FIFO occupancy = ', self.IO.read_ffifo_wd(0)
@@ -217,68 +206,71 @@ class DataProcessor:
                 ax2.set_xlabel('Time(s)')
 
     def update_plot(self):
-        if self.get_plot() == Plots.INTENSITY:
-            ax1, = plt.gcf().get_axes()
-            ax1.get_lines()[0].set_data(self.time_data, self.s_data)
-        else:
-            ax1, ax2 = plt.gcf().get_axes()
-            if self.get_plot() == Plots.POSITION:
-                ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
-                ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
-                ax2.get_lines()[0].set_data(self.time_data, self.x_rms_data)
-                ax2.get_lines()[1].set_data(self.time_data, self.y_rms_data)
-            elif self.get_plot() == Plots.POWER:
-                ax1.get_lines()[0].set_data(self.time_data, self.power_a_data)
-                ax1.get_lines()[1].set_data(self.time_data, self.power_b_data)
-                ax2.get_lines()[0].set_data(self.time_data, self.power_c_data)
-                ax2.get_lines()[1].set_data(self.time_data, self.power_d_data)
+        if self.get_plot() != Plots.NONE:
+            if self.get_plot() == Plots.INTENSITY:
+                ax1, = plt.gcf().get_axes()
+                ax1.get_lines()[0].set_data(self.time_data, self.s_data)
+            else:
+                ax1, ax2 = plt.gcf().get_axes()
+                if self.get_plot() == Plots.POSITION:
+                    ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
+                    ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
+                    ax2.get_lines()[0].set_data(self.time_data, self.x_rms_data)
+                    ax2.get_lines()[1].set_data(self.time_data, self.y_rms_data)
+                elif self.get_plot() == Plots.POWER:
+                    ax1.get_lines()[0].set_data(self.time_data, self.power_a_data)
+                    ax1.get_lines()[1].set_data(self.time_data, self.power_b_data)
+                    ax2.get_lines()[0].set_data(self.time_data, self.power_c_data)
+                    ax2.get_lines()[1].set_data(self.time_data, self.power_d_data)
 
-            ax2.relim()
-            ax2.autoscale_view()
+                ax2.relim()
+                ax2.autoscale_view()
 
-        ax1.relim()
-        ax1.autoscale_view()
+            ax1.relim()
+            ax1.autoscale_view()
 
-        plt.pause(0.1)
+            plt.pause(0.1)
 
-    # Looks at the slow fifo occupancy; if it is greater than 16, then a packet is read from the slow fifo,
-    # appropriate data buffers (x, y, etc.) are updated, and True is returned. Otherwise, False is returned.
-    def read_data(self, current_time):
+    # Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA.
+    def is_new_data_rdy(self):
         samples_in_sfifo = self.IO.read_sfifo_wd()
-        if samples_in_sfifo > 16:
-            packet = self.IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
-            if packet[0] != self.PACKET_ID:
-                raise TypeError('Packet ID error!')
+        return samples_in_sfifo > 16
 
-            # extract new data from packet
-            x = TCP.s16(packet[3] >> 16)
-            y = TCP.s16(packet[3] & 0xFFFF)
-            s = TCP.s16(packet[4] >> 16)
-            PA = packet[5]
-            PB = packet[6]
-            PC = packet[7]
-            PD = packet[8]
+    # Read a packet of data from the slow fifo in the FPGA and update the appropriate data buffers (x, y, etc.)
+    def read_data(self):
+        packet = self.IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
+        if packet[0] != self.PACKET_ID:
+            # print packet
+            # print 'test'
+            raise TypeError('Packet ID error!')
 
-            # add new data to old data
-            self.time_data.append(current_time + 1)
-            self.x_pos_data.append(x)
-            self.y_pos_data.append(y)
-            self.s_data.append(s)
-            self.power_a_data.append(PA)
-            self.power_b_data.append(PB)
-            self.power_c_data.append(PC)
-            self.power_d_data.append(PD)
+        self.current_time += 1
+        # extract new data from packet
+        x = TCP.s16(packet[3] >> 16)
+        y = TCP.s16(packet[3] & 0xFFFF)
+        s = TCP.s16(packet[4] >> 16)
+        PA = packet[5]
+        PB = packet[6]
+        PC = packet[7]
+        PD = packet[8]
 
-            x_rms = int(TCP.rms(self.x_pos_data))
-            y_rms = int(TCP.rms(self.y_pos_data))
-            self.x_rms_data.append(x_rms)
-            self.y_rms_data.append(y_rms)
+        # add new data to old data
+        self.time_data.append(self.current_time)
+        self.x_pos_data.append(x)
+        self.y_pos_data.append(y)
+        self.s_data.append(s)
+        self.power_a_data.append(PA)
+        self.power_b_data.append(PB)
+        self.power_c_data.append(PC)
+        self.power_d_data.append(PD)
 
-            return True
-
-        return False
+        x_rms = int(TCP.rms(self.x_pos_data))
+        y_rms = int(TCP.rms(self.y_pos_data))
+        self.x_rms_data.append(x_rms)
+        self.y_rms_data.append(y_rms)
 
     def clear_data(self):
+        self.current_time = 0
         del self.time_data[:]
         del self.x_pos_data[:]
         del self.y_pos_data[:]
@@ -295,5 +287,7 @@ class DataProcessor:
         plt.close()
 
     def shutdown(self):
+        self.close_windows()
+        self.clear_data()
         self.IO.destroy()
         plt.ioff()
