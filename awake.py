@@ -13,6 +13,8 @@ import Queue
 import logging
 import DataProcessor
 import Commands
+import Modes
+import Plots
 
 # These are only used to suppress a warning
 import warnings
@@ -24,54 +26,42 @@ warnings.filterwarnings("ignore", category=matplotlib.cbook.mplDeprecation)
 # configure logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
-# def get_user_input(command_queue):
-#     while True:
-#         print """
-#         Enter any of the following commands on the left
-#         to do the corresponding command on the right:
-#         stop        |   to stop measuring data
-#         close       |   to close any open plots (but continue measuring data)
-#         position    |   to view X/Y data
-#         intensity   |   to view S (intensity) data
-#         power       |   to view Power AB/CD data
-#         rms         |   to view X/Y rms data
-#         """
-#         command = raw_input('Your command: ')
-#
-#         command_queue.put(command)
-#
-#         if command == 'stop':
-#             break
-
 
 def process_data(host, port, command_queue):
 
-    DEFAULT_MODE = 'close'
-    POSITION_MODE = 'position'
-    INTENSITY_MODE = 'intensity'
-    POWER_MODE = 'power'
-    RMS_MODE = 'rms'
-    STOP_MODE = 'stop'
-
     data_processor = DataProcessor.DataProcessor(host, port)
-
     data_processor.init_config()
-
 
     while True:
         command = command_queue.get()
 
-        if command == '1':
-            data_processor.view_parameters()
+        if command == Commands.START_MEASURING_DATA:
+            data_processor.set_op_mode(Modes.RUNNING)
 
-        elif command == '2':
-            data_processor.view_fifo_occupancy()
+        elif command == Commands.PAUSE_MEASURING_DATA:
+            data_processor.set_op_mode(Modes.PAUSED)
 
-        elif command == '3':  # Print&Save ADC waveforms for all four channels
-            data_processor.view_waveform()
+        elif command == Commands.CLEAR_DATA:
+            data_processor.clear_data()
 
-        # Change this!
-        elif (command == '10'):  # Print/Save Packet in consecutive command number
+        elif command == Commands.EDIT_SETTINGS:
+            # implement this later
+            pass
+
+        elif command == Commands.VIEW_WAVEFORM_DATA:
+            data_processor.setup_plot(Plots.WAVEFORM)
+
+        elif command == Commands.VIEW_POSITION_DATA:
+            data_processor.setup_plot(Plots.POSITION)
+
+        elif command == Commands.VIEW_INTENSITY_DATA:
+            data_processor.setup_plot(Plots.INTENSITY)
+
+        elif command == Commands.VIEW_POWER_DATA:
+            data_processor.setup_plot(Plots.POWER)
+
+        elif command == Commands.CLOSE_WINDOWS:
+
 
             # time counter
             current_time = 0
@@ -112,8 +102,6 @@ def process_data(host, port, command_queue):
             data_processor.shutdown()
             break
 
-        else:
-            print "Not a valid input!"
 
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
@@ -174,59 +162,6 @@ if __name__ == '__main__':
 
         if command == 10:
             break
-
-
-        # elif command == '4':  # change AFE gain setting
-        #     pass
-            # try:
-            #     Gain = int(raw_input('Enter AFE gain: 1 ~ 31 dB Attenuation:\n'))
-            # except ValueError:
-            #     print("not a valid input!")
-            # if (Gain > 0) and (Gain < 32):
-            #     # if IO.write_reg('AFE:CTRL', Gain) is False: exit()
-            #     # command_queue.put()
-            #     print "The new AFE gain is (dB): ", -1 * Gain
-            # else:
-            #     print "gain value not valid!"
-            #
-
-        # elif command == '5':  # Trigger mode
-        #     try:
-        #         Trig_mode = int(raw_input('Enter trigger mode: 0=external, 1=internal, 2=self, 3=Cal:\n'))
-        #     except ValueError:
-        #         print("not a valid input!")
-        #         Trig_mode = 10  # fake,make it invalid
-        #
-        #     command_queue.put()
-            # if (Trig_mode == 0):
-            #     print "The new trigger mode is: External"
-            #     if IO.write_reg('CR', MODE_EXT_TRIG) is False: exit()
-            # elif (Trig_mode == 1):
-            #     print "The new trigger mode is: Internal"
-            #     if IO.write_reg('CR', MODE_INT_TRIG) is False: exit()
-            # elif (Trig_mode == 2):
-            #     print "The new trigger mode is: Self"
-            #     if IO.write_reg('CR', MODE_SEL_TRIG) is False: exit()
-            # elif (Trig_mode == 3):
-            #     print "The new trigger mode is: Cal+Internal"
-            #     if IO.write_reg('CR', MODE_CAL) is False: exit()
-            # else:
-            #     print "Input value not valid!"
-
-
-        # elif command == '6':  # change trigger delay in unit of 10 ns
-        #
-        #     try:
-        #         TRIG_DL = int(raw_input('Enter trigger delay 0~ 64000 :\n'))
-        #     except ValueError:
-        #         print("not a valid input!")
-        #     if (TRIG_DL > 0) and (TRIG_DL < 64000):
-        #         if IO.write_reg('TRIG:DL', TRIG_DL) is False: exit()
-        #         print "The new trigger delay is (ns): ", TRIG_DL * 10
-        #     else:
-        #         print "gain value not valid!"
-
-
 
     # -- end of while loop------------------------------------
     # tell process to finish

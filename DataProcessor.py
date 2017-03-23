@@ -2,16 +2,11 @@ import TCP
 import time
 import sys
 import matplotlib.pyplot as plt
+import Modes
+import Plots
 
 
 class DataProcessor:
-
-    DEFAULT_MODE = 'close'
-    POSITION_MODE = 'position'
-    INTENSITY_MODE = 'intensity'
-    POWER_MODE = 'power'
-    RMS_MODE = 'rms'
-    STOP_MODE = 'stop'
 
     def __init__(self, host, port):
         # Initial Parameters
@@ -57,7 +52,11 @@ class DataProcessor:
         self.IO = TCP.TCP(host, port)
         self.PACKET_ID = 0x4142504D
 
-        self.current_mode = DataProcessor.DEFAULT_MODE
+        # Initial mode of operation is PAUSED
+        self.op_mode = Modes.PAUSED
+
+        # Initial plot is NONE
+        self.plot = Plots.NONE
 
         plt.ion()
 
@@ -164,60 +163,71 @@ class DataProcessor:
         self.TRIG_DL = trigger_delay
         if self.IO.write_reg('TRIG:DL', self.TRIG_DL) is False: sys.exit()
 
-    def set_mode(self, mode):
-        self.current_mode = mode
+    def set_op_mode(self, op_mode):
+        self.op_mode = op_mode
 
-    def get_mode(self):
-        return self.current_mode
+    def get_op_mode(self):
+        return self.op_mode
 
-    def setup_plot(self):
-        # clear the figure
-        fig = plt.gcf()
-        plt.clf()
-        if self.current_mode == DataProcessor.INTENSITY_MODE:
-            ax = fig.add_subplot(111)
-            ax.set_ylabel('S Intensity')
-            ax.set_xlabel('Time (s)')
-            ax.set_gid(self.current_mode)
-            ax.plot(self.time_data, self.s_data)
-        else:
-            ax1 = fig.add_subplot(211)
-            ax2 = fig.add_subplot(212)
-            if self.current_mode == DataProcessor.POSITION_MODE:
-                ax1.set_ylabel('X/Y position (um)')
-                ax2.set_ylabel('X/Y res. rms (um)')
-                ax1.plot(self.time_data, self.x_pos_data, 'b-', label='X pos')
-                ax1.plot(self.time_data, self.y_pos_data, 'r-', label='Y pos')
-                ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
-                ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
-            elif self.current_mode == DataProcessor.POWER_MODE:
-                ax1.set_ylabel('Power AB')
-                ax2.set_ylabel('Power CD')
-                ax1.plot(self.time_data, self.power_a_data, 'b-', label='A')
-                ax1.plot(self.time_data, self.power_b_data, 'r-', label='B')
-                ax2.plot(self.time_data, self.power_c_data, 'b-', label='C')
-                ax2.plot(self.time_data, self.power_d_data, 'r-', label='D')
+    def set_plot(self, plot):
+        self.plot = plot
 
-            # Add a legend to distinguish plots on the same axes
-            ax1.legend()
-            ax2.legend()
+    def get_plot(self):
+        return self.plot
 
-            # gid is only set for the first axes (it would be the same for the second)
-            ax1.set_gid(self.current_mode)
-            ax2.set_xlabel('Time(s)')
+    def setup_plot(self, plot):
+        # only take action if the current plot is not the same as the provided plot
+        if self.get_plot() != plot:
+            # update active plot
+            self.set_plot(plot)
+
+            # clear the figure
+            fig = plt.gcf()
+            plt.clf()
+
+            if plot == Plots.INTENSITY:
+                ax = fig.add_subplot(111)
+                ax.set_ylabel('S Intensity')
+                ax.set_xlabel('Time (s)')
+                ax.plot(self.time_data, self.s_data)
+            else:
+                ax1 = fig.add_subplot(211)
+                ax2 = fig.add_subplot(212)
+                if plot == Plots.POSITION:
+                    ax1.set_ylabel('X/Y position (um)')
+                    ax2.set_ylabel('X/Y res. rms (um)')
+                    ax1.plot(self.time_data, self.x_pos_data, 'b-', label='X pos')
+                    ax1.plot(self.time_data, self.y_pos_data, 'r-', label='Y pos')
+                    ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
+                    ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
+                elif plot == Plots.POWER:
+                    ax1.set_ylabel('Power AB')
+                    ax2.set_ylabel('Power CD')
+                    ax1.plot(self.time_data, self.power_a_data, 'b-', label='A')
+                    ax1.plot(self.time_data, self.power_b_data, 'r-', label='B')
+                    ax2.plot(self.time_data, self.power_c_data, 'b-', label='C')
+                    ax2.plot(self.time_data, self.power_d_data, 'r-', label='D')
+
+                # Add a legend to distinguish plots on the same axes
+                ax1.legend()
+                ax2.legend()
+
+                # gid is only set for the first axes (it would be the same for the second)
+                # ax1.set_gid()
+                ax2.set_xlabel('Time(s)')
 
     def update_plot(self):
-        if self.current_mode == DataProcessor.INTENSITY_MODE:
+        if self.get_plot() == Plots.INTENSITY:
             ax1, = plt.gcf().get_axes()
             ax1.get_lines()[0].set_data(self.time_data, self.s_data)
         else:
             ax1, ax2 = plt.gcf().get_axes()
-            if self.current_mode == DataProcessor.POSITION_MODE:
+            if self.get_plot() == Plots.POSITION:
                 ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
                 ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
                 ax2.get_lines()[0].set_data(self.time_data, self.x_rms_data)
                 ax2.get_lines()[1].set_data(self.time_data, self.y_rms_data)
-            elif self.current_mode == DataProcessor.POWER_MODE:
+            elif self.get_plot() == Plots.POWER:
                 ax1.get_lines()[0].set_data(self.time_data, self.power_a_data)
                 ax1.get_lines()[1].set_data(self.time_data, self.power_b_data)
                 ax2.get_lines()[0].set_data(self.time_data, self.power_c_data)
@@ -229,15 +239,7 @@ class DataProcessor:
         ax1.relim()
         ax1.autoscale_view()
 
-        # if ax2 is defined
-        # if 'ax2' in locals():
-        #     ax2.relim()
-        #     ax2.autoscale_view()
-
         plt.pause(0.1)
-
-    def new_plot_needed(self):
-        return not plt.get_fignums() or plt.gcf().get_axes()[0].get_gid() != self.current_mode
 
     # Looks at the slow fifo occupancy; if it is greater than 16, then a packet is read from the slow fifo,
     # appropriate data buffers (x, y, etc.) are updated, and True is returned. Otherwise, False is returned.
@@ -289,6 +291,7 @@ class DataProcessor:
         del self.y_rms_data[:]
 
     def close_windows(self):
+        self.set_plot(Plots.NONE)
         plt.close()
 
     def shutdown(self):
