@@ -1,5 +1,6 @@
 import TCP
 import time
+import sys
 import matplotlib.pyplot as plt
 
 
@@ -63,36 +64,40 @@ class DataProcessor:
     def init_config(self):
         print self.IO.read_MBver()
 
-        if self.IO.write_reg('BPM:DIA', self.BPM_DIA) is False: exit()
+        if self.IO.write_reg('BPM:DIA', self.BPM_DIA) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('TRIG:TH', self.TRIG_TH) is False: exit()
+        if self.IO.write_reg('TRIG:TH', self.TRIG_TH) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('TRIG:DT', self.TRIG_DT) is False: exit()
+        if self.IO.write_reg('TRIG:DT', self.TRIG_DT) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('TRIG:DL', self.TRIG_DL) is False: exit()
+        if self.IO.write_reg('TRIG:DL', self.TRIG_DL) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('EVT:LEN', self.EVT_LEN) is False: exit()
+        if self.IO.write_reg('EVT:LEN', self.EVT_LEN) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('EVT:TAIL', self.EVT_TAIL) is False: exit()
+        if self.IO.write_reg('EVT:TAIL', self.EVT_TAIL) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('BL:LEN', self.BL_LEN) is False: exit()
+        if self.IO.write_reg('BL:LEN', self.BL_LEN) is False: sys.exit()
         time.sleep(0.1)
 
-        print 'BPM Diameter (mm) = ', format(self.IO.read_reg('BPM:DIA?'), 'd')
-        print 'TRIG:TH =', format(self.IO.read_reg('TRIG:TH?'), 'd')
-        print 'TRIG:DT =', format(self.IO.read_reg('TRIG:DT?'), 'd')
-        print 'TRIG:DL =', format(self.IO.read_reg('TRIG:DL?'), 'd')
-        print 'EVT:LEN =', format(self.IO.read_reg('EVT:LEN?'), 'd')
-        print 'EVT:TAIL =', format(self.IO.read_reg('EVT:TAIL?'), 'd')
-        print 'BL:LEN =', format(self.IO.read_reg('BL:LEN?'), 'd')
+        # This output can be removed
+        # print 'BPM Diameter (mm) = ', format(self.IO.read_reg('BPM:DIA?'), 'd')
+        # print 'TRIG:TH =', format(self.IO.read_reg('TRIG:TH?'), 'd')
+        # print 'TRIG:DT =', format(self.IO.read_reg('TRIG:DT?'), 'd')
+        # print 'TRIG:DL =', format(self.IO.read_reg('TRIG:DL?'), 'd')
+        # print 'EVT:LEN =', format(self.IO.read_reg('EVT:LEN?'), 'd')
+        # print 'EVT:TAIL =', format(self.IO.read_reg('EVT:TAIL?'), 'd')
+        # print 'BL:LEN =', format(self.IO.read_reg('BL:LEN?'), 'd')
 
-        if self.IO.write_reg('AFE:CTRL', self.Gain) is False: exit()
+        if self.IO.write_reg('AFE:CTRL', self.Gain) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('CR', self.MODE_EXT_TRIG) is False: exit()
+        if self.IO.write_reg('CR', self.MODE_EXT_TRIG) is False: sys.exit()
         time.sleep(0.1)
-        print 'AFE Ctrl Reg = 0x', format(self.IO.read_reg('AFE:CTRL?'), '02x')
-        print 'Mode Reg = 0x', format(self.IO.read_reg('CR?'), '02x')
 
+        # This output can be removed
+        # print 'AFE Ctrl Reg = 0x', format(self.IO.read_reg('AFE:CTRL?'), '02x')
+        # print 'Mode Reg = 0x', format(self.IO.read_reg('CR?'), '02x')
+
+    # This method can be removed
     def view_parameters(self):
         print 'BPM Diameter (mm) = ', format(self.IO.read_reg('BPM:DIA?'), 'd')
         print 'TRIG:TH =', format(self.IO.read_reg('TRIG:TH?'), 'd')
@@ -142,8 +147,22 @@ class DataProcessor:
             print "ChC waveform saved: max, min value", max(waveform[0]), min(waveform[0])
             print "ChD waveform saved: max, min value", max(waveform[1]), min(waveform[1])
 
-    def set_AFE_gain(self):
-        pass
+    def set_afe_gain(self, gain):
+        if self.IO.write_reg('AFE:CTRL', gain) is False: sys.exit()
+
+    def set_trigger_mode(self, trigger_mode):
+        if trigger_mode == 0:
+            if self.IO.write_reg('CR', self.MODE_EXT_TRIG) is False: sys.exit()
+        elif trigger_mode == 1:
+            if self.IO.write_reg('CR', self.MODE_INT_TRIG) is False: sys.exit()
+        elif trigger_mode == 2:
+            if self.IO.write_reg('CR', self.MODE_SEL_TRIG) is False: sys.exit()
+        elif trigger_mode == 3:
+            if self.IO.write_reg('CR', self.MODE_CAL) is False: sys.exit()
+
+    def set_trigger_delay(self, trigger_delay):
+        self.TRIG_DL = trigger_delay
+        if self.IO.write_reg('TRIG:DL', self.TRIG_DL) is False: sys.exit()
 
     def set_mode(self, mode):
         self.current_mode = mode
@@ -165,10 +184,12 @@ class DataProcessor:
             ax1 = fig.add_subplot(211)
             ax2 = fig.add_subplot(212)
             if self.current_mode == DataProcessor.POSITION_MODE:
-                ax1.set_ylabel('X position (um)')
-                ax2.set_ylabel('Y position (um)')
-                ax1.plot(self.time_data, self.x_pos_data)
-                ax2.plot(self.time_data, self.y_pos_data)
+                ax1.set_ylabel('X/Y position (um)')
+                ax2.set_ylabel('X/Y res. rms (um)')
+                ax1.plot(self.time_data, self.x_pos_data, 'b-', label='X pos')
+                ax1.plot(self.time_data, self.y_pos_data, 'r-', label='Y pos')
+                ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
+                ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
             elif self.current_mode == DataProcessor.POWER_MODE:
                 ax1.set_ylabel('Power AB')
                 ax2.set_ylabel('Power CD')
@@ -176,13 +197,10 @@ class DataProcessor:
                 ax1.plot(self.time_data, self.power_b_data, 'r-', label='B')
                 ax2.plot(self.time_data, self.power_c_data, 'b-', label='C')
                 ax2.plot(self.time_data, self.power_d_data, 'r-', label='D')
-                ax1.legend()
-                ax2.legend()
-            elif self.current_mode == DataProcessor.RMS_MODE:
-                ax1.set_ylabel('X res. rms (um)')
-                ax2.set_ylabel('Y res. rms (um)')
-                ax1.plot(self.time_data, self.x_rms_data)
-                ax2.plot(self.time_data, self.y_rms_data)
+
+            # Add a legend to distinguish plots on the same axes
+            ax1.legend()
+            ax2.legend()
 
             # gid is only set for the first axes (it would be the same for the second)
             ax1.set_gid(self.current_mode)
@@ -196,23 +214,25 @@ class DataProcessor:
             ax1, ax2 = plt.gcf().get_axes()
             if self.current_mode == DataProcessor.POSITION_MODE:
                 ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
-                ax2.get_lines()[0].set_data(self.time_data, self.y_pos_data)
+                ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
+                ax2.get_lines()[0].set_data(self.time_data, self.x_rms_data)
+                ax2.get_lines()[1].set_data(self.time_data, self.y_rms_data)
             elif self.current_mode == DataProcessor.POWER_MODE:
                 ax1.get_lines()[0].set_data(self.time_data, self.power_a_data)
                 ax1.get_lines()[1].set_data(self.time_data, self.power_b_data)
                 ax2.get_lines()[0].set_data(self.time_data, self.power_c_data)
                 ax2.get_lines()[1].set_data(self.time_data, self.power_d_data)
-            elif self.current_mode == DataProcessor.RMS_MODE:
-                ax1.get_lines()[0].set_data(self.time_data, self.x_rms_data)
-                ax2.get_lines()[0].set_data(self.time_data, self.y_rms_data)
+
+            ax2.relim()
+            ax2.autoscale_view()
 
         ax1.relim()
         ax1.autoscale_view()
 
         # if ax2 is defined
-        if 'ax2' in locals():
-            ax2.relim()
-            ax2.autoscale_view()
+        # if 'ax2' in locals():
+        #     ax2.relim()
+        #     ax2.autoscale_view()
 
         plt.pause(0.1)
 
