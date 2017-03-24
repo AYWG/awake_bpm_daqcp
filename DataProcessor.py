@@ -178,13 +178,20 @@ class DataProcessor:
 
             if plot == Plots.INTENSITY:
                 ax = fig.add_subplot(111)
-                ax.set_ylabel('S Intensity')
+                ax.set_title('Intensity')
+                # labelpad is for adding space between y axis label and tick labels
+                ax.set_ylabel('S Intensity', labelpad=10)
                 ax.set_xlabel('Time (s)')
+                # ax.tick_params(axis='both', which='major', pad=15)
                 ax.plot(self.time_data, self.s_data)
             else:
                 ax1 = fig.add_subplot(211)
                 ax2 = fig.add_subplot(212)
+                # Disables scientific notation for tick labels
+                # ax1.get_yaxis().get_major_formatter().set_scientific(False)
+                # ax2.get_yaxis().get_major_formatter().set_scientific(False)
                 if plot == Plots.POSITION:
+                    ax1.set_title('Position and Res. RMS')
                     ax1.set_ylabel('X/Y position (um)')
                     ax2.set_ylabel('X/Y res. rms (um)')
                     ax1.plot(self.time_data, self.x_pos_data, 'b-', label='X pos')
@@ -192,6 +199,7 @@ class DataProcessor:
                     ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
                     ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
                 elif plot == Plots.POWER:
+                    ax1.set_title('Power')
                     ax1.set_ylabel('Power AB')
                     ax2.set_ylabel('Power CD')
                     ax1.plot(self.time_data, self.power_a_data, 'b-', label='A')
@@ -203,13 +211,9 @@ class DataProcessor:
                 ax1.legend()
                 ax2.legend()
 
-                # gid is only set for the first axes (it would be the same for the second)
-                # ax1.set_gid()
                 ax2.set_xlabel('Time(s)')
 
             fig.canvas.draw()
-            # plt.draw()
-            # plt.show(block=False)
 
     def update_plot(self):
         if self.get_plot() != Plots.NONE:
@@ -235,10 +239,6 @@ class DataProcessor:
             ax1.relim()
             ax1.autoscale_view()
 
-            # plt.pause(0.1)
-            # time.sleep(0.01)
-            # plt.draw()
-            # plt.show(block=False)
             plt.gcf().canvas.draw()
 
     # Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA.
