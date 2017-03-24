@@ -1,6 +1,8 @@
 import TCP
 import time
 import sys
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import Modes
 import Plots
@@ -205,6 +207,10 @@ class DataProcessor:
                 # ax1.set_gid()
                 ax2.set_xlabel('Time(s)')
 
+            fig.canvas.draw()
+            # plt.draw()
+            # plt.show(block=False)
+
     def update_plot(self):
         if self.get_plot() != Plots.NONE:
             if self.get_plot() == Plots.INTENSITY:
@@ -229,7 +235,11 @@ class DataProcessor:
             ax1.relim()
             ax1.autoscale_view()
 
-            plt.pause(0.1)
+            # plt.pause(0.1)
+            # time.sleep(0.01)
+            # plt.draw()
+            # plt.show(block=False)
+            plt.gcf().canvas.draw()
 
     # Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA.
     def is_new_data_rdy(self):

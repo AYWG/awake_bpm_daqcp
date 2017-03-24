@@ -10,19 +10,11 @@
 import time
 import threading
 import multiprocessing
-import Queue
 import logging
 import DataProcessor
 import Commands
 import Modes
 import Plots
-
-# These are only used to suppress a warning
-import warnings
-import matplotlib.cbook
-
-# suppress an irrelevant warning that gets printed to the console
-warnings.filterwarnings("ignore", category=matplotlib.cbook.mplDeprecation)
 
 # configure logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
