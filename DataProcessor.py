@@ -2,6 +2,7 @@ import TCP
 import time
 import sys
 import matplotlib
+
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import Modes
@@ -9,7 +10,6 @@ import Plots
 
 
 class DataProcessor:
-
     def __init__(self, host, port):
         # Initial Parameters
         self.BPM_DIA = 40
