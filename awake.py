@@ -15,6 +15,7 @@ import DataProcessor
 import Commands
 import Modes
 import Plots
+import CtrlWindow
 
 # configure logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)

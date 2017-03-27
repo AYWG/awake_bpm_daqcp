@@ -80,28 +80,10 @@ class DataProcessor:
         time.sleep(0.1)
         if self.IO.write_reg('BL:LEN', self.BL_LEN) is False: sys.exit()
         time.sleep(0.1)
-
-        # This output can be removed
-        # print 'BPM Diameter (mm) = ', format(self.IO.read_reg('BPM:DIA?'), 'd')
-        # print 'TRIG:TH =', format(self.IO.read_reg('TRIG:TH?'), 'd')
-        # print 'TRIG:DT =', format(self.IO.read_reg('TRIG:DT?'), 'd')
-        # print 'TRIG:DL =', format(self.IO.read_reg('TRIG:DL?'), 'd')
-        # print 'EVT:LEN =', format(self.IO.read_reg('EVT:LEN?'), 'd')
-        # print 'EVT:TAIL =', format(self.IO.read_reg('EVT:TAIL?'), 'd')
-        # print 'BL:LEN =', format(self.IO.read_reg('BL:LEN?'), 'd')
-
         if self.IO.write_reg('AFE:CTRL', self.Gain) is False: sys.exit()
         time.sleep(0.1)
         if self.IO.write_reg('CR', self.MODE_EXT_TRIG) is False: sys.exit()
         time.sleep(0.1)
-
-        # This output can be removed
-        # print 'AFE Ctrl Reg = 0x', format(self.IO.read_reg('AFE:CTRL?'), '02x')
-        # print 'Mode Reg = 0x', format(self.IO.read_reg('CR?'), '02x')
-
-    def view_fifo_occupancy(self):
-        print 'Fast FIFO occupancy = ', self.IO.read_ffifo_wd(0)
-        print 'Packet FFIFO occupancy = ', self.IO.read_sfifo_wd()
 
     # using old code for printing and saving waveform data; will need to change this later
     def view_waveform(self):
@@ -215,7 +197,9 @@ class DataProcessor:
 
             fig.canvas.draw()
 
+    # Updates the active plot, adjusting the appropriate axis based on the data collected so far
     def update_plot(self):
+        # Only take action if there's an active plot
         if self.get_plot() != Plots.NONE:
             if self.get_plot() == Plots.INTENSITY:
                 ax1, = plt.gcf().get_axes()
@@ -279,6 +263,7 @@ class DataProcessor:
         self.x_rms_data.append(x_rms)
         self.y_rms_data.append(y_rms)
 
+    # Resets all data buffers and sets the current time to 0
     def clear_data(self):
         self.current_time = 0
         del self.time_data[:]
@@ -292,6 +277,7 @@ class DataProcessor:
         del self.x_rms_data[:]
         del self.y_rms_data[:]
 
+    # Closes control window and any active plots
     def close_windows(self):
         self.set_plot(Plots.NONE)
         plt.close()
