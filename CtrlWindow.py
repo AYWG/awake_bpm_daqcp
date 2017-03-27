@@ -4,9 +4,8 @@ import wx
 
 
 class CtrlWindow(wx.Frame):
-    def __init__(self):
-        wx.Frame.__init__(self)
-        pass
+    def __init__(self, parent, title):
+        wx.Frame.__init__(self, parent=parent, id=wx.ID_ANY, title=title)
 
     def __do_layout(self):
         pass

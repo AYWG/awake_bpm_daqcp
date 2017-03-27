@@ -15,7 +15,7 @@ import DataProcessor
 import Commands
 import Modes
 import Plots
-import CtrlWindow
+import CtrlGUI
 
 # configure logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
@@ -36,6 +36,11 @@ def data_collector(data_processor, command_queue, lock):
 
             # data_processor.update_plot()
             command_queue.put(Commands.UPDATE_PLOT)
+
+# thread that creates the control GUI and runs it until it is closed
+def ctrl_gui_handler():
+    gui = CtrlGUI.CtrlGUI(False)
+    gui.MainLoop()
 
 
 def process_data(host, port, command_queue):
@@ -67,8 +72,8 @@ def process_data(host, port, command_queue):
             data_processor.clear_data()
 
         elif command == Commands.EDIT_SETTINGS:
-            # implement this later
-            pass
+            t = threading.Thread(target=ctrl_gui_handler)
+            t.start()
 
         elif command == Commands.VIEW_WAVEFORM_DATA:
             data_processor.setup_plot(Plots.WAVEFORM)
