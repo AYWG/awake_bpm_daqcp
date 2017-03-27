@@ -196,6 +196,7 @@ class DataProcessor:
                 ax2.set_xlabel('Time(s)')
 
             fig.canvas.draw()
+            fig.canvas.start_event_loop(0.1)
 
     # Updates the active plot, adjusting the appropriate axis based on the data collected so far
     def update_plot(self):
@@ -224,6 +225,7 @@ class DataProcessor:
             ax1.autoscale_view()
 
             plt.gcf().canvas.draw()
+            plt.gcf().canvas.start_event_loop(0.1)
 
     # Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA.
     def is_new_data_rdy(self):

@@ -10,6 +10,9 @@ class CtrlWindow(wx.Frame):
     def __do_layout(self):
         pass
 
+    def __set_properties(self):
+        pass
+
 
 # For testing purposes; will normally be created via awake.py
 if __name__ == '__main__':

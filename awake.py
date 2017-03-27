@@ -37,6 +37,7 @@ def data_collector(data_processor, command_queue, lock):
             # data_processor.update_plot()
             command_queue.put(Commands.UPDATE_PLOT)
 
+
 # thread that creates the control GUI and runs it until it is closed
 def ctrl_gui_handler():
     gui = CtrlGUI.CtrlGUI(False)
