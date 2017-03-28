@@ -34,10 +34,10 @@ class CtrlWindow(wx.Frame):
 
     def __do_layout(self):
         sizer_btm_row = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_btm_row.Add(self.eventparam_panel, 1, wx.EXPAND | wx.ALL, 4)
-        sizer_btm_row.Add(self.chgain_panel, 1, wx.EXPAND | wx.ALL, 4)
-        sizer_btm_row.Add(self.calgain_panel, 1, wx.EXPAND | wx.ALL, 4)
-        sizer_btm_row.Add(self.otherparam_panel, 1, wx.EXPAND | wx.ALL, 4)
+        sizer_btm_row.Add(self.eventparam_panel, 1, wx.EXPAND | wx.ALL, 0)
+        sizer_btm_row.Add(self.chgain_panel, 1, wx.EXPAND | wx.ALL, 0)
+        sizer_btm_row.Add(self.calgain_panel, 1, wx.EXPAND | wx.ALL, 0)
+        sizer_btm_row.Add(self.otherparam_panel, 1, wx.EXPAND | wx.ALL, 0)
 
         sizer_mid_row = wx.BoxSizer(wx.HORIZONTAL)
         sizer_mid_row.Add(self.mode_panel, 1, wx.EXPAND | wx.ALL, 4)
@@ -48,9 +48,9 @@ class CtrlWindow(wx.Frame):
 
         # Our top-level sizer
         sizer_main = wx.BoxSizer(wx.VERTICAL)
-        sizer_main.Add(sizer_top_row, 0, wx.EXPAND, 0)
-        sizer_main.Add(sizer_mid_row, 0, wx.EXPAND, 0)
-        sizer_main.Add(sizer_btm_row, 0, wx.EXPAND, 0)
+        sizer_main.Add(sizer_top_row, 1, wx.EXPAND, 0)
+        sizer_main.Add(sizer_mid_row, 1, wx.EXPAND, 0)
+        sizer_main.Add(sizer_btm_row, 1, wx.EXPAND, 0)
 
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
