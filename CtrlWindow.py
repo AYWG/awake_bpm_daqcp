@@ -47,10 +47,13 @@ class CtrlWindow(wx.Frame):
         sizer_top_row.Add(self.status_panel, 1, wx.EXPAND | wx.ALL, 4)
 
         # Our top-level sizer
+        sizer_vert = wx.BoxSizer(wx.VERTICAL)
+        sizer_vert.Add(sizer_top_row, 1, wx.EXPAND)
+        sizer_vert.Add(sizer_mid_row, 1, wx.EXPAND)
+        sizer_vert.Add(sizer_btm_row, 1, wx.EXPAND)
+
         sizer_main = wx.BoxSizer(wx.VERTICAL)
-        sizer_main.Add(sizer_top_row, 1, wx.EXPAND, 0)
-        sizer_main.Add(sizer_mid_row, 1, wx.EXPAND, 0)
-        sizer_main.Add(sizer_btm_row, 1, wx.EXPAND, 0)
+        sizer_main.Add(sizer_vert, 1, wx.EXPAND)
 
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)

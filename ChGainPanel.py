@@ -29,7 +29,7 @@ class ChGainPanel(wx.Panel):
         sizer_ch_gain_box = wx.StaticBoxSizer(self.ch_gain_box, wx.VERTICAL)
 
         sizer_ch_gain_a = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_ch_gain_a.Add(self.lbl_ch_gain_a, 0, wx.ALL | wx.ALIGN_CENTER, 4)
+        sizer_ch_gain_a.Add(self.lbl_ch_gain_a, 1, wx.ALL | wx.ALIGN_CENTER, 4)
         sizer_ch_gain_a.Add(self.txt_ch_gain_a, 1, wx.EXPAND, 0)
 
         sizer_ch_gain_b = wx.BoxSizer(wx.HORIZONTAL)
