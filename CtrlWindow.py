@@ -29,7 +29,8 @@ class CtrlWindow(wx.Frame):
         self.__do_layout()
 
     def __set_properties(self):
-        pass
+        # Light-grey
+        self.SetBackgroundColour(wx.Colour(240, 240, 240))
 
     def __do_layout(self):
         sizer_btm_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -52,9 +53,8 @@ class CtrlWindow(wx.Frame):
         sizer_main.Add(sizer_btm_row, 0, wx.EXPAND, 0)
 
         self.SetSizer(sizer_main)
-        # self.setAutoLayout(True)
+        self.SetAutoLayout(True)
         sizer_main.Fit(self)
-        self.Layout()
 
 
 # For testing purposes; will normally be created via awake.py

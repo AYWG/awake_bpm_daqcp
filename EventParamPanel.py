@@ -53,6 +53,7 @@ class EventParamPanel(wx.Panel):
         sizer_bl_len.Add(self.txt_bl_len, 1, wx.EXPAND, 0)
 
         sizer_main = wx.BoxSizer(wx.VERTICAL)
+        sizer_main.Add(self.btn_update_evt_param, 0, wx.EXPAND, 0)
         sizer_main.Add(sizer_trig_th, 0, wx.EXPAND, 0)
         sizer_main.Add(sizer_trig_dt, 0, wx.EXPAND, 0)
         sizer_main.Add(sizer_trig_dl, 0, wx.EXPAND, 0)
@@ -61,6 +62,5 @@ class EventParamPanel(wx.Panel):
         sizer_main.Add(sizer_bl_len, 0, wx.EXPAND, 0)
 
         self.SetSizer(sizer_main)
-        # self.SetAutoLayout(True)
+        self.SetAutoLayout(True)
         sizer_main.Fit(self)
-        self.Layout()
