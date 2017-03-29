@@ -1,7 +1,7 @@
 # Panel for showing what settings are currently enabled (akin to the LED indicators in the LabVIEW GUI
 
 import wx
-
+from LED import LED
 
 class StatusPanel(wx.Panel):
     def __init__(self, parent, title):

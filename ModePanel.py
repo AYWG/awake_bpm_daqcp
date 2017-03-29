@@ -99,7 +99,7 @@ class ModePanel(wx.Panel):
         sizer_mode_box.Add(sizer_afe_cal, 0, wx.ALL | wx.EXPAND, 4)
         sizer_mode_box.Add(sizer_onfly_cal, 0, wx.ALL | wx.EXPAND, 4)
 
-        sizer_main = wx.BoxSizer(wx.VERTICAL)
+        sizer_main = wx.BoxSizer(wx.HORIZONTAL)
         sizer_main.Add(sizer_mode_box, 0, wx.EXPAND, 0)
 
         self.SetSizer(sizer_main)
