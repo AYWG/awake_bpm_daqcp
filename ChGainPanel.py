@@ -50,8 +50,8 @@ class ChGainPanel(wx.Panel):
         sizer_ch_gain_box.Add(sizer_ch_gain_c, 0, wx.ALL | wx.EXPAND, 4)
         sizer_ch_gain_box.Add(sizer_ch_gain_d, 0, wx.ALL | wx.EXPAND, 4)
 
-        sizer_main = wx.BoxSizer(wx.VERTICAL)
-        sizer_main.Add(sizer_ch_gain_box, 0, wx.EXPAND, 0)
+        sizer_main = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_main.Add(sizer_ch_gain_box, 1, wx.EXPAND, 0)
 
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)

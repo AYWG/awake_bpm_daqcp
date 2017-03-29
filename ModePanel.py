@@ -75,8 +75,8 @@ class ModePanel(wx.Panel):
         sizer_raw_adc_rd.Add(self.chk_raw_adc_rd, 1, wx.EXPAND)
 
         sizer_blr_rd = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_blr_rd.Add(self.lbl_ena_temp_rd, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_blr_rd.Add(self.chk_ena_temp_rd, 1, wx.EXPAND)
+        sizer_blr_rd.Add(self.lbl_blr_rd, 1, wx.ALL | wx.ALIGN_CENTER, 4)
+        sizer_blr_rd.Add(self.chk_blr_rd, 1, wx.EXPAND)
 
         sizer_afe_cal = wx.BoxSizer(wx.HORIZONTAL)
         sizer_afe_cal.Add(self.lbl_afe_cal, 1, wx.ALL | wx.ALIGN_CENTER, 4)

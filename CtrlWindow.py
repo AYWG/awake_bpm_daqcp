@@ -5,6 +5,7 @@ import AFECtrlPanel
 import CalGainPanel
 import ChGainPanel
 import EventParamPanel
+import FlashReadWritePanel
 import ModePanel
 import OtherParamPanel
 import StatusPanel
@@ -19,6 +20,7 @@ class CtrlWindow(wx.Frame):
         self.calgain_panel = CalGainPanel.CalGainPanel(parent=self, title='Cal Gain Adj.')
         self.chgain_panel = ChGainPanel.ChGainPanel(parent=self, title='Channel Gain Adj.')
         self.eventparam_panel = EventParamPanel.EventParamPanel(parent=self, title='Event Parameters')
+        self.flashrdwr_panel = FlashReadWritePanel.FlashReadWritePanel(parent=self, title='Flash Read/Write')
         self.mode_panel = ModePanel.ModePanel(parent=self, title='Mode Register')
         self.otherparam_panel = OtherParamPanel.OtherParamPanel(parent=self, title='Other Parameters')
         self.status_panel = StatusPanel.StatusPanel(parent=self, title='Status')
@@ -39,14 +41,17 @@ class CtrlWindow(wx.Frame):
         sizer_btm_row.Add(self.calgain_panel, 1, wx.EXPAND | wx.ALL, 0)
         sizer_btm_row.Add(self.otherparam_panel, 1, wx.EXPAND | wx.ALL, 0)
 
+        sizer_mid_right = wx.BoxSizer(wx.VERTICAL)
+        sizer_mid_right.Add(self.afectrl_panel, 1, wx.EXPAND | wx.ALL, 4)
+        sizer_mid_right.Add(self.flashrdwr_panel, 1, wx.EXPAND | wx.ALL, 4)
+
         sizer_mid_row = wx.BoxSizer(wx.HORIZONTAL)
         sizer_mid_row.Add(self.mode_panel, 1, wx.EXPAND | wx.ALL, 4)
-        sizer_mid_row.Add(self.afectrl_panel, 1, wx.EXPAND | wx.ALL, 4)
+        sizer_mid_row.Add(sizer_mid_right, 1, wx.EXPAND | wx.ALL, 4)
 
         sizer_top_row = wx.BoxSizer(wx.HORIZONTAL)
         sizer_top_row.Add(self.status_panel, 1, wx.EXPAND | wx.ALL, 4)
 
-        # Our top-level sizer
         sizer_vert = wx.BoxSizer(wx.VERTICAL)
         sizer_vert.Add(sizer_top_row, 1, wx.EXPAND)
         sizer_vert.Add(sizer_mid_row, 1, wx.EXPAND)

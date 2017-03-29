@@ -56,12 +56,6 @@ class AFECtrlPanel(wx.Panel):
         sizer_afe_ctrl_box.Add(sizer_4_db, 0, wx.ALL | wx.EXPAND, 4)
         sizer_afe_ctrl_box.Add(sizer_8_db, 0, wx.ALL | wx.EXPAND, 4)
         sizer_afe_ctrl_box.Add(sizer_16_db, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_ena_temp_rd, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_bypass_blr, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_raw_adc_rd, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_blr_rd, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_afe_cal, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_onfly_cal, 0, wx.ALL | wx.EXPAND, 4)
 
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_main.Add(sizer_afe_ctrl_box, 0, wx.EXPAND, 0)
