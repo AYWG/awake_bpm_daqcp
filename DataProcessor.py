@@ -120,7 +120,34 @@ class DataProcessor:
             print "ChD waveform saved: max, min value", max(waveform[1]), min(waveform[1])
 
     def set_afe_gain(self, gain):
+        self.Gain = gain
         if self.IO.write_reg('AFE:CTRL', gain) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_bl_len(self, bl_len):
+        self.BL_LEN = bl_len
+        if self.IO.write_reg('BL:LEN', bl_len) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_evt_len(self, evt_len):
+        self.EVT_LEN = evt_len
+        if self.IO.write_reg('EVT:LEN', evt_len) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_evt_tail(self, evt_tail):
+        self.EVT_TAIL = evt_tail
+        if self.IO.write_reg('EVT:TAIL', evt_tail) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_trig_th(self, trig_th):
+        self.TRIG_TH = trig_th
+        if self.IO.write_reg('TRIG:TH', trig_th) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_trig_dt(self, trig_dt):
+        self.TRIG_DT = trig_dt
+        if self.IO.write_reg('TRIG:DT', trig_dt) is False: sys.exit()
+        time.sleep(0.1)
 
     def set_trigger_mode(self, trigger_mode):
         if trigger_mode == 0:
@@ -132,9 +159,21 @@ class DataProcessor:
         elif trigger_mode == 3:
             if self.IO.write_reg('CR', self.MODE_CAL) is False: sys.exit()
 
-    def set_trigger_delay(self, trigger_delay):
-        self.TRIG_DL = trigger_delay
-        if self.IO.write_reg('TRIG:DL', self.TRIG_DL) is False: sys.exit()
+    def set_trig_dl(self, trig_dl):
+        self.TRIG_DL = trig_dl
+        if self.IO.write_reg('TRIG:DL', trig_dl) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_bpm_dia(self, bpm_dia):
+        self.BPM_DIA = bpm_dia
+        if self.IO.write_reg('BPM:DIA', bpm_dia) is False: sys.exit()
+        time.sleep(0.1)
+
+    def wr_flash_buf(self):
+        if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit() # the 0 is arbitrary
+        time.sleep(0.1)
+
+    #-------------- Methods for managing the plot
 
     def set_op_mode(self, op_mode):
         self.op_mode = op_mode
@@ -151,7 +190,6 @@ class DataProcessor:
     def setup_plot(self, plot):
         # only take action if the current plot is not the same as the provided plot
         if self.get_plot() != plot:
-            # update active plot
             self.set_plot(plot)
 
             # clear the figure

@@ -39,8 +39,8 @@ def data_collector(data_processor, command_queue, lock):
 
 
 # thread that creates the control GUI and runs it until it is closed
-def ctrl_gui_handler():
-    gui = CtrlGUI.CtrlGUI(False)
+def ctrl_gui_handler(data_processor):
+    gui = CtrlGUI.CtrlGUI(data_processor)
     gui.MainLoop()
 
 
@@ -73,7 +73,7 @@ def process_data(host, port, command_queue):
             data_processor.clear_data()
 
         elif command == Commands.EDIT_SETTINGS:
-            t = threading.Thread(target=ctrl_gui_handler)
+            t = threading.Thread(target=ctrl_gui_handler, args=(data_processor,))
             t.start()
 
         elif command == Commands.VIEW_WAVEFORM_DATA:

@@ -4,9 +4,9 @@ import wx
 
 
 class ModePanel(wx.Panel):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-
+        self.data_processor = data_processor
         self.btn_update_mode = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_run = wx.StaticText(self, wx.ID_ANY, 'Run')
         self.chk_run = wx.CheckBox(self, wx.ID_ANY)

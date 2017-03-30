@@ -4,9 +4,9 @@ import wx
 
 
 class CalGainPanel(wx.Panel):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-
+        self.data_processor = data_processor
         self.btn_update_cal_gain = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_cal_gain_a = wx.StaticText(self, wx.ID_ANY, 'CAL:GAIN:A')
         self.txt_cal_gain_a = wx.TextCtrl(self, wx.ID_ANY, '')

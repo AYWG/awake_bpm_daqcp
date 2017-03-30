@@ -4,9 +4,9 @@ import wx
 
 
 class AFECtrlPanel(wx.Panel):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-
+        self.data_processor = data_processor
         self.btn_update_mode = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_1_db = wx.StaticText(self, wx.ID_ANY, '-1 dB')
         self.chk_1_db = wx.CheckBox(self, wx.ID_ANY)

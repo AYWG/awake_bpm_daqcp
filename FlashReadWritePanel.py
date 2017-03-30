@@ -4,9 +4,9 @@ import wx
 
 
 class FlashReadWritePanel(wx.Panel):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-
+        self.data_processor = data_processor
         self.btn_flash_rd = wx.Button(self, wx.ID_ANY, 'Read From Flash')
         self.btn_flash_wr = wx.Button(self, wx.ID_ANY, 'Write To Flash')
 

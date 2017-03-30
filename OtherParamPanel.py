@@ -4,9 +4,9 @@ import wx
 
 
 class OtherParamPanel(wx.Panel):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-
+        self.data_processor = data_processor
         self.btn_update_other_param = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_bpm_dia = wx.StaticText(self, wx.ID_ANY, 'BPM:DIA')
         self.txt_bpm_dia = wx.TextCtrl(self, wx.ID_ANY, '')

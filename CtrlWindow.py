@@ -13,18 +13,24 @@ import StatusPanel
 
 
 class CtrlWindow(wx.Frame):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, data_processor):
         wx.Frame.__init__(self, parent=parent, id=wx.ID_ANY, title=title)
 
         # Add panels
-        self.address_panel = AddressPanel.AddressPanel(parent=self, title='Addresses')
-        self.afectrl_panel = AFECtrlPanel.AFECtrlPanel(parent=self, title='AFE Control Register')
-        self.calgain_panel = CalGainPanel.CalGainPanel(parent=self, title='Cal Gain Adj.')
-        self.chgain_panel = ChGainPanel.ChGainPanel(parent=self, title='Channel Gain Adj.')
-        self.eventparam_panel = EventParamPanel.EventParamPanel(parent=self, title='Event Parameters')
-        self.flashrdwr_panel = FlashReadWritePanel.FlashReadWritePanel(parent=self, title='Flash Read/Write')
-        self.mode_panel = ModePanel.ModePanel(parent=self, title='Mode Register')
-        self.otherparam_panel = OtherParamPanel.OtherParamPanel(parent=self, title='Other Parameters')
+        self.address_panel = AddressPanel.AddressPanel(parent=self, title='Addresses', data_processor=data_processor)
+        self.afectrl_panel = AFECtrlPanel.AFECtrlPanel(parent=self, title='AFE Control Register',
+                                                       data_processor=data_processor)
+        self.calgain_panel = CalGainPanel.CalGainPanel(parent=self, title='Cal Gain Adj.',
+                                                       data_processor=data_processor)
+        self.chgain_panel = ChGainPanel.ChGainPanel(parent=self, title='Channel Gain Adj.',
+                                                    data_processor=data_processor)
+        self.eventparam_panel = EventParamPanel.EventParamPanel(parent=self, title='Event Parameters',
+                                                                data_processor=data_processor)
+        self.flashrdwr_panel = FlashReadWritePanel.FlashReadWritePanel(parent=self, title='Flash Read/Write',
+                                                                       data_processor=data_processor)
+        self.mode_panel = ModePanel.ModePanel(parent=self, title='Mode Register', data_processor=data_processor)
+        self.otherparam_panel = OtherParamPanel.OtherParamPanel(parent=self, title='Other Parameters',
+                                                                data_processor=data_processor)
         # self.status_panel = StatusPanel.StatusPanel(parent=self, title='Status')
 
         # Add event bindings
@@ -69,8 +75,3 @@ class CtrlWindow(wx.Frame):
 
         # Set the minimum size of the window once all of the sizers have been set up.
         self.SetMinSize(self.GetSize())
-
-
-# For testing purposes; will normally be created via awake.py
-if __name__ == '__main__':
-    pass

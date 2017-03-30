@@ -4,9 +4,9 @@ import wx
 
 
 class EventParamPanel(wx.Panel):
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-
+        self.data_processor = data_processor
         self.btn_update_evt_param = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_trig_th = wx.StaticText(self, wx.ID_ANY, 'TRIG:TH')
         self.txt_trig_th = wx.TextCtrl(self, wx.ID_ANY, '')
@@ -25,6 +25,7 @@ class EventParamPanel(wx.Panel):
 
         self.__set_properties()
         self.__do_layout()
+        self.__attach_events()
 
     def __set_properties(self):
         pass
@@ -71,3 +72,28 @@ class EventParamPanel(wx.Panel):
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
         sizer_main.Fit(self)
+
+    def __attach_events(self):
+        self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_evt_param)
+
+    def OnUpdate(self):
+        # Do validation here?
+
+        # Everything is validated, so convert the inputs to floats
+        trig_th = float(self.txt_trig_th.GetValue())
+        trig_dt = float(self.txt_trig_dt.GetValue())
+        trig_dl = float(self.txt_trig_dl.GetValue())
+        evt_len = float(self.txt_evt_len.GetValue())
+        evt_tail = float(self.txt_evt_tail.GetValue())
+        bl_len = float(self.txt_bl_len.GetValue())
+
+        # First load the relevant data to the FPGA
+        self.data_processor.set_trig_th(trig_th)
+        self.data_processor.set_trig_dt(trig_dt)
+        self.data_processor.set_trig_dl(trig_dl)
+        self.data_processor.set_evt_len(evt_len)
+        self.data_processor.set_evt_tail(evt_tail)
+        self.data_processor.set_bl_len(bl_len)
+
+        # Then write to the flash buffer
+        self.data_processor.wr_flash_buf()
