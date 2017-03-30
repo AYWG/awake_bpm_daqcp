@@ -30,21 +30,21 @@ class CalGainPanel(wx.Panel):
 
         sizer_cal_gain_a = wx.BoxSizer(wx.HORIZONTAL)
         sizer_cal_gain_a.Add(self.lbl_cal_gain_a, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_cal_gain_a.Add(self.txt_cal_gain_a, 1, wx.EXPAND, 0)
+        sizer_cal_gain_a.Add(self.txt_cal_gain_a, 2, wx.EXPAND, 0)
 
         sizer_cal_gain_b = wx.BoxSizer(wx.HORIZONTAL)
         sizer_cal_gain_b.Add(self.lbl_cal_gain_b, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_cal_gain_b.Add(self.txt_cal_gain_b, 1, wx.EXPAND, 0)
+        sizer_cal_gain_b.Add(self.txt_cal_gain_b, 2, wx.EXPAND, 0)
 
         sizer_cal_gain_c = wx.BoxSizer(wx.HORIZONTAL)
         sizer_cal_gain_c.Add(self.lbl_cal_gain_c, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_cal_gain_c.Add(self.txt_cal_gain_c, 1, wx.EXPAND, 0)
+        sizer_cal_gain_c.Add(self.txt_cal_gain_c, 2, wx.EXPAND, 0)
 
         sizer_cal_gain_d = wx.BoxSizer(wx.HORIZONTAL)
         sizer_cal_gain_d.Add(self.lbl_cal_gain_d, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_cal_gain_d.Add(self.txt_cal_gain_d, 1, wx.EXPAND, 0)
+        sizer_cal_gain_d.Add(self.txt_cal_gain_d, 2, wx.EXPAND, 0)
 
-        sizer_cal_gain_box.Add(self.btn_update_cal_gain, 0, wx.EXPAND, 0)
+        sizer_cal_gain_box.Add(self.btn_update_cal_gain, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_cal_gain_box.Add(sizer_cal_gain_a, 0, wx.ALL | wx.EXPAND, 4)
         sizer_cal_gain_box.Add(sizer_cal_gain_b, 0, wx.ALL | wx.EXPAND, 4)
         sizer_cal_gain_box.Add(sizer_cal_gain_c, 0, wx.ALL | wx.EXPAND, 4)

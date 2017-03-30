@@ -24,9 +24,9 @@ class OtherParamPanel(wx.Panel):
 
         sizer_bpm_dia = wx.BoxSizer(wx.HORIZONTAL)
         sizer_bpm_dia.Add(self.lbl_bpm_dia, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_bpm_dia.Add(self.txt_bpm_dia, 1, wx.EXPAND, 0)
+        sizer_bpm_dia.Add(self.txt_bpm_dia, 2, wx.EXPAND, 0)
 
-        sizer_other_param_box.Add(self.btn_update_other_param, 0, wx.EXPAND, 0)
+        sizer_other_param_box.Add(self.btn_update_other_param, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_other_param_box.Add(sizer_bpm_dia, 0, wx.ALL | wx.EXPAND, 4)
 
         sizer_main = wx.BoxSizer(wx.HORIZONTAL)

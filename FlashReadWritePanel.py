@@ -21,8 +21,8 @@ class FlashReadWritePanel(wx.Panel):
     def __do_layout(self):
         sizer_flash_rd_wr_box = wx.StaticBoxSizer(self.flash_rd_wr_box, wx.VERTICAL)
 
-        sizer_flash_rd_wr_box.Add(self.btn_flash_rd, 0, wx.EXPAND, 0)
-        sizer_flash_rd_wr_box.Add(self.btn_flash_wr, 0, wx.EXPAND, 0)
+        sizer_flash_rd_wr_box.Add(self.btn_flash_rd, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
+        sizer_flash_rd_wr_box.Add(self.btn_flash_wr, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
 
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_main.Add(sizer_flash_rd_wr_box, 0, wx.EXPAND, 0)
