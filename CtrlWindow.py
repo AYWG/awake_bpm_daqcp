@@ -57,7 +57,7 @@ class CtrlWindow(wx.Frame):
 
         sizer_vert = wx.BoxSizer(wx.VERTICAL)
         # sizer_vert.Add(sizer_top_row, 1, wx.EXPAND)
-        sizer_vert.Add(sizer_mid_row, 1, wx.EXPAND)
+        sizer_vert.Add(sizer_mid_row, 2, wx.EXPAND)
         sizer_vert.Add(sizer_btm_row, 1, wx.EXPAND)
 
         sizer_main = wx.BoxSizer(wx.VERTICAL)
@@ -66,6 +66,9 @@ class CtrlWindow(wx.Frame):
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
         sizer_main.Fit(self)
+
+        # Set the minimum size of the window once all of the sizers have been set up.
+        self.SetMinSize(self.GetSize())
 
 
 # For testing purposes; will normally be created via awake.py

@@ -102,7 +102,7 @@ class ModePanel(wx.Panel):
         sizer_mode_box.Add(sizer_onfly_cal, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
 
         sizer_main = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_main.Add(sizer_mode_box, 0, wx.EXPAND, 0)
+        sizer_main.Add(sizer_mode_box, 1, wx.EXPAND, 0)
 
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
