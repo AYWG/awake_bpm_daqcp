@@ -15,6 +15,7 @@ class OtherParamPanel(wx.Panel):
 
         self.__set_properties()
         self.__do_layout()
+        self.__attach_events()
 
     def __set_properties(self):
         pass
@@ -35,3 +36,12 @@ class OtherParamPanel(wx.Panel):
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
         sizer_main.Fit(self)
+
+    def __attach_events(self):
+        self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_other_param)
+
+    def OnUpdate(self):
+        bpm_dia = int(self.txt_bpm_dia.GetValue())
+
+        self.data_processor.set_bpm_dia(bpm_dia)
+        self.data_processor.wr_flash_buf()

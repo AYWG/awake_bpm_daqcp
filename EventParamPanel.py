@@ -1,13 +1,14 @@
 # Panel for editing event parameters (e.g. event length)
 
 import wx
-
+import numpy
 
 class EventParamPanel(wx.Panel):
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_evt_param = wx.Button(self, wx.ID_ANY, 'Update')
+        self.btn_test = wx.Button(self, wx.ID_ANY, 'Test')
         self.lbl_trig_th = wx.StaticText(self, wx.ID_ANY, 'TRIG:TH')
         self.txt_trig_th = wx.TextCtrl(self, wx.ID_ANY, '')
         self.lbl_trig_dt = wx.StaticText(self, wx.ID_ANY, 'TRIG:DT')
@@ -59,6 +60,7 @@ class EventParamPanel(wx.Panel):
         sizer_bl_len.Add(self.txt_bl_len, 2, wx.EXPAND)
 
         sizer_event_param_box.Add(self.btn_update_evt_param, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
+        sizer_event_param_box.Add(self.btn_test, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_event_param_box.Add(sizer_trig_th, 0, wx.ALL | wx.EXPAND, 4)
         sizer_event_param_box.Add(sizer_trig_dt, 0, wx.ALL | wx.EXPAND, 4)
         sizer_event_param_box.Add(sizer_trig_dl, 0, wx.ALL | wx.EXPAND, 4)
@@ -75,17 +77,24 @@ class EventParamPanel(wx.Panel):
 
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_evt_param)
+        self.Bind(wx.EVT_BUTTON, self.OnTest, self.btn_test)
 
-    def OnUpdate(self):
+    def OnTest(self, e):
+        trig_th_val = str(self.data_processor.get_trig_th())
+        dlg = wx.MessageDialog(self, trig_th_val, "Updated trig th", wx.OK)
+        dlg.ShowModal()  # Show it
+        dlg.Destroy()  # finally destroy it when finished.
+
+    def OnUpdate(self, e):
         # Do validation here?
 
-        # Everything is validated, so convert the inputs to floats
-        trig_th = float(self.txt_trig_th.GetValue())
-        trig_dt = float(self.txt_trig_dt.GetValue())
-        trig_dl = float(self.txt_trig_dl.GetValue())
-        evt_len = float(self.txt_evt_len.GetValue())
-        evt_tail = float(self.txt_evt_tail.GetValue())
-        bl_len = float(self.txt_bl_len.GetValue())
+        # Everything is validated, so convert the inputs to ints
+        trig_th = int(self.txt_trig_th.GetValue())
+        trig_dt = int(self.txt_trig_dt.GetValue())
+        trig_dl = int(self.txt_trig_dl.GetValue())
+        evt_len = int(self.txt_evt_len.GetValue())
+        evt_tail = int(self.txt_evt_tail.GetValue())
+        bl_len = int(self.txt_bl_len.GetValue())
 
         # First load the relevant data to the FPGA
         self.data_processor.set_trig_th(trig_th)

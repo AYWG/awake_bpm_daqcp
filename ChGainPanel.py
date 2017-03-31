@@ -21,6 +21,7 @@ class ChGainPanel(wx.Panel):
 
         self.__set_properties()
         self.__do_layout()
+        self.__attach_events()
 
     def __set_properties(self):
         pass
@@ -56,3 +57,30 @@ class ChGainPanel(wx.Panel):
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
         sizer_main.Fit(self)
+
+    def __attach_events(self):
+        self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_ch_gain)
+
+    def OnUpdate(self):
+        # Do validation here?
+
+        # Everything is validated, so convert the inputs to floats
+        ch_gain_a = float(self.txt_ch_gain_a.GetValue())
+        ch_gain_b = float(self.txt_ch_gain_b.GetValue())
+        ch_gain_c = float(self.txt_ch_gain_c.GetValue())
+        ch_gain_d = float(self.txt_ch_gain_d.GetValue())
+
+        # We then need to convert the values to the IEEE 754 representation as integers
+        ch_gain_a = int(self.data_processor.float_to_hex(ch_gain_a))
+        ch_gain_b = int(self.data_processor.float_to_hex(ch_gain_b))
+        ch_gain_c = int(self.data_processor.float_to_hex(ch_gain_c))
+        ch_gain_d = int(self.data_processor.float_to_hex(ch_gain_d))
+
+        # First load the relevant data to the FPGA
+        self.data_processor.set_cal_gain_a(ch_gain_a)
+        self.data_processor.set_cal_gain_b(ch_gain_b)
+        self.data_processor.set_cal_gain_c(ch_gain_c)
+        self.data_processor.set_cal_gain_d(ch_gain_d)
+
+        # Then write to the flash buffer
+        self.data_processor.wr_flash_buf()

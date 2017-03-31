@@ -20,6 +20,16 @@ class DataProcessor:
         self.EVT_TAIL = 300
         self.BL_LEN = 40
 
+        self.ch_gain_a = 1.0
+        self.ch_gain_b = 1.0
+        self.ch_gain_c = 1.0
+        self.ch_gain_d = 1.0
+
+        self.cal_gain_a = 1.0
+        self.cal_gain_b = 1.0
+        self.cal_gain_c = 1.0
+        self.cal_gain_d = 1.0
+
         self.MODE_INT_TRIG = 0x105  # mode reg bit = RUN + Internal trigger + BLR readout
         self.MODE_EXT_TRIG = 0x101  # mode reg bit = RUN + External trigger + BLR readout
         self.MODE_SEL_TRIG = 0x103  # mode reg bit = RUN + Self trigger + BLR readout
@@ -169,11 +179,72 @@ class DataProcessor:
         if self.IO.write_reg('BPM:DIA', bpm_dia) is False: sys.exit()
         time.sleep(0.1)
 
-    def wr_flash_buf(self):
-        if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit() # the 0 is arbitrary
+    def set_cal_gain_a(self, cal_gain_a):
+        self.cal_gain_a = cal_gain_a
+        if self.IO.write_reg('CAL:GAIN:A', cal_gain_a) is False: sys.exit()
         time.sleep(0.1)
 
-    #-------------- Methods for managing the plot
+    def set_cal_gain_b(self, cal_gain_b):
+        self.cal_gain_b = cal_gain_b
+        if self.IO.write_reg('CAL:GAIN:B', cal_gain_b) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_cal_gain_c(self, cal_gain_c):
+        self.cal_gain_c = cal_gain_c
+        if self.IO.write_reg('CAL:GAIN:C', cal_gain_c) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_cal_gain_d(self, cal_gain_d):
+        self.cal_gain_d = cal_gain_d
+        if self.IO.write_reg('CAL:GAIN:D', cal_gain_d) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_ch_gain_a(self, ch_gain_a):
+        self.ch_gain_a = ch_gain_a
+        if self.IO.write_reg('CH:GAIN:A', ch_gain_a) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_ch_gain_b(self, ch_gain_b):
+        self.ch_gain_b = ch_gain_b
+        if self.IO.write_reg('CH:GAIN:B', ch_gain_b) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_ch_gain_c(self, ch_gain_c):
+        self.ch_gain_c = ch_gain_c
+        if self.IO.write_reg('CH:GAIN:C', ch_gain_c) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_ch_gain_d(self, ch_gain_d):
+        self.ch_gain_d = ch_gain_d
+        if self.IO.write_reg('CH:GAIN:D', ch_gain_d) is False: sys.exit()
+        time.sleep(0.1)
+
+    def wr_flash_buf(self):
+        if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
+        time.sleep(0.1)
+
+    # For testing
+    def get_trig_th(self):
+        return self.IO.read_reg('TRIG:TH?')
+
+    # Returns the hexadecimal representation of the IEEE 754 format of the given python floating point value
+    # e.g. 1.0 returns 0x3f800000
+    def float_to_hex(self, f):
+        import struct
+        return hex(struct.unpack('<I', struct.pack('<f', f))[0])
+
+    # -------------- Methods for managing the plot
+
+    def get_average(self, data_buffer):
+        # Empty
+        if not data_buffer:
+            return float('NaN')
+        else:
+            sum = 0.0
+            for i in range(0, len(data_buffer)):
+                sum += data_buffer[i]
+
+            return sum / len(data_buffer)
 
     def set_op_mode(self, op_mode):
         self.op_mode = op_mode
@@ -204,6 +275,7 @@ class DataProcessor:
                 ax.set_xlabel('Time (s)')
                 # ax.tick_params(axis='both', which='major', pad=15)
                 ax.plot(self.time_data, self.s_data)
+                plt.text(0, 0, 'DANK MEMES')
             else:
                 ax1 = fig.add_subplot(211)
                 ax2 = fig.add_subplot(212)
