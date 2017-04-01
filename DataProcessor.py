@@ -275,7 +275,7 @@ class DataProcessor:
                 ax.set_xlabel('Time (s)')
                 # ax.tick_params(axis='both', which='major', pad=15)
                 ax.plot(self.time_data, self.s_data)
-                plt.text(0, 0, 'DANK MEMES')
+                # ax.text(0, 0.95, 'DANK MEMES', transform=ax.transAxes, fontsize=12)
             else:
                 ax1 = fig.add_subplot(211)
                 ax2 = fig.add_subplot(212)
@@ -290,6 +290,9 @@ class DataProcessor:
                     ax1.plot(self.time_data, self.y_pos_data, 'r-', label='Y pos')
                     ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
                     ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
+                    # Display running average
+                    ax1.text(0.05, 0.90, str(self.get_average(self.x_pos_data)), transform=ax1.transAxes, fontsize=10)
+                    ax1.text(0.05, 0.80, str(self.get_average(self.y_pos_data)), transform=ax1.transAxes, fontsize=10)
                 elif plot == Plots.POWER:
                     ax1.set_title('Power')
                     ax1.set_ylabel('Power AB')
