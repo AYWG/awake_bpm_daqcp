@@ -61,6 +61,14 @@ class DataProcessor:
         self.x_rms_data = []
         self.y_rms_data = []
 
+        self.power_a_avg = ''
+        self.power_b_avg = ''
+        self.power_c_avg = ''
+        self.power_d_avg = ''
+
+        self.x_pos_avg = ''
+        self.y_pos_avg = ''
+
         # ethernet communication
         self.IO = TCP.TCP(host, port)
         self.PACKET_ID = 0x4142504D
@@ -244,7 +252,8 @@ class DataProcessor:
             for i in range(0, len(data_buffer)):
                 sum += data_buffer[i]
 
-            return sum / len(data_buffer)
+            # rounded average
+            return round(sum / len(data_buffer))
 
     def set_op_mode(self, op_mode):
         self.op_mode = op_mode
@@ -275,7 +284,6 @@ class DataProcessor:
                 ax.set_xlabel('Time (s)')
                 # ax.tick_params(axis='both', which='major', pad=15)
                 ax.plot(self.time_data, self.s_data)
-                # ax.text(0, 0.95, 'DANK MEMES', transform=ax.transAxes, fontsize=12)
             else:
                 ax1 = fig.add_subplot(211)
                 ax2 = fig.add_subplot(212)
@@ -291,8 +299,10 @@ class DataProcessor:
                     ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
                     ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
                     # Display running average
-                    ax1.text(0.05, 0.90, str(self.get_average(self.x_pos_data)), transform=ax1.transAxes, fontsize=10)
-                    ax1.text(0.05, 0.80, str(self.get_average(self.y_pos_data)), transform=ax1.transAxes, fontsize=10)
+                    self.x_pos_avg = ax1.text(0.05, 0.90, str(self.get_average(self.x_pos_data)),
+                                              transform=ax1.transAxes, fontsize=10)
+                    self.y_pos_avg = ax1.text(0.05, 0.80, str(self.get_average(self.y_pos_data)),
+                                              transform=ax1.transAxes, fontsize=10)
                 elif plot == Plots.POWER:
                     ax1.set_title('Power')
                     ax1.set_ylabel('Power AB')
@@ -301,11 +311,26 @@ class DataProcessor:
                     ax1.plot(self.time_data, self.power_b_data, 'r-', label='B')
                     ax2.plot(self.time_data, self.power_c_data, 'b-', label='C')
                     ax2.plot(self.time_data, self.power_d_data, 'r-', label='D')
+                    # Display running average
+                    self.power_a_avg = ax1.text(0.05, 0.90, str(self.get_average(self.power_a_data)),
+                                                transform=ax1.transAxes, fontsize=10)
+                    self.power_b_avg = ax1.text(0.05, 0.80, str(self.get_average(self.power_b_data)),
+                                                transform=ax1.transAxes, fontsize=10)
+                    self.power_c_avg = ax2.text(0.05, 0.90, str(self.get_average(self.power_c_data)),
+                                                transform=ax2.transAxes, fontsize=10)
+                    self.power_d_avg = ax2.text(0.05, 0.80, str(self.get_average(self.power_d_data)),
+                                                transform=ax2.transAxes, fontsize=10)
 
                 # Add a legend to distinguish plots on the same axes
-                ax1.legend()
-                ax2.legend()
+                box1 = ax1.get_position()
+                box2 = ax2.get_position()
+                # Shrink current axis's width by 10% on the right
+                ax1.set_position([box1.x0, box1.y0, box1.width * 0.9, box1.height])
+                ax2.set_position([box2.x0, box2.y0, box2.width * 0.9, box2.height])
+                ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+                ax2.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
+                # Both axes share the same x label, so we only need one
                 ax2.set_xlabel('Time(s)')
 
             fig.canvas.draw()
@@ -325,11 +350,17 @@ class DataProcessor:
                     ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
                     ax2.get_lines()[0].set_data(self.time_data, self.x_rms_data)
                     ax2.get_lines()[1].set_data(self.time_data, self.y_rms_data)
+                    self.x_pos_avg.set_text(str(self.get_average(self.x_pos_data)))
+                    self.y_pos_avg.set_text(str(self.get_average(self.y_pos_data)))
                 elif self.get_plot() == Plots.POWER:
                     ax1.get_lines()[0].set_data(self.time_data, self.power_a_data)
                     ax1.get_lines()[1].set_data(self.time_data, self.power_b_data)
                     ax2.get_lines()[0].set_data(self.time_data, self.power_c_data)
                     ax2.get_lines()[1].set_data(self.time_data, self.power_d_data)
+                    self.power_a_avg.set_text(str(self.get_average(self.power_a_data)))
+                    self.power_b_avg.set_text(str(self.get_average(self.power_b_data)))
+                    self.power_c_avg.set_text(str(self.get_average(self.power_c_data)))
+                    self.power_d_avg.set_text(str(self.get_average(self.power_d_data)))
 
                 ax2.relim()
                 ax2.autoscale_view()
