@@ -125,7 +125,7 @@ class TCP(object):
         waveform.append([])
         waveform.append([])
         loop = num // 16;
-        print "read waveform loop:", loop
+        # print "read waveform loop:", loop
         for j in range(loop):
             data = self.read_buffer(msg)
             if data is False:

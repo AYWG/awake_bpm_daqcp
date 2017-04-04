@@ -50,6 +50,10 @@ class DataProcessor:
 
         # Data buffers
         self.current_time = 0
+        self.raw_adc_a_data = []
+        self.raw_adc_b_data = []
+        self.raw_adc_c_data = []
+        self.raw_adc_d_data = []
         self.time_data = []
         self.x_pos_data = []
         self.y_pos_data = []
@@ -68,6 +72,8 @@ class DataProcessor:
 
         self.x_pos_avg = ''
         self.y_pos_avg = ''
+
+        self.samples_to_read = 0
 
         # ethernet communication
         self.IO = TCP.TCP(host, port)
@@ -108,6 +114,7 @@ class DataProcessor:
         samples_to_read = 16 * ((self.EVT_LEN - self.BL_LEN - 4) // 16)
         samples_in_buf = self.IO.read_ffifo_wd(0)
         print "Fast FIFO occupancy: ", samples_in_buf
+        # condition for reading waveform data
         if samples_in_buf > samples_to_read:
             waveform = self.IO.read_waveform(self.ChAB, samples_to_read)
             wf_name = raw_input('Press RETURN or Enter waveform file name:')
@@ -124,18 +131,12 @@ class DataProcessor:
             print "ChA waveform saved: max, min value", max(waveform[0]), min(waveform[0])
             print "ChB waveform saved: max, min value", max(waveform[1]), min(waveform[1])
             waveform = self.IO.read_waveform(self.ChCD, samples_to_read)
-            wfcd_file = wf_name + "cd.wav"
-            print "ChC/D waveform file name is : ", wfcd_file
-            f = open(wfcd_file, "w")
-            try:
-                for i in range(0, samples_to_read - 1):
-                    f.write("%d\t%d\n" % (waveform[0][i], waveform[1][i]))
-            except TypeError as e:
-                print "write file error: "
-                print e
-            f.close()
-            print "ChC waveform saved: max, min value", max(waveform[0]), min(waveform[0])
-            print "ChD waveform saved: max, min value", max(waveform[1]), min(waveform[1])
+            # wfcd_file = wf_name + "cd.wav"
+            # print "ChC/D waveform file name is : ", wfcd_file
+            # f = open(wfcd_file, "w")
+            # try:
+            #     for i in range(0, samples_to_read - 1):
+            #         f.write("%d\t%d\n" % (waveform[0][i], waveform[1][i]))
 
     def set_afe_gain(self, gain):
         self.Gain = gain
@@ -290,7 +291,16 @@ class DataProcessor:
                 # Disables scientific notation for tick labels
                 # ax1.get_yaxis().get_major_formatter().set_scientific(False)
                 # ax2.get_yaxis().get_major_formatter().set_scientific(False)
-                if plot == Plots.POSITION:
+                if plot == Plots.WAVEFORM:
+                    ax1.set_title('ADC 16 bit data RAW or after BLR/Gain Cor.')
+                    ax1.set_ylabel('ADC output 16 bit')
+                    ax2.set_ylabel('ADC output 16 bit')
+                    ax1.plot(range(len(self.raw_adc_a_data)), self.raw_adc_a_data, 'b-', label='A')
+                    ax1.plot(range(len(self.raw_adc_b_data)), self.raw_adc_b_data, 'r-', label='B')
+                    ax2.plot(range(len(self.raw_adc_c_data)), self.raw_adc_c_data, 'b-', label='C')
+                    ax2.plot(range(len(self.raw_adc_d_data)), self.raw_adc_d_data, 'r-', label='D')
+
+                elif plot == Plots.POSITION:
                     ax1.set_title('Position and Res. RMS')
                     ax1.set_ylabel('X/Y position (um)')
                     ax2.set_ylabel('X/Y res. rms (um)')
@@ -333,6 +343,7 @@ class DataProcessor:
                 # Both axes share the same x label, so we only need one
                 ax2.set_xlabel('Time(s)')
 
+            fig.canvas.mpl_connect('close_event', self.close_windows)
             fig.canvas.draw()
             fig.canvas.start_event_loop(0.1)
 
@@ -345,6 +356,11 @@ class DataProcessor:
                 ax1.get_lines()[0].set_data(self.time_data, self.s_data)
             else:
                 ax1, ax2 = plt.gcf().get_axes()
+                # if self.get_plot() == Plots.WAVEFORM:
+                #     ax1.get_lines()[0].set_data(range(len(self.raw_adc_a_data)), self.raw_adc_a_data)
+                #     ax1.get_lines()[1].set_data(range(len(self.raw_adc_b_data)), self.raw_adc_b_data)
+                #     ax2.get_lines()[0].set_data(range(len(self.raw_adc_c_data)), self.raw_adc_c_data)
+                #     ax2.get_lines()[1].set_data(range(len(self.raw_adc_d_data)), self.raw_adc_d_data)
                 if self.get_plot() == Plots.POSITION:
                     ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
                     ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
@@ -371,6 +387,25 @@ class DataProcessor:
             plt.gcf().canvas.draw()
             plt.gcf().canvas.start_event_loop(0.1)
 
+    def update_waveform(self):
+        if self.get_plot() == Plots.WAVEFORM:
+            ax1, ax2 = plt.gcf().get_axes()
+            ax1.get_lines()[0].set_data(range(len(self.raw_adc_a_data)), self.raw_adc_a_data)
+            ax1.get_lines()[1].set_data(range(len(self.raw_adc_b_data)), self.raw_adc_b_data)
+            ax2.get_lines()[0].set_data(range(len(self.raw_adc_c_data)), self.raw_adc_c_data)
+            ax2.get_lines()[1].set_data(range(len(self.raw_adc_d_data)), self.raw_adc_d_data)
+            ax1.relim()
+            ax1.autoscale_view()
+            ax2.relim()
+            ax2.autoscale_view()
+            plt.gcf().canvas.draw()
+            plt.gcf().canvas.start_event_loop(0.1)
+
+    def is_waveform_rdy(self):
+        self.samples_to_read = 16 * ((self.EVT_LEN - self.BL_LEN - 4) // 16)
+        samples_in_buf = self.IO.read_ffifo_wd(0)
+        return samples_in_buf > self.samples_to_read
+
     # Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA.
     def is_new_data_rdy(self):
         samples_in_sfifo = self.IO.read_sfifo_wd()
@@ -380,8 +415,6 @@ class DataProcessor:
     def read_data(self):
         packet = self.IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
         if packet[0] != self.PACKET_ID:
-            # print packet
-            # print 'test'
             raise TypeError('Packet ID error!')
 
         self.current_time += 1
@@ -409,9 +442,21 @@ class DataProcessor:
         self.x_rms_data.append(x_rms)
         self.y_rms_data.append(y_rms)
 
+    def read_waveform(self):
+        waveform_AB = self.IO.read_waveform(self.ChAB, self.samples_to_read)
+        waveform_CD = self.IO.read_waveform(self.ChCD, self.samples_to_read)
+        self.raw_adc_a_data = waveform_AB[0]
+        self.raw_adc_b_data = waveform_AB[1]
+        self.raw_adc_c_data = waveform_CD[0]
+        self.raw_adc_d_data = waveform_CD[1]
+
     # Resets all data buffers and sets the current time to 0
     def clear_data(self):
         self.current_time = 0
+        del self.raw_adc_a_data[:]
+        del self.raw_adc_b_data[:]
+        del self.raw_adc_c_data[:]
+        del self.raw_adc_d_data[:]
         del self.time_data[:]
         del self.x_pos_data[:]
         del self.y_pos_data[:]
@@ -426,7 +471,7 @@ class DataProcessor:
     # Closes control window and any active plots
     def close_windows(self):
         self.set_plot(Plots.NONE)
-        plt.close()
+        plt.close('all')
 
     def shutdown(self):
         self.close_windows()

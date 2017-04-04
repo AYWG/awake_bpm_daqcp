@@ -24,18 +24,44 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 # thread that reads from the FPGA and updates the plots
 def data_collector(data_processor, command_queue, lock):
     while True:
+        """
         if data_processor.is_new_data_rdy():
             lock.acquire()
             # check if we're still running
             if data_processor.get_op_mode() == Modes.RUNNING:
+                # read the slow fifo and update the collected data
                 data_processor.read_data()
                 lock.release()
             else:
                 lock.release()
                 break
+            if data_processor.get_plot() != Plots.WAVEFORM:
+                command_queue.put(Commands.UPDATE_PLOT)
 
-            # data_processor.update_plot()
-            command_queue.put(Commands.UPDATE_PLOT)
+        if data_processor.is_waveform_rdy():
+            lock.acquire()
+            if data_processor.get_op_mode() == Modes.RUNNING:
+                data_processor.read_waveform()
+                lock.release()
+            else:
+                lock.release()
+                break
+            if data_processor.get_plot() == Plots.WAVEFORM:
+                command_queue.put(Commands.UPDATE_PLOT)
+        """
+
+        if data_processor.is_waveform_rdy():
+            lock.acquire()
+            if data_processor.get_op_mode() == Modes.RUNNING:
+                data_processor.read_waveform()
+                command_queue.put(Commands.UPDATE_WAVEFORM)
+                if data_processor.is_new_data_rdy():
+                    data_processor.read_data()
+                    command_queue.put(Commands.UPDATE_PLOT)
+                lock.release()
+            else:
+                lock.release()
+                break
 
 
 # thread that creates the control GUI and runs it until it is closed
@@ -93,6 +119,10 @@ def process_data(host, port, command_queue):
 
         elif command == Commands.UPDATE_PLOT:
             data_processor.update_plot()
+
+        elif command == Commands.UPDATE_WAVEFORM:
+            data_processor.update_waveform()
+            # pass
 
         elif command == Commands.EXIT:
             data_processor.shutdown()
