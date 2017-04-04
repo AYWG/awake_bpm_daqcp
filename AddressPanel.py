@@ -2,6 +2,9 @@
 
 import wx
 
+HEX_ONLY = 1
+DIGIT_ONLY = 2
+
 
 class AddressPanel(wx.Panel):
     def __init__(self, parent, title, data_processor):
@@ -26,6 +29,7 @@ class AddressPanel(wx.Panel):
 
         self.__set_properties()
         self.__do_layout()
+        self.__attach_events()
 
     def __set_properties(self):
         pass
@@ -62,3 +66,36 @@ class AddressPanel(wx.Panel):
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
         sizer_main.Fit(self)
+
+    def __attach_events(self):
+        self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_address)
+
+    def OnUpdate(self, event):
+        pass
+
+
+class AddressValidator(wx.PyValidator):
+    def __init__(self, flag=None):
+        wx.PyValidator.__init__(self)
+        self.flag = flag
+        self.Bind(wx.EVT_CHAR, self.OnChar)
+
+    def Clone(self):
+        return AddressValidator(self.flag)
+
+    def Validate(self, parent):
+        textCtrl = self.GetWindow()
+        val = textCtrl.GetValue()
+
+        # if self.flag == HEX_ONLY:
+
+        # elif self.flag == DIGIT_ONLY:
+
+    def TransferToWindow(self):
+        return True
+
+    def TransferFromWindow(self):
+        return True
+
+
+

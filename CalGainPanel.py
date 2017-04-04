@@ -61,7 +61,7 @@ class CalGainPanel(wx.Panel):
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_cal_gain)
 
-    def OnUpdate(self):
+    def OnUpdate(self, event):
         # Do validation here?
 
         # Everything is validated, so convert the inputs to floats

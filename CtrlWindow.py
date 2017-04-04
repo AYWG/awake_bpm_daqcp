@@ -40,7 +40,8 @@ class CtrlWindow(wx.Frame):
 
     def __set_properties(self):
         # Light-grey
-        self.SetBackgroundColour(wx.Colour(240, 240, 240))
+        # self.SetBackgroundColour(wx.Colour(240, 240, 240))
+        self.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
 
     def __do_layout(self):
         sizer_btm_row = wx.BoxSizer(wx.HORIZONTAL)

@@ -63,11 +63,14 @@ def data_collector(data_processor, command_queue, lock):
                 lock.release()
                 break
 
+
+# Checks if there's a thread that's alive and has the given name
 def is_thread_active(name):
     for t in threading.enumerate():
         if t.name == name:
             return True
     return False
+
 
 # thread that creates the control GUI and runs it until it is closed
 def ctrl_gui_handler(data_processor):
@@ -79,7 +82,6 @@ def plot_refresher(data_processor, command_queue):
     while data_processor.get_op_mode() == Modes.PAUSED:
         command_queue.put(Commands.REFRESH_PLOT)
         time.sleep(0.5)
-        # DataProcessor.DataProcessor.enable_plot_interaction()
 
 
 def process_data(host, port, command_queue):

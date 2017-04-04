@@ -82,7 +82,7 @@ class DataProcessor:
         # Initial mode of operation is PAUSED
         self.op_mode = Modes.PAUSED
 
-        # Initial plot is NONE
+        # There is no plot at the beginning
         self.plot = Plots.NONE
 
         plt.ion()
@@ -108,35 +108,6 @@ class DataProcessor:
         time.sleep(0.1)
         if self.IO.write_reg('CR', self.MODE_EXT_TRIG) is False: sys.exit()
         time.sleep(0.1)
-
-    # using old code for printing and saving waveform data; will need to change this later
-    def view_waveform(self):
-        samples_to_read = 16 * ((self.EVT_LEN - self.BL_LEN - 4) // 16)
-        samples_in_buf = self.IO.read_ffifo_wd(0)
-        print "Fast FIFO occupancy: ", samples_in_buf
-        # condition for reading waveform data
-        if samples_in_buf > samples_to_read:
-            waveform = self.IO.read_waveform(self.ChAB, samples_to_read)
-            wf_name = raw_input('Press RETURN or Enter waveform file name:')
-            wfab_file = wf_name + "ab.wav"
-            print "ChA/B waveform file name is : ", wfab_file
-            f = open(wfab_file, "w")
-            try:
-                for i in range(0, samples_to_read - 1):
-                    f.write("%d\t%d\n" % (waveform[0][i], waveform[1][i]))
-            except TypeError as e:
-                print "write file error: "
-                print e
-            f.close()
-            print "ChA waveform saved: max, min value", max(waveform[0]), min(waveform[0])
-            print "ChB waveform saved: max, min value", max(waveform[1]), min(waveform[1])
-            waveform = self.IO.read_waveform(self.ChCD, samples_to_read)
-            # wfcd_file = wf_name + "cd.wav"
-            # print "ChC/D waveform file name is : ", wfcd_file
-            # f = open(wfcd_file, "w")
-            # try:
-            #     for i in range(0, samples_to_read - 1):
-            #         f.write("%d\t%d\n" % (waveform[0][i], waveform[1][i]))
 
     def set_afe_gain(self, gain):
         self.Gain = gain

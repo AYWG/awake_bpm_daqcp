@@ -1,7 +1,7 @@
 # Panel for editing parameters not included in the other panels (e.g. BPM Diameter)
 
 import wx
-
+import string
 
 class OtherParamPanel(wx.Panel):
     def __init__(self, parent, title, data_processor):
@@ -18,7 +18,8 @@ class OtherParamPanel(wx.Panel):
         self.__attach_events()
 
     def __set_properties(self):
-        pass
+        # self.SetExtraStyle(wx.WS_EX_VALIDATE_RECURSIVELY)
+        self.txt_bpm_dia.SetValidator(OtherParamValidator())
 
     def __do_layout(self):
         sizer_other_param_box = wx.StaticBoxSizer(self.other_param_box, wx.VERTICAL)
@@ -40,8 +41,55 @@ class OtherParamPanel(wx.Panel):
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_other_param)
 
-    def OnUpdate(self):
-        bpm_dia = int(self.txt_bpm_dia.GetValue())
+    def OnUpdate(self, event):
+        if (self.Validate()):
+            bpm_dia = int(self.txt_bpm_dia.GetValue())
 
-        self.data_processor.set_bpm_dia(bpm_dia)
-        self.data_processor.wr_flash_buf()
+            self.data_processor.set_bpm_dia(bpm_dia)
+            self.data_processor.wr_flash_buf()
+
+
+class OtherParamValidator(wx.PyValidator):
+    def __init__(self):
+        wx.PyValidator.__init__(self)
+
+    def Clone(self):
+        return OtherParamValidator()
+
+    def Validate(self, parent):
+        textCtrl = self.GetWindow()
+        val = textCtrl.GetValue()
+
+        if len(val) == 0:
+            wx.MessageBox("BPM DIA value required!", "Error")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        else:
+            textCtrl.SetBackgroundColour(
+                wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.Refresh()
+            return True
+
+    def TransferToWindow(self):
+        return True
+
+    def TransferFromWindow(self):
+        return True
+
+    def OnChar(self, event):
+        key = event.GetKeyCode()
+
+        if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
+            event.Skip()
+            return
+
+        if chr(key) in string.digits:
+            event.Skip()
+            return
+
+        if not wx.Validator_IsSilent():
+            wx.Bell()
+
+        return
