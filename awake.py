@@ -63,11 +63,23 @@ def data_collector(data_processor, command_queue, lock):
                 lock.release()
                 break
 
+def is_thread_active(name):
+    for t in threading.enumerate():
+        if t.name == name:
+            return True
+    return False
 
 # thread that creates the control GUI and runs it until it is closed
 def ctrl_gui_handler(data_processor):
     gui = CtrlGUI.CtrlGUI(data_processor)
     gui.MainLoop()
+
+
+def plot_refresher(data_processor, command_queue):
+    while data_processor.get_op_mode() == Modes.PAUSED:
+        command_queue.put(Commands.REFRESH_PLOT)
+        time.sleep(0.5)
+        # DataProcessor.DataProcessor.enable_plot_interaction()
 
 
 def process_data(host, port, command_queue):
@@ -85,8 +97,8 @@ def process_data(host, port, command_queue):
                 op_mode_lock.acquire()
                 data_processor.set_op_mode(Modes.RUNNING)
                 op_mode_lock.release()
-                t = threading.Thread(target=data_collector, args=(data_processor, command_queue, op_mode_lock))
-                t.start()
+                t_data_collector = threading.Thread(target=data_collector, args=(data_processor, command_queue, op_mode_lock), name='data_collector')
+                t_data_collector.start()
 
         elif command == Commands.PAUSE_MEASURING_DATA:
             # only take action if currently running
@@ -123,10 +135,16 @@ def process_data(host, port, command_queue):
         elif command == Commands.UPDATE_WAVEFORM:
             data_processor.update_waveform()
             # pass
+        elif command == Commands.REFRESH_PLOT:
+            data_processor.enable_plot_interaction()
 
         elif command == Commands.EXIT:
             data_processor.shutdown()
             break
+
+        if data_processor.get_plot() != Plots.NONE and data_processor.get_op_mode() == Modes.PAUSED and not is_thread_active('plot_refresher'):
+            t_plot_refresher = threading.Thread(target=plot_refresher, args=(data_processor, command_queue), name='plot_refresher')
+            t_plot_refresher.start()
 
 
 # -------------------------------------------------------------------------------

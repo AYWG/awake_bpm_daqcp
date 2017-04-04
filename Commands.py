@@ -13,3 +13,4 @@ EXIT = 10
 # Internal commands
 UPDATE_PLOT = 11
 UPDATE_WAVEFORM = 12
+REFRESH_PLOT = 13

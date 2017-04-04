@@ -345,7 +345,12 @@ class DataProcessor:
 
             fig.canvas.mpl_connect('close_event', self.close_windows)
             fig.canvas.draw()
-            fig.canvas.start_event_loop(0.1)
+            # plt.show(block=False)
+            fig.canvas.start_event_loop(5)
+
+    @staticmethod
+    def enable_plot_interaction():
+        plt.gcf().canvas.start_event_loop(0.1)
 
     # Updates the active plot, adjusting the appropriate axis based on the data collected so far
     def update_plot(self):
@@ -385,7 +390,8 @@ class DataProcessor:
             ax1.autoscale_view()
 
             plt.gcf().canvas.draw()
-            plt.gcf().canvas.start_event_loop(0.1)
+            # plt.show(block=False)
+            plt.gcf().canvas.start_event_loop(0.5)
 
     def update_waveform(self):
         if self.get_plot() == Plots.WAVEFORM:
