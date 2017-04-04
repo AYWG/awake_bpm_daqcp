@@ -3,6 +3,7 @@
 import wx
 import string
 
+
 class OtherParamPanel(wx.Panel):
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
@@ -52,6 +53,7 @@ class OtherParamPanel(wx.Panel):
 class OtherParamValidator(wx.PyValidator):
     def __init__(self):
         wx.PyValidator.__init__(self)
+        self.Bind(wx.EVT_CHAR, self.OnChar)
 
     def Clone(self):
         return OtherParamValidator()
@@ -61,7 +63,13 @@ class OtherParamValidator(wx.PyValidator):
         val = textCtrl.GetValue()
 
         if len(val) == 0:
-            wx.MessageBox("BPM DIA value required!", "Error")
+            wx.MessageBox("BPM DIA value required!", "No Input")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        elif not OtherParamValidator._contains_only_digits(val):
+            wx.MessageBox("Please enter numbers only", "Invalid Input")
             textCtrl.SetBackgroundColour("pink")
             textCtrl.SetFocus()
             textCtrl.Refresh()
@@ -71,6 +79,13 @@ class OtherParamValidator(wx.PyValidator):
                 wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
             textCtrl.Refresh()
             return True
+
+    @staticmethod
+    def _contains_only_digits(val):
+        for x in val:
+            if x not in string.digits:
+                return False
+        return True
 
     def TransferToWindow(self):
         return True
