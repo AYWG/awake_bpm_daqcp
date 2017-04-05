@@ -7,7 +7,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import Modes
 import Plots
-
+import Commands
 
 class DataProcessor:
     def __init__(self, host, port):
@@ -30,12 +30,14 @@ class DataProcessor:
         self.cal_gain_c = 1.0
         self.cal_gain_d = 1.0
 
-        self.MODE_INT_TRIG = 0x105  # mode reg bit = RUN + Internal trigger + BLR readout
-        self.MODE_EXT_TRIG = 0x101  # mode reg bit = RUN + External trigger + BLR readout
-        self.MODE_SEL_TRIG = 0x103  # mode reg bit = RUN + Self trigger + BLR readout
-        self.MODE_CAL = 0x2105  # mode reg bit = RUN + Self trigger + BLR readout + AFE Cal.
+        self.MODE_INT_TRIG = 0x105  # mode reg bit = RUN + Internal trigger + BLR readout       0000 0001 0000 0101
+        self.MODE_EXT_TRIG = 0x101  # mode reg bit = RUN + External trigger + BLR readout       0000 0001 0000 0001
+        self.MODE_SEL_TRIG = 0x103  # mode reg bit = RUN + Self trigger + BLR readout           0000 0001 0000 0011
+        self.MODE_CAL = 0x2105  # mode reg bit = RUN + Self trigger + BLR readout + AFE Cal.    0010 0001 0000 0101
 
-        self.MODE_TEMP = 0x0020  # mode reg bit = Ena temperature reading
+        self.MODE_TEMP = 0x0020  # mode reg bit = Ena temperature reading                       0000 0000 0010 0000
+
+        self.mode = self.MODE_EXT_TRIG
 
         self.A1dB = 0x01  # Analog Front-end board gain setting : 1 dB attenuation
         self.A2dB = 0x02  # Analog Front-end board gain setting : 2 dB attenuation
@@ -85,6 +87,8 @@ class DataProcessor:
         # There is no plot at the beginning
         self.plot = Plots.NONE
 
+        # self.command_queue = command_queue
+
         plt.ion()
 
     def init_config(self):
@@ -107,6 +111,11 @@ class DataProcessor:
         if self.IO.write_reg('AFE:CTRL', self.Gain) is False: sys.exit()
         time.sleep(0.1)
         if self.IO.write_reg('CR', self.MODE_EXT_TRIG) is False: sys.exit()
+        time.sleep(0.1)
+
+    def set_mode(self, mode):
+        set.mode = mode
+        if self.IO.write_reg('CR', mode) is False: sys.exit()
         time.sleep(0.1)
 
     def set_afe_gain(self, gain):
@@ -220,6 +229,12 @@ class DataProcessor:
     def float_to_hex(self, f):
         import struct
         return hex(struct.unpack('<I', struct.pack('<f', f))[0])
+
+    # def run(self):
+    #     self.command_queue.put(Commands.START_MEASURING_DATA)
+
+    # def pause(self):
+    #     self.command_queue.put(Commands.PAUSE_MEASURING_DATA)
 
     # -------------- Methods for managing the plot
 

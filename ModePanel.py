@@ -35,6 +35,7 @@ class ModePanel(wx.Panel):
 
         self.__set_properties()
         self.__do_layout()
+        self.__attach_events()
 
     def __set_properties(self):
         pass
@@ -107,3 +108,38 @@ class ModePanel(wx.Panel):
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
         sizer_main.Fit(self)
+
+    def __attach_events(self):
+        self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_mode)
+
+    def OnUpdate(self, event):
+        mode = 0x0
+
+        # The value added represents in binary the number that must be written to the control register
+        # in order to enable that particular mode
+        if self.chk_run.GetValue():
+            mode += 0x1
+        if self.chk_ext_trig.GetValue():
+            mode += 0x2
+        if self.chk_self_trig.GetValue():
+            mode += 0x4
+        if self.chk_int_trig.GetValue():
+            mode += 0x8
+        if self.chk_ena_trig_out.GetValue():
+            mode += 0x10
+        if self.chk_ena_temp_rd.GetValue():
+            mode += 0x20
+        if self.chk_bypass_blr.GetValue():
+            mode += 0x40
+        if self.chk_raw_adc_rd.GetValue():
+            mode += 0x80
+        if self.chk_blr_rd.GetValue():
+            mode += 0x100
+        if self.chk_afe_cal.GetValue():
+            mode += 0x2000
+        if self.chk_onfly_cal.GetValue():
+            mode += 0x4000
+
+        self.data_processor.set_mode(mode)
+
+        wx.MessageBox("Mode successfully updated", "Update Successful")
