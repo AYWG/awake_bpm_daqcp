@@ -1,7 +1,9 @@
 # Panel for editing event parameters (e.g. event length)
 
 import wx
-import numpy
+import string
+import Validator
+
 
 class EventParamPanel(wx.Panel):
     def __init__(self, parent, title, data_processor):
@@ -29,10 +31,14 @@ class EventParamPanel(wx.Panel):
         self.__attach_events()
 
     def __set_properties(self):
-        pass
+        self.txt_trig_th.SetValidator(EventParamValidator())
+        self.txt_trig_dt.SetValidator(EventParamValidator())
+        self.txt_trig_dl.SetValidator(EventParamValidator())
+        self.txt_evt_len.SetValidator(EventParamValidator())
+        self.txt_evt_tail.SetValidator(EventParamValidator())
+        self.txt_bl_len.SetValidator(EventParamValidator())
 
     def __do_layout(self):
-
         sizer_event_param_box = wx.StaticBoxSizer(self.event_param_box, wx.VERTICAL)
 
         sizer_trig_th = wx.BoxSizer(wx.HORIZONTAL)
@@ -86,23 +92,53 @@ class EventParamPanel(wx.Panel):
         dlg.Destroy()  # finally destroy it when finished.
 
     def OnUpdate(self, e):
-        # Do validation here?
+        if self.Validate():
+            # Everything is validated, so convert the inputs to ints
+            trig_th = int(self.txt_trig_th.GetValue())
+            trig_dt = int(self.txt_trig_dt.GetValue())
+            trig_dl = int(self.txt_trig_dl.GetValue())
+            evt_len = int(self.txt_evt_len.GetValue())
+            evt_tail = int(self.txt_evt_tail.GetValue())
+            bl_len = int(self.txt_bl_len.GetValue())
 
-        # Everything is validated, so convert the inputs to ints
-        trig_th = int(self.txt_trig_th.GetValue())
-        trig_dt = int(self.txt_trig_dt.GetValue())
-        trig_dl = int(self.txt_trig_dl.GetValue())
-        evt_len = int(self.txt_evt_len.GetValue())
-        evt_tail = int(self.txt_evt_tail.GetValue())
-        bl_len = int(self.txt_bl_len.GetValue())
+            # First load the relevant data to the FPGA
+            self.data_processor.set_trig_th(trig_th)
+            self.data_processor.set_trig_dt(trig_dt)
+            self.data_processor.set_trig_dl(trig_dl)
+            self.data_processor.set_evt_len(evt_len)
+            self.data_processor.set_evt_tail(evt_tail)
+            self.data_processor.set_bl_len(bl_len)
 
-        # First load the relevant data to the FPGA
-        self.data_processor.set_trig_th(trig_th)
-        self.data_processor.set_trig_dt(trig_dt)
-        self.data_processor.set_trig_dl(trig_dl)
-        self.data_processor.set_evt_len(evt_len)
-        self.data_processor.set_evt_tail(evt_tail)
-        self.data_processor.set_bl_len(bl_len)
+            # Then write to the flash buffer
+            self.data_processor.wr_flash_buf()
 
-        # Then write to the flash buffer
-        self.data_processor.wr_flash_buf()
+
+class EventParamValidator(Validator.Validator):
+    def __init__(self):
+        Validator.Validator.__init__(self)
+
+    def Clone(self):
+        return EventParamValidator()
+
+    def Validate(self, parent):
+        textCtrl = self.GetWindow()
+        val = textCtrl.GetValue()
+
+        if len(val) == 0:
+            wx.MessageBox("Event Parameter required!", "No Input")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        elif not EventParamValidator.contains_only_digits(val):
+            wx.MessageBox("Please enter numbers only", "Invalid Input")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        else:
+            # Add a success message here
+            textCtrl.SetBackgroundColour(
+                wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.Refresh()
+            return True

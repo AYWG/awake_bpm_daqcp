@@ -40,4 +40,19 @@ class Validator(wx.PyValidator):
                 return False
         return True
 
+    @staticmethod
+    def contains_only_hex(val):
+        for x in val:
+            if x not in string.hexdigits:
+                return False
+        return True
+
+    @staticmethod
+    def is_float(val):
+        try:
+            float(val)
+        except ValueError:
+            return False
+        return True
+
 

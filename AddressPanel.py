@@ -203,12 +203,7 @@ class AddressValidator(Validator.Validator):
 
         return
 
-    @staticmethod
-    def contains_only_hex(val):
-        for x in val:
-            if x not in string.hexdigits:
-                return False
-        return True
+
 
 
 

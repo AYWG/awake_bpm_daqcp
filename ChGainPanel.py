@@ -1,7 +1,8 @@
 # Panel for adjusting channel gain
 
 import wx
-
+import string
+import Validator
 
 class ChGainPanel(wx.Panel):
     def __init__(self, parent, title, data_processor):
@@ -24,7 +25,10 @@ class ChGainPanel(wx.Panel):
         self.__attach_events()
 
     def __set_properties(self):
-        pass
+        self.txt_ch_gain_a.SetValidator(ChGainValidator())
+        self.txt_ch_gain_b.SetValidator(ChGainValidator())
+        self.txt_ch_gain_c.SetValidator(ChGainValidator())
+        self.txt_ch_gain_d.SetValidator(ChGainValidator())
 
     def __do_layout(self):
         sizer_ch_gain_box = wx.StaticBoxSizer(self.ch_gain_box, wx.VERTICAL)
@@ -62,25 +66,71 @@ class ChGainPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_ch_gain)
 
     def OnUpdate(self, event):
-        # Do validation here?
+        if self.Validate():
+            # Everything is validated, so convert the inputs to floats
+            ch_gain_a = float(self.txt_ch_gain_a.GetValue())
+            ch_gain_b = float(self.txt_ch_gain_b.GetValue())
+            ch_gain_c = float(self.txt_ch_gain_c.GetValue())
+            ch_gain_d = float(self.txt_ch_gain_d.GetValue())
 
-        # Everything is validated, so convert the inputs to floats
-        ch_gain_a = float(self.txt_ch_gain_a.GetValue())
-        ch_gain_b = float(self.txt_ch_gain_b.GetValue())
-        ch_gain_c = float(self.txt_ch_gain_c.GetValue())
-        ch_gain_d = float(self.txt_ch_gain_d.GetValue())
+            # We then need to convert the values to the IEEE 754 representation as integers
+            ch_gain_a = int(self.data_processor.float_to_hex(ch_gain_a))
+            ch_gain_b = int(self.data_processor.float_to_hex(ch_gain_b))
+            ch_gain_c = int(self.data_processor.float_to_hex(ch_gain_c))
+            ch_gain_d = int(self.data_processor.float_to_hex(ch_gain_d))
 
-        # We then need to convert the values to the IEEE 754 representation as integers
-        ch_gain_a = int(self.data_processor.float_to_hex(ch_gain_a))
-        ch_gain_b = int(self.data_processor.float_to_hex(ch_gain_b))
-        ch_gain_c = int(self.data_processor.float_to_hex(ch_gain_c))
-        ch_gain_d = int(self.data_processor.float_to_hex(ch_gain_d))
+            # First load the relevant data to the FPGA
+            self.data_processor.set_cal_gain_a(ch_gain_a)
+            self.data_processor.set_cal_gain_b(ch_gain_b)
+            self.data_processor.set_cal_gain_c(ch_gain_c)
+            self.data_processor.set_cal_gain_d(ch_gain_d)
 
-        # First load the relevant data to the FPGA
-        self.data_processor.set_cal_gain_a(ch_gain_a)
-        self.data_processor.set_cal_gain_b(ch_gain_b)
-        self.data_processor.set_cal_gain_c(ch_gain_c)
-        self.data_processor.set_cal_gain_d(ch_gain_d)
+            # Then write to the flash buffer
+            self.data_processor.wr_flash_buf()
 
-        # Then write to the flash buffer
-        self.data_processor.wr_flash_buf()
+
+class ChGainValidator(Validator.Validator):
+    def __init__(self):
+        Validator.Validator.__init__(self)
+
+    def Clone(self):
+        return ChGainValidator()
+
+    def Validate(self, parent):
+        textCtrl = self.GetWindow()
+        val = textCtrl.GetValue()
+
+        if len(val) == 0:
+            wx.MessageBox("Ch Gain value required!", "No Input")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        elif not ChGainValidator.is_float(val):
+            wx.MessageBox("Please enter a valid decimal value", "Invalid Input")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        else:
+            # Add a success message here
+            textCtrl.SetBackgroundColour(
+                wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.Refresh()
+            return True
+
+    def OnChar(self, event):
+        key = event.GetKeyCode()
+
+        if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
+            event.Skip()
+            return
+
+        if chr(key) in string.digits or chr(key) == '.':
+            event.Skip()
+            return
+
+        if not wx.Validator_IsSilent():
+            wx.Bell()
+
+        return
