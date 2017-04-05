@@ -1,6 +1,8 @@
 # Panel for setting the IP and MAC addresses
 
 import wx
+import string
+import Validator
 
 HEX_ONLY = 1
 DIGIT_ONLY = 2
@@ -32,7 +34,30 @@ class AddressPanel(wx.Panel):
         self.__attach_events()
 
     def __set_properties(self):
-        pass
+        self.txt_mac_address_0.SetMaxLength(2)
+        self.txt_mac_address_1.SetMaxLength(2)
+        self.txt_mac_address_2.SetMaxLength(2)
+        self.txt_mac_address_3.SetMaxLength(2)
+        self.txt_mac_address_4.SetMaxLength(2)
+        self.txt_mac_address_5.SetMaxLength(2)
+
+        self.txt_ip_address_0.SetMaxLength(3)
+        self.txt_ip_address_0.SetMaxLength(3)
+        self.txt_ip_address_0.SetMaxLength(3)
+        self.txt_ip_address_0.SetMaxLength(3)
+
+        self.txt_mac_address_0.SetValidator(AddressValidator(HEX_ONLY))
+        self.txt_mac_address_1.SetValidator(AddressValidator(HEX_ONLY))
+        self.txt_mac_address_2.SetValidator(AddressValidator(HEX_ONLY))
+        self.txt_mac_address_3.SetValidator(AddressValidator(HEX_ONLY))
+        self.txt_mac_address_4.SetValidator(AddressValidator(HEX_ONLY))
+        self.txt_mac_address_5.SetValidator(AddressValidator(HEX_ONLY))
+
+        self.txt_ip_address_0.SetValidator(AddressValidator(DIGIT_ONLY))
+        self.txt_ip_address_1.SetValidator(AddressValidator(DIGIT_ONLY))
+        self.txt_ip_address_2.SetValidator(AddressValidator(DIGIT_ONLY))
+        self.txt_ip_address_3.SetValidator(AddressValidator(DIGIT_ONLY))
+
 
     def __do_layout(self):
         SIZER_BORDER_WIDTH = 5
@@ -71,14 +96,36 @@ class AddressPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_address)
 
     def OnUpdate(self, event):
-        pass
+        if self.Validate():
+            mac_address_0 = int(self.txt_mac_address_0.GetValue(), 16)
+            mac_address_1 = int(self.txt_mac_address_1.GetValue(), 16)
+            mac_address_2 = int(self.txt_mac_address_2.GetValue(), 16)
+            mac_address_3 = int(self.txt_mac_address_3.GetValue(), 16)
+            mac_address_4 = int(self.txt_mac_address_4.GetValue(), 16)
+            mac_address_5 = int(self.txt_mac_address_5.GetValue(), 16)
+
+            ip_address_0 = int(self.txt_ip_address_0.GetValue())
+            ip_address_1 = int(self.txt_ip_address_0.GetValue())
+            ip_address_2 = int(self.txt_ip_address_0.GetValue())
+            ip_address_3 = int(self.txt_ip_address_0.GetValue())
+
+            self.data_processor.wr_mac_address(0, mac_address_0)
+            self.data_processor.wr_mac_address(1, mac_address_1)
+            self.data_processor.wr_mac_address(2, mac_address_2)
+            self.data_processor.wr_mac_address(3, mac_address_3)
+            self.data_processor.wr_mac_address(4, mac_address_4)
+            self.data_processor.wr_mac_address(5, mac_address_5)
+
+            self.data_processor.wr_ip_address(0, ip_address_0)
+            self.data_processor.wr_ip_address(1, ip_address_1)
+            self.data_processor.wr_ip_address(2, ip_address_2)
+            self.data_processor.wr_ip_address(3, ip_address_3)
 
 
-class AddressValidator(wx.PyValidator):
-    def __init__(self, flag=None):
-        wx.PyValidator.__init__(self)
+class AddressValidator(Validator.Validator):
+    def __init__(self, flag):
+        Validator.Validator.__init__(self)
         self.flag = flag
-        self.Bind(wx.EVT_CHAR, self.OnChar)
 
     def Clone(self):
         return AddressValidator(self.flag)
@@ -87,14 +134,80 @@ class AddressValidator(wx.PyValidator):
         textCtrl = self.GetWindow()
         val = textCtrl.GetValue()
 
-        # if self.flag == HEX_ONLY:
+        # for MAC address
+        if self.flag == HEX_ONLY:
+            if len(val) == 0:
+                wx.MessageBox("Part of the MAC address is missing!", "Missing Input")
+                textCtrl.SetBackgroundColour("pink")
+                textCtrl.SetFocus()
+                textCtrl.Refresh()
+                return False
+            elif not AddressValidator.contains_only_hex(val):
+                wx.MessageBox("A MAC address may only contain hexadecimal characters", "Invalid Input")
+                textCtrl.SetBackgroundColour("pink")
+                textCtrl.SetFocus()
+                textCtrl.Refresh()
+                return False
+            else:
+                # Add a success message here
+                textCtrl.SetBackgroundColour(
+                    wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+                textCtrl.Refresh()
+                return True
 
-        # elif self.flag == DIGIT_ONLY:
+        # for IP address
+        elif self.flag == DIGIT_ONLY:
+            if len(val) == 0:
+                wx.MessageBox("Part of the IP address is missing!", "Missing Input")
+                textCtrl.SetBackgroundColour("pink")
+                textCtrl.SetFocus()
+                textCtrl.Refresh()
+                return False
+            elif not AddressValidator.contains_only_digits(val):
+                wx.MessageBox("An IP address may only contain numbers", "Invalid Input")
+                textCtrl.SetBackgroundColour("pink")
+                textCtrl.SetFocus()
+                textCtrl.Refresh()
+                return False
+            elif int(val) > 255:
+                wx.MessageBox("Invalid value for an IP address (valid range is 0-255)", "Invalid Input")
+                textCtrl.SetBackgroundColour("pink")
+                textCtrl.SetFocus()
+                textCtrl.Refresh()
+                return False
+            else:
+                # Add a success message here
+                textCtrl.SetBackgroundColour(
+                    wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+                textCtrl.Refresh()
+                return True
 
-    def TransferToWindow(self):
-        return True
 
-    def TransferFromWindow(self):
+    def OnChar(self, event):
+        key = event.GetKeyCode()
+
+        if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
+            event.Skip()
+            return
+
+        if self.flag == HEX_ONLY and chr(key) in string.hexdigits:
+            event.Skip()
+            return
+
+        if self.flag == DIGIT_ONLY and chr(key) in string.digits:
+            event.Skip()
+            return
+
+        if not wx.Validator_IsSilent():
+            wx.Bell()
+
+        return
+
+    @staticmethod
+    def contains_only_hex(val):
+        for x in val:
+            if x not in string.hexdigits:
+                return False
         return True
 
 

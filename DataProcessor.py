@@ -203,6 +203,14 @@ class DataProcessor:
         if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
         time.sleep(0.1)
 
+    def wr_mac_address(self, index, value):
+        if self.IO.write_reg('FL:BUF:MAC:' + str(index), value) is False: sys.exit()
+        time.sleep(0.1)
+
+    def wr_ip_address(self, index, value):
+        if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()
+        time.sleep(0.1)
+
     # For testing
     def get_trig_th(self):
         return self.IO.read_reg('TRIG:TH?')

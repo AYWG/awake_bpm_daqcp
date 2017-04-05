@@ -2,6 +2,7 @@
 
 import wx
 import string
+import Validator
 
 
 class OtherParamPanel(wx.Panel):
@@ -50,6 +51,7 @@ class OtherParamPanel(wx.Panel):
             self.data_processor.wr_flash_buf()
 
 
+"""
 class OtherParamValidator(wx.PyValidator):
     def __init__(self):
         wx.PyValidator.__init__(self)
@@ -108,3 +110,35 @@ class OtherParamValidator(wx.PyValidator):
             wx.Bell()
 
         return
+"""
+
+
+class OtherParamValidator(Validator.Validator):
+    def __init__(self):
+        Validator.Validator.__init__(self)
+
+    def Clone(self):
+        return OtherParamValidator()
+
+    def Validate(self, parent):
+        textCtrl = self.GetWindow()
+        val = textCtrl.GetValue()
+
+        if len(val) == 0:
+            wx.MessageBox("BPM DIA value required!", "No Input")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        elif not OtherParamValidator.contains_only_digits(val):
+            wx.MessageBox("Please enter numbers only", "Invalid Input")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
+        else:
+            # Add a success message here
+            textCtrl.SetBackgroundColour(
+                wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.Refresh()
+            return True
