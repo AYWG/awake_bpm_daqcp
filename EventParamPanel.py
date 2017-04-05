@@ -111,6 +111,7 @@ class EventParamPanel(wx.Panel):
 
             # Then write to the flash buffer
             self.data_processor.wr_flash_buf()
+            wx.MessageBox("Event Parameters successfully updated", "Update Successful")
 
 
 class EventParamValidator(Validator.Validator):

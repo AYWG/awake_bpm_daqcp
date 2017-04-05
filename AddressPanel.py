@@ -121,6 +121,7 @@ class AddressPanel(wx.Panel):
             self.data_processor.wr_ip_address(2, ip_address_2)
             self.data_processor.wr_ip_address(3, ip_address_3)
 
+            wx.MessageBox("Addresses successfully updated", "Update Successful")
 
 class AddressValidator(Validator.Validator):
     def __init__(self, flag):

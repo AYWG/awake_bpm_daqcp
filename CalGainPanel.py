@@ -88,6 +88,7 @@ class CalGainPanel(wx.Panel):
 
             # Then write to the flash buffer
             self.data_processor.wr_flash_buf()
+            wx.MessageBox("Cal Gain successfully updated", "Update Successful")
 
 
 class CalGainValidator(Validator.Validator):

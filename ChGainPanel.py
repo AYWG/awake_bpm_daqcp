@@ -87,7 +87,7 @@ class ChGainPanel(wx.Panel):
 
             # Then write to the flash buffer
             self.data_processor.wr_flash_buf()
-
+            wx.MessageBox("Ch Gain successfully updated", "Update Successful")
 
 class ChGainValidator(Validator.Validator):
     def __init__(self):
