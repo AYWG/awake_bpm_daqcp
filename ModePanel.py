@@ -36,6 +36,7 @@ class ModePanel(wx.Panel):
         self.__set_properties()
         self.__do_layout()
         self.__attach_events()
+        self.initialize_controls()
 
     def __set_properties(self):
         pass
@@ -112,6 +113,41 @@ class ModePanel(wx.Panel):
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_mode)
 
+    def initialize_controls(self):
+        mode = self.data_processor.get_mode()
+
+        if mode - 0x4000 >= 0:
+            mode -= 0x4000
+            self.chk_onfly_cal.SetValue(True)
+        if mode - 0x2000 >= 0:
+            mode -= 0x2000
+            self.chk_afe_cal.SetValue(True)
+        if mode - 0x200 >= 0:
+            mode -= 0x200
+            self.chk_bypass_blr.SetValue(True)
+        if mode - 0x100 >= 0:
+            mode -= 0x100
+            self.chk_blr_rd.SetValue(True)
+        if mode - 0x20 >= 0:
+            mode -= 0x20
+            self.chk_ena_temp_rd.SetValue(True)
+        if mode - 0x18 >= 0:
+            mode -= 0x18
+            self.chk_ena_trig_out.SetValue(True)
+        if mode - 0x4 >= 0:
+            mode -= 0x4
+            self.chk_int_trig.SetValue(True)
+        if mode - 0x2 >= 0:
+            mode -= 0x2
+            self.chk_self_trig.SetValue(True)
+        if mode - 0x1 >= 0:
+            mode -= 0x1
+            self.chk_run.SetValue(True)
+
+        self.chk_ext_trig.SetValue(True)
+        self.chk_raw_adc_rd.SetValue(True)
+
+
     def OnUpdate(self, event):
         mode = 0x0
 
@@ -120,19 +156,19 @@ class ModePanel(wx.Panel):
         if self.chk_run.GetValue():
             mode += 0x1
         if self.chk_ext_trig.GetValue():
-            mode += 0x2
+            mode += 0x0
         if self.chk_self_trig.GetValue():
-            mode += 0x4
+            mode += 0x2
         if self.chk_int_trig.GetValue():
-            mode += 0x8
+            mode += 0x4
         if self.chk_ena_trig_out.GetValue():
-            mode += 0x10
+            mode += 0x18
         if self.chk_ena_temp_rd.GetValue():
             mode += 0x20
         if self.chk_bypass_blr.GetValue():
-            mode += 0x40
+            mode += 0x200
         if self.chk_raw_adc_rd.GetValue():
-            mode += 0x80
+            mode += 0x0
         if self.chk_blr_rd.GetValue():
             mode += 0x100
         if self.chk_afe_cal.GetValue():
@@ -140,6 +176,7 @@ class ModePanel(wx.Panel):
         if self.chk_onfly_cal.GetValue():
             mode += 0x4000
 
+        # print mode
         self.data_processor.set_mode(mode)
 
         wx.MessageBox("Mode successfully updated", "Update Successful")

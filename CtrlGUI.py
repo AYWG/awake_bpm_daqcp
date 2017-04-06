@@ -14,11 +14,11 @@ class CtrlGUI(wx.App):
         windowCtrl = CtrlWindow(parent=None, title='AWAKE BPM Settings', data_processor=self.data_processor)
         windowCtrl.SetIcon(iconCtrl)
         self.SetTopWindow(windowCtrl)
+
         windowCtrl.Show()
+        windowCtrl.Restore()
+        # windowCtrl.Maximize(True)
+        # print windowCtrl.IsMaximized()
+        # windowCtrl.Raise()
+        # windowCtrl.Iconize(False)
         return True
-
-
-# For testing
-# if __name__ == '__main__':
-#     ctrl_window = CtrlGUI(False)
-#     ctrl_window.MainLoop()

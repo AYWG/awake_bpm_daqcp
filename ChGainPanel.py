@@ -23,6 +23,7 @@ class ChGainPanel(wx.Panel):
         self.__set_properties()
         self.__do_layout()
         self.__attach_events()
+        self.initialize_controls()
 
     def __set_properties(self):
         self.txt_ch_gain_a.SetValidator(ChGainValidator())
@@ -65,6 +66,16 @@ class ChGainPanel(wx.Panel):
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_ch_gain)
 
+    def initialize_controls(self):
+        ch_gain_a = self.data_processor.int_to_float(self.data_processor.get_ch_gain_a())
+        ch_gain_b = self.data_processor.int_to_float(self.data_processor.get_ch_gain_b())
+        ch_gain_c = self.data_processor.int_to_float(self.data_processor.get_ch_gain_c())
+        ch_gain_d = self.data_processor.int_to_float(self.data_processor.get_ch_gain_d())
+        self.txt_ch_gain_a.SetValue(str(ch_gain_a))
+        self.txt_ch_gain_b.SetValue(str(ch_gain_b))
+        self.txt_ch_gain_c.SetValue(str(ch_gain_c))
+        self.txt_ch_gain_d.SetValue(str(ch_gain_d))
+
     def OnUpdate(self, event):
         if self.Validate():
             # Everything is validated, so convert the inputs to floats
@@ -74,10 +85,10 @@ class ChGainPanel(wx.Panel):
             ch_gain_d = float(self.txt_ch_gain_d.GetValue())
 
             # We then need to convert the values to the IEEE 754 representation as integers
-            ch_gain_a = int(self.data_processor.float_to_hex(ch_gain_a))
-            ch_gain_b = int(self.data_processor.float_to_hex(ch_gain_b))
-            ch_gain_c = int(self.data_processor.float_to_hex(ch_gain_c))
-            ch_gain_d = int(self.data_processor.float_to_hex(ch_gain_d))
+            ch_gain_a = self.data_processor.float_to_int(ch_gain_a)
+            ch_gain_b = self.data_processor.float_to_int(ch_gain_b)
+            ch_gain_c = self.data_processor.float_to_int(ch_gain_c)
+            ch_gain_d = self.data_processor.float_to_int(ch_gain_d)
 
             # First load the relevant data to the FPGA
             self.data_processor.set_cal_gain_a(ch_gain_a)
@@ -89,6 +100,7 @@ class ChGainPanel(wx.Panel):
             self.data_processor.wr_flash_buf()
             wx.MessageBox("Ch Gain successfully updated", "Update Successful")
 
+
 class ChGainValidator(Validator.Validator):
     def __init__(self):
         Validator.Validator.__init__(self)
@@ -99,6 +111,8 @@ class ChGainValidator(Validator.Validator):
     def Validate(self, parent):
         textCtrl = self.GetWindow()
         val = textCtrl.GetValue()
+        gain_upper_limit = 5.0
+        gain_lower_limit = -5.0
 
         if len(val) == 0:
             wx.MessageBox("Ch Gain value required!", "No Input")
@@ -112,8 +126,13 @@ class ChGainValidator(Validator.Validator):
             textCtrl.SetFocus()
             textCtrl.Refresh()
             return False
+        elif float(val) > gain_upper_limit or float(val) < gain_lower_limit:
+            wx.MessageBox("Please enter a value that is within the accepted range (+/- 5.0)", "Out of Range")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
         else:
-            # Add a success message here
             textCtrl.SetBackgroundColour(
                 wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
             textCtrl.Refresh()
@@ -126,7 +145,7 @@ class ChGainValidator(Validator.Validator):
             event.Skip()
             return
 
-        if chr(key) in string.digits or chr(key) == '.':
+        if chr(key) in string.digits or chr(key) == '.' or chr(key) == '-':
             event.Skip()
             return
 

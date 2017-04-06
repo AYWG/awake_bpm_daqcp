@@ -57,13 +57,13 @@ class TCP(object):
 
     def read_MBver(self):
         if self.s.sendall('FL:BUF:*IDN?\r\n') != None:
-            print "\nTCP_Error: sending command failed !", com
+            print "\nTCP_Error: sending command failed !"
             return False
         try:
             recv_msg = self.s.recv(64)
 
         except socket.timeout:
-            print "\nTCP_Error: receiving data timeout !", com
+            print "\nTCP_Error: receiving data timeout !"
             return False
         return recv_msg
 
@@ -92,12 +92,12 @@ class TCP(object):
         else:
             msg = 'CDFIFO:WD?\r\n'
         if self.s.sendall(msg) != None:
-            print "\nTCP_Error: sending command failed !", com
+            print "\nTCP_Error: sending command failed !"
             return False
         try:
             recv_msg = self.s.recv(64)
         except socket.timeout:
-            print "\nTCP_Error: receiving data timeout !", com
+            print "\nTCP_Error: receiving data timeout !"
             return False
         int_str, EOL_str = recv_msg.split("\n\r")
         return int(int_str)
@@ -105,12 +105,12 @@ class TCP(object):
     def read_sfifo_wd(self):  # read back fast fifo occupancy
         msg = 'SFIFO:WD?\r\n'
         if self.s.sendall(msg) != None:
-            print "\nTCP_Error: sending command failed !", com
+            print "\nTCP_Error: sending command failed !"
             return False
         try:
             recv_msg = self.s.recv(64)
         except socket.timeout:
-            print "\nTCP_Error: receiving datda timeout !", com
+            print "\nTCP_Error: receiving data timeout !"
             return False
         int_str, EOL_str = recv_msg.split("\n\r")
         return int(int_str)

@@ -14,6 +14,8 @@ class FlashReadWritePanel(wx.Panel):
 
         self.__set_properties()
         self.__do_layout()
+        self.__attach_events()
+        self.__initialize_controls()
 
     def __set_properties(self):
         pass
@@ -30,3 +32,17 @@ class FlashReadWritePanel(wx.Panel):
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
         sizer_main.Fit(self)
+
+    def __attach_events(self):
+        self.Bind(wx.EVT_BUTTON, self.OnRead, self.btn_flash_rd)
+        self.Bind(wx.EVT_BUTTON, self.OnWrite, self.btn_flash_wr)
+
+    def __initialize_controls(self):
+        pass
+
+    def OnRead(self, event):
+        self.data_processor.rd_flash()
+        event.Skip()
+
+    def OnWrite(self, event):
+        self.data_processor.wr_flash()

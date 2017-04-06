@@ -24,31 +24,30 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 # thread that reads from the FPGA and updates the plots
 def data_collector(data_processor, command_queue, lock):
     while True:
-        """
-        if data_processor.is_new_data_rdy():
-            lock.acquire()
-            # check if we're still running
-            if data_processor.get_op_mode() == Modes.RUNNING:
-                # read the slow fifo and update the collected data
-                data_processor.read_data()
-                lock.release()
-            else:
-                lock.release()
-                break
-            if data_processor.get_plot() != Plots.WAVEFORM:
-                command_queue.put(Commands.UPDATE_PLOT)
 
-        if data_processor.is_waveform_rdy():
-            lock.acquire()
-            if data_processor.get_op_mode() == Modes.RUNNING:
-                data_processor.read_waveform()
-                lock.release()
-            else:
-                lock.release()
-                break
-            if data_processor.get_plot() == Plots.WAVEFORM:
-                command_queue.put(Commands.UPDATE_PLOT)
-        """
+        # if data_processor.is_new_data_rdy():
+        #     lock.acquire()
+        #     # check if we're still running
+        #     if data_processor.get_op_mode() == Modes.RUNNING:
+        #         # read the slow fifo and update the collected data
+        #         data_processor.read_data()
+        #         lock.release()
+        #     else:
+        #         lock.release()
+        #         break
+        #     # if data_processor.get_plot() != Plots.WAVEFORM:
+        #     command_queue.put(Commands.UPDATE_PLOT)
+
+        # if data_processor.is_waveform_rdy():
+        #     lock.acquire()
+        #     if data_processor.get_op_mode() == Modes.RUNNING:
+        #         data_processor.read_waveform()
+        #         lock.release()
+        #     else:
+        #         lock.release()
+        #         break
+        #     if data_processor.get_plot() == Plots.WAVEFORM:
+        #         command_queue.put(Commands.UPDATE_PLOT)
 
         if data_processor.is_waveform_rdy():
             lock.acquire()
@@ -62,6 +61,20 @@ def data_collector(data_processor, command_queue, lock):
             else:
                 lock.release()
                 break
+
+
+
+# def waveform_collector(data_processor, command_queue, lock):
+#     while True:
+#         if data_processor.is_waveform_rdy():
+#             lock.acquire()
+#             if data_processor.get_op_mode() == Modes.RUNNING:
+#                 data_processor.read_waveform()
+#                 lock.release()
+#             else:
+#                 lock.release()
+#                 break
+#             command_queue.put(Commands.UPDATE_WAVEFORM)
 
 
 # Checks if there's a thread that's alive and has the given name
@@ -99,8 +112,14 @@ def process_data(host, port, command_queue):
                 op_mode_lock.acquire()
                 data_processor.set_op_mode(Modes.RUNNING)
                 op_mode_lock.release()
-                t_data_collector = threading.Thread(target=data_collector, args=(data_processor, command_queue, op_mode_lock), name='data_collector')
+                t_data_collector = threading.Thread(target=data_collector,
+                                                    args=(data_processor, command_queue, op_mode_lock),
+                                                    name='data_collector')
+                # t_waveform_collector = threading.Thread(target=waveform_collector,
+                #                                         args=(data_processor, command_queue, op_mode_lock),
+                #                                         name='waveform_collector')
                 t_data_collector.start()
+                # t_waveform_collector.start()
 
         elif command == Commands.PAUSE_MEASURING_DATA:
             # only take action if currently running
@@ -136,7 +155,7 @@ def process_data(host, port, command_queue):
 
         elif command == Commands.UPDATE_WAVEFORM:
             data_processor.update_waveform()
-            # pass
+
         elif command == Commands.REFRESH_PLOT:
             data_processor.enable_plot_interaction()
 
@@ -144,8 +163,10 @@ def process_data(host, port, command_queue):
             data_processor.shutdown()
             break
 
-        if data_processor.get_plot() != Plots.NONE and data_processor.get_op_mode() == Modes.PAUSED and not is_thread_active('plot_refresher'):
-            t_plot_refresher = threading.Thread(target=plot_refresher, args=(data_processor, command_queue), name='plot_refresher')
+        if data_processor.get_plot() != Plots.NONE and data_processor.get_op_mode() == Modes.PAUSED and not is_thread_active(
+                'plot_refresher'):
+            t_plot_refresher = threading.Thread(target=plot_refresher, args=(data_processor, command_queue),
+                                                name='plot_refresher')
             t_plot_refresher.start()
 
 

@@ -32,8 +32,10 @@ class AddressPanel(wx.Panel):
         self.__set_properties()
         self.__do_layout()
         self.__attach_events()
+        self.initialize_controls()
 
     def __set_properties(self):
+        # Each portion of the MAC address is 2 characters
         self.txt_mac_address_0.SetMaxLength(2)
         self.txt_mac_address_1.SetMaxLength(2)
         self.txt_mac_address_2.SetMaxLength(2)
@@ -41,6 +43,7 @@ class AddressPanel(wx.Panel):
         self.txt_mac_address_4.SetMaxLength(2)
         self.txt_mac_address_5.SetMaxLength(2)
 
+        # Each portion of the IP address is at most 3 characters
         self.txt_ip_address_0.SetMaxLength(3)
         self.txt_ip_address_0.SetMaxLength(3)
         self.txt_ip_address_0.SetMaxLength(3)
@@ -57,7 +60,6 @@ class AddressPanel(wx.Panel):
         self.txt_ip_address_1.SetValidator(AddressValidator(DIGIT_ONLY))
         self.txt_ip_address_2.SetValidator(AddressValidator(DIGIT_ONLY))
         self.txt_ip_address_3.SetValidator(AddressValidator(DIGIT_ONLY))
-
 
     def __do_layout(self):
         SIZER_BORDER_WIDTH = 5
@@ -95,6 +97,27 @@ class AddressPanel(wx.Panel):
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_address)
 
+    def initialize_controls(self):
+        mac_address_0 = format(self.data_processor.get_mac_address(0), 'x')
+        mac_address_1 = format(self.data_processor.get_mac_address(1), 'x')
+        mac_address_2 = format(self.data_processor.get_mac_address(2), 'x')
+        mac_address_3 = format(self.data_processor.get_mac_address(3), 'x')
+        mac_address_4 = format(self.data_processor.get_mac_address(4), 'x')
+        mac_address_5 = format(self.data_processor.get_mac_address(5), 'x')
+
+        self.txt_mac_address_0.SetValue(str(mac_address_0))
+        self.txt_mac_address_1.SetValue(str(mac_address_1))
+        self.txt_mac_address_2.SetValue(str(mac_address_2))
+        self.txt_mac_address_3.SetValue(str(mac_address_3))
+        self.txt_mac_address_4.SetValue(str(mac_address_4))
+        self.txt_mac_address_5.SetValue(str(mac_address_5))
+
+        self.txt_ip_address_0.SetValue(str(self.data_processor.get_ip_address(0)))
+        self.txt_ip_address_1.SetValue(str(self.data_processor.get_ip_address(1)))
+        self.txt_ip_address_2.SetValue(str(self.data_processor.get_ip_address(2)))
+        self.txt_ip_address_3.SetValue(str(self.data_processor.get_ip_address(3)))
+
+
     def OnUpdate(self, event):
         if self.Validate():
             mac_address_0 = int(self.txt_mac_address_0.GetValue(), 16)
@@ -109,19 +132,20 @@ class AddressPanel(wx.Panel):
             ip_address_2 = int(self.txt_ip_address_0.GetValue())
             ip_address_3 = int(self.txt_ip_address_0.GetValue())
 
-            self.data_processor.wr_mac_address(0, mac_address_0)
-            self.data_processor.wr_mac_address(1, mac_address_1)
-            self.data_processor.wr_mac_address(2, mac_address_2)
-            self.data_processor.wr_mac_address(3, mac_address_3)
-            self.data_processor.wr_mac_address(4, mac_address_4)
-            self.data_processor.wr_mac_address(5, mac_address_5)
+            self.data_processor.set_mac_address(0, mac_address_0)
+            self.data_processor.set_mac_address(1, mac_address_1)
+            self.data_processor.set_mac_address(2, mac_address_2)
+            self.data_processor.set_mac_address(3, mac_address_3)
+            self.data_processor.set_mac_address(4, mac_address_4)
+            self.data_processor.set_mac_address(5, mac_address_5)
 
-            self.data_processor.wr_ip_address(0, ip_address_0)
-            self.data_processor.wr_ip_address(1, ip_address_1)
-            self.data_processor.wr_ip_address(2, ip_address_2)
-            self.data_processor.wr_ip_address(3, ip_address_3)
+            self.data_processor.set_ip_address(0, ip_address_0)
+            self.data_processor.set_ip_address(1, ip_address_1)
+            self.data_processor.set_ip_address(2, ip_address_2)
+            self.data_processor.set_ip_address(3, ip_address_3)
 
             wx.MessageBox("Addresses successfully updated", "Update Successful")
+
 
 class AddressValidator(Validator.Validator):
     def __init__(self, flag):
@@ -183,7 +207,6 @@ class AddressValidator(Validator.Validator):
                 textCtrl.Refresh()
                 return True
 
-
     def OnChar(self, event):
         key = event.GetKeyCode()
 
@@ -203,8 +226,3 @@ class AddressValidator(Validator.Validator):
             wx.Bell()
 
         return
-
-
-
-
-

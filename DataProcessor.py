@@ -7,18 +7,18 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import Modes
 import Plots
-import Commands
+
 
 class DataProcessor:
     def __init__(self, host, port):
         # Initial Parameters
-        self.BPM_DIA = 40
-        self.TRIG_TH = 200  # only used for self trigger mode
-        self.TRIG_DT = 0
-        self.TRIG_DL = 0
-        self.EVT_LEN = 1024
-        self.EVT_TAIL = 300
-        self.BL_LEN = 40
+        self.bpm_dia = 40
+        self.trig_th = 200  # only used for self trigger mode
+        self.trig_dt = 0
+        self.trig_dl = 0
+        self.evt_len = 1024
+        self.evt_tail = 300
+        self.bl_len = 40
 
         self.ch_gain_a = 1.0
         self.ch_gain_b = 1.0
@@ -30,22 +30,16 @@ class DataProcessor:
         self.cal_gain_c = 1.0
         self.cal_gain_d = 1.0
 
-        self.MODE_INT_TRIG = 0x105  # mode reg bit = RUN + Internal trigger + BLR readout       0000 0001 0000 0101
-        self.MODE_EXT_TRIG = 0x101  # mode reg bit = RUN + External trigger + BLR readout       0000 0001 0000 0001
-        self.MODE_SEL_TRIG = 0x103  # mode reg bit = RUN + Self trigger + BLR readout           0000 0001 0000 0011
-        self.MODE_CAL = 0x2105  # mode reg bit = RUN + Self trigger + BLR readout + AFE Cal.    0010 0001 0000 0101
+        # self.MODE_INT_TRIG = 0x105  # mode reg bit = RUN + Internal trigger + BLR readout       0000 0001 0000 0101
+        # self.MODE_EXT_TRIG = 0x101  # mode reg bit = RUN + External trigger + BLR readout       0000 0001 0000 0001
+        # self.MODE_SEL_TRIG = 0x103  # mode reg bit = RUN + Self trigger + BLR readout           0000 0001 0000 0011
+        # self.MODE_CAL = 0x2105  # mode reg bit = RUN + Self trigger + BLR readout + AFE Cal.    0010 0001 0000 0101
 
-        self.MODE_TEMP = 0x0020  # mode reg bit = Ena temperature reading                       0000 0000 0010 0000
+        # self.MODE_TEMP = 0x0020  # mode reg bit = Ena temperature reading                       0000 0000 0010 0000
 
-        self.mode = self.MODE_EXT_TRIG
+        self.mode = 0x101 # mode reg bit = RUN + External trigger + BLR readout
 
-        self.A1dB = 0x01  # Analog Front-end board gain setting : 1 dB attenuation
-        self.A2dB = 0x02  # Analog Front-end board gain setting : 2 dB attenuation
-        self.A4dB = 0x04  # Analog Front-end board gain setting : 4 dB attenuation
-        self.A8dB = 0x08  # Analog Front-end board gain setting : 8 dB attenuation
-        self.A16dB = 0x10  # Analog Front-end board gain setting : 16 dB attenuation
-
-        self.Gain = self.A1dB + self.A2dB + self.A4dB + self.A8dB + self.A16dB
+        self.gain = 0x1F # 31 dB attenuation
 
         self.ChAB = 0
         self.ChCD = 1
@@ -94,117 +88,141 @@ class DataProcessor:
     def init_config(self):
         print self.IO.read_MBver()
 
-        if self.IO.write_reg('BPM:DIA', self.BPM_DIA) is False: sys.exit()
+        if self.IO.write_reg('BPM:DIA', self.bpm_dia) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('TRIG:TH', self.TRIG_TH) is False: sys.exit()
+        if self.IO.write_reg('TRIG:TH', self.trig_th) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('TRIG:DT', self.TRIG_DT) is False: sys.exit()
+        if self.IO.write_reg('TRIG:DT', self.trig_dt) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('TRIG:DL', self.TRIG_DL) is False: sys.exit()
+        if self.IO.write_reg('TRIG:DL', self.trig_dl) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('EVT:LEN', self.EVT_LEN) is False: sys.exit()
+        if self.IO.write_reg('EVT:LEN', self.evt_len) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('EVT:TAIL', self.EVT_TAIL) is False: sys.exit()
+        if self.IO.write_reg('EVT:TAIL', self.evt_tail) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('BL:LEN', self.BL_LEN) is False: sys.exit()
+        if self.IO.write_reg('BL:LEN', self.bl_len) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('AFE:CTRL', self.Gain) is False: sys.exit()
+        if self.IO.write_reg('AFE:CTRL', self.gain) is False: sys.exit()
         time.sleep(0.1)
-        if self.IO.write_reg('CR', self.MODE_EXT_TRIG) is False: sys.exit()
+        if self.IO.write_reg('CR', self.mode) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_mode(self):
+        return self.IO.read_reg('CR?')
+
     def set_mode(self, mode):
-        set.mode = mode
         if self.IO.write_reg('CR', mode) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_afe_gain(self):
+        return self.IO.read_reg('AFE:CTRL?')
+
     def set_afe_gain(self, gain):
-        self.Gain = gain
         if self.IO.write_reg('AFE:CTRL', gain) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_bl_len(self):
+        return self.IO.read_reg('BL:LEN?')
+
     def set_bl_len(self, bl_len):
-        self.BL_LEN = bl_len
         if self.IO.write_reg('BL:LEN', bl_len) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_evt_len(self):
+        return self.IO.read_reg('EVT:LEN?')
+
     def set_evt_len(self, evt_len):
-        self.EVT_LEN = evt_len
         if self.IO.write_reg('EVT:LEN', evt_len) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_evt_tail(self):
+        return self.IO.read_reg('EVT:TAIL?')
+
     def set_evt_tail(self, evt_tail):
-        self.EVT_TAIL = evt_tail
         if self.IO.write_reg('EVT:TAIL', evt_tail) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_trig_th(self):
+        return self.IO.read_reg('TRIG:TH?')
+
     def set_trig_th(self, trig_th):
-        self.TRIG_TH = trig_th
         if self.IO.write_reg('TRIG:TH', trig_th) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_trig_dt(self):
+        return self.IO.read_reg('TRIG:DT?')
+
     def set_trig_dt(self, trig_dt):
-        self.TRIG_DT = trig_dt
         if self.IO.write_reg('TRIG:DT', trig_dt) is False: sys.exit()
         time.sleep(0.1)
 
-    def set_trigger_mode(self, trigger_mode):
-        if trigger_mode == 0:
-            if self.IO.write_reg('CR', self.MODE_EXT_TRIG) is False: sys.exit()
-        elif trigger_mode == 1:
-            if self.IO.write_reg('CR', self.MODE_INT_TRIG) is False: sys.exit()
-        elif trigger_mode == 2:
-            if self.IO.write_reg('CR', self.MODE_SEL_TRIG) is False: sys.exit()
-        elif trigger_mode == 3:
-            if self.IO.write_reg('CR', self.MODE_CAL) is False: sys.exit()
+    def get_trig_dl(self):
+        return self.IO.read_reg('TRIG:DL?')
 
     def set_trig_dl(self, trig_dl):
-        self.TRIG_DL = trig_dl
         if self.IO.write_reg('TRIG:DL', trig_dl) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_bpm_dia(self):
+        return self.IO.read_reg('BPM:DIA?')
+
     def set_bpm_dia(self, bpm_dia):
-        self.BPM_DIA = bpm_dia
         if self.IO.write_reg('BPM:DIA', bpm_dia) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_cal_gain_a(self):
+        return self.IO.read_reg('CAL:GAIN:A?')
+
     def set_cal_gain_a(self, cal_gain_a):
-        self.cal_gain_a = cal_gain_a
         if self.IO.write_reg('CAL:GAIN:A', cal_gain_a) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_cal_gain_b(self):
+        return self.IO.read_reg('CAL:GAIN:B?')
+
     def set_cal_gain_b(self, cal_gain_b):
-        self.cal_gain_b = cal_gain_b
         if self.IO.write_reg('CAL:GAIN:B', cal_gain_b) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_cal_gain_c(self):
+        return self.IO.read_reg('CAL:GAIN:C?')
+
     def set_cal_gain_c(self, cal_gain_c):
-        self.cal_gain_c = cal_gain_c
         if self.IO.write_reg('CAL:GAIN:C', cal_gain_c) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_cal_gain_d(self):
+        return self.IO.read_reg('CAL:GAIN:D?')
+
     def set_cal_gain_d(self, cal_gain_d):
-        self.cal_gain_d = cal_gain_d
         if self.IO.write_reg('CAL:GAIN:D', cal_gain_d) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_ch_gain_a(self):
+        return self.IO.read_reg('CH:GAIN:A?')
+
     def set_ch_gain_a(self, ch_gain_a):
-        self.ch_gain_a = ch_gain_a
         if self.IO.write_reg('CH:GAIN:A', ch_gain_a) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_ch_gain_b(self):
+        return self.IO.read_reg('CH:GAIN:B?')
+
     def set_ch_gain_b(self, ch_gain_b):
-        self.ch_gain_b = ch_gain_b
         if self.IO.write_reg('CH:GAIN:B', ch_gain_b) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_ch_gain_c(self):
+        return self.IO.read_reg('CH:GAIN:C?')
+
     def set_ch_gain_c(self, ch_gain_c):
-        self.ch_gain_c = ch_gain_c
         if self.IO.write_reg('CH:GAIN:C', ch_gain_c) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_ch_gain_d(self):
+        return self.IO.read_reg('CH:GAIN:D?')
+
     def set_ch_gain_d(self, ch_gain_d):
-        self.ch_gain_d = ch_gain_d
         if self.IO.write_reg('CH:GAIN:D', ch_gain_d) is False: sys.exit()
         time.sleep(0.1)
 
@@ -212,33 +230,57 @@ class DataProcessor:
         if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
         time.sleep(0.1)
 
-    def wr_mac_address(self, index, value):
+    def rd_flash(self):
+        if self.IO.write_reg('FLASH:READ', 0) is False: sys.exit()  # the 0 is arbitrary
+        time.sleep(0.1)
+        if self.IO.write_reg('FLASHBUF:TO:FPGA', 0) is False: sys.exit()  # the 0 is arbitrary
+        time.sleep(0.1)
+
+    def wr_flash(self):
+        if self.IO.write_reg('FLASH:WRIT', 0) is False: sys.exit()  # the 0 is arbitrary
+        time.sleep(0.1)
+
+    def get_mac_address(self, index):
+        return self.IO.read_reg('FL:BUF:MAC:' + str(index) + '?')
+
+    def set_mac_address(self, index, value):
         if self.IO.write_reg('FL:BUF:MAC:' + str(index), value) is False: sys.exit()
         time.sleep(0.1)
 
-    def wr_ip_address(self, index, value):
+    def get_ip_address(self, index):
+        return self.IO.read_reg('FL:BUF:IP:' + str(index) + '?')
+
+    def set_ip_address(self, index, value):
         if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()
         time.sleep(0.1)
 
-    # For testing
-    def get_trig_th(self):
-        return self.IO.read_reg('TRIG:TH?')
-
-    # Returns the hexadecimal representation of the IEEE 754 format of the given python floating point value
-    # e.g. 1.0 returns 0x3f800000
-    def float_to_hex(self, f):
+    def float_to_int(self, f):
+        """
+        Returns the integer representation of the IEEE 754 format of the given python
+        floating point value.
+        For example, 1.0 returns 1065353216
+        :param f:
+        :return:
+        """
         import struct
-        return hex(struct.unpack('<I', struct.pack('<f', f))[0])
+        return struct.unpack('<i', struct.pack('<f', f))[0]
 
-    # def run(self):
-    #     self.command_queue.put(Commands.START_MEASURING_DATA)
-
-    # def pause(self):
-    #     self.command_queue.put(Commands.PAUSE_MEASURING_DATA)
+    def int_to_float(self, i):
+        """
+        Returns the python floating point representation of the IEEE 754 format integer
+        :param i:
+        :return:
+        """
+        import struct
+        return struct.unpack('<f', struct.pack('<i', i))[0]
 
     # -------------- Methods for managing the plot
 
     def get_average(self, data_buffer):
+        """
+        :param data_buffer: a list of data (e.g. x_pos_data)
+        :return: rounded average of all elements of data_buffer
+        """
         # Empty
         if not data_buffer:
             return float('NaN')
@@ -263,6 +305,11 @@ class DataProcessor:
         return self.plot
 
     def setup_plot(self, plot):
+        """
+        Builds the given plot in a new window, or changes the current plot to the given plot if the window
+        is already open.
+        :param plot: The plot to setup.
+        """
         # only take action if the current plot is not the same as the provided plot
         if self.get_plot() != plot:
             self.set_plot(plot)
@@ -339,11 +386,13 @@ class DataProcessor:
 
             fig.canvas.mpl_connect('close_event', self.close_windows)
             fig.canvas.draw()
-            # plt.show(block=False)
-            fig.canvas.start_event_loop(5)
+            fig.canvas.start_event_loop(0.5)
 
     @staticmethod
     def enable_plot_interaction():
+        """
+        This method allows the user to interact with a plot when data is not being collected (i.e. op_mode is PAUSED)
+        """
         plt.gcf().canvas.start_event_loop(0.1)
 
     # Updates the active plot, adjusting the appropriate axis based on the data collected so far
@@ -384,7 +433,6 @@ class DataProcessor:
             ax1.autoscale_view()
 
             plt.gcf().canvas.draw()
-            # plt.show(block=False)
             plt.gcf().canvas.start_event_loop(0.5)
 
     def update_waveform(self):
@@ -402,7 +450,7 @@ class DataProcessor:
             plt.gcf().canvas.start_event_loop(0.1)
 
     def is_waveform_rdy(self):
-        self.samples_to_read = 16 * ((self.EVT_LEN - self.BL_LEN - 4) // 16)
+        self.samples_to_read = 16 * ((self.evt_len - self.bl_len - 4) // 16)
         samples_in_buf = self.IO.read_ffifo_wd(0)
         return samples_in_buf > self.samples_to_read
 
@@ -411,8 +459,10 @@ class DataProcessor:
         samples_in_sfifo = self.IO.read_sfifo_wd()
         return samples_in_sfifo > 16
 
-    # Read a packet of data from the slow fifo in the FPGA and update the appropriate data buffers (x, y, etc.)
     def read_data(self):
+        """
+        Read a packet of data from the slow fifo in the FPGA and update the appropriate data buffers (x, y, etc.)
+        """
         packet = self.IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
         if packet[0] != self.PACKET_ID:
             raise TypeError('Packet ID error!')
@@ -445,13 +495,18 @@ class DataProcessor:
     def read_waveform(self):
         waveform_AB = self.IO.read_waveform(self.ChAB, self.samples_to_read)
         waveform_CD = self.IO.read_waveform(self.ChCD, self.samples_to_read)
-        self.raw_adc_a_data = waveform_AB[0]
-        self.raw_adc_b_data = waveform_AB[1]
-        self.raw_adc_c_data = waveform_CD[0]
-        self.raw_adc_d_data = waveform_CD[1]
+        # False if waveform not successfully read
+        if waveform_AB:
+            self.raw_adc_a_data = waveform_AB[0]
+            self.raw_adc_b_data = waveform_AB[1]
+        if waveform_CD:
+            self.raw_adc_c_data = waveform_CD[0]
+            self.raw_adc_d_data = waveform_CD[1]
 
-    # Resets all data buffers and sets the current time to 0
     def clear_data(self):
+        """
+        Resets all data buffers and sets the current time to 0
+        """
         self.current_time = 0
         del self.raw_adc_a_data[:]
         del self.raw_adc_b_data[:]

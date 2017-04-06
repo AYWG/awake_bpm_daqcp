@@ -24,6 +24,7 @@ class CalGainPanel(wx.Panel):
         self.__set_properties()
         self.__do_layout()
         self.__attach_events()
+        self.initialize_controls()
 
     def __set_properties(self):
         self.txt_cal_gain_a.SetValidator(CalGainValidator())
@@ -66,6 +67,16 @@ class CalGainPanel(wx.Panel):
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_cal_gain)
 
+    def initialize_controls(self):
+        cal_gain_a = self.data_processor.int_to_float(self.data_processor.get_cal_gain_a())
+        cal_gain_b = self.data_processor.int_to_float(self.data_processor.get_cal_gain_b())
+        cal_gain_c = self.data_processor.int_to_float(self.data_processor.get_cal_gain_c())
+        cal_gain_d = self.data_processor.int_to_float(self.data_processor.get_cal_gain_d())
+        self.txt_cal_gain_a.SetValue(str(cal_gain_a))
+        self.txt_cal_gain_b.SetValue(str(cal_gain_b))
+        self.txt_cal_gain_c.SetValue(str(cal_gain_c))
+        self.txt_cal_gain_d.SetValue(str(cal_gain_d))
+
     def OnUpdate(self, event):
         if self.Validate():
             # Everything is validated, so convert the inputs to floats
@@ -75,10 +86,10 @@ class CalGainPanel(wx.Panel):
             cal_gain_d = float(self.txt_cal_gain_d.GetValue())
 
             # We then need to convert the values to the IEEE 754 representation as integers
-            cal_gain_a = int(self.data_processor.float_to_hex(cal_gain_a))
-            cal_gain_b = int(self.data_processor.float_to_hex(cal_gain_b))
-            cal_gain_c = int(self.data_processor.float_to_hex(cal_gain_c))
-            cal_gain_d = int(self.data_processor.float_to_hex(cal_gain_d))
+            cal_gain_a = self.data_processor.float_to_int(cal_gain_a)
+            cal_gain_b = self.data_processor.float_to_int(cal_gain_b)
+            cal_gain_c = self.data_processor.float_to_int(cal_gain_c)
+            cal_gain_d = self.data_processor.float_to_int(cal_gain_d)
 
             # First load the relevant data to the FPGA
             self.data_processor.set_cal_gain_a(cal_gain_a)
@@ -101,6 +112,8 @@ class CalGainValidator(Validator.Validator):
     def Validate(self, parent):
         textCtrl = self.GetWindow()
         val = textCtrl.GetValue()
+        gain_upper_limit = 5.0
+        gain_lower_limit = -5.0
 
         if len(val) == 0:
             wx.MessageBox("Cal Gain value required!", "No Input")
@@ -114,10 +127,15 @@ class CalGainValidator(Validator.Validator):
             textCtrl.SetFocus()
             textCtrl.Refresh()
             return False
+        elif float(val) > gain_upper_limit or float(val) < gain_lower_limit:
+            wx.MessageBox("Please enter a value that is within the accepted range (+/- 5.0)", "Out of Range")
+            textCtrl.SetBackgroundColour("pink")
+            textCtrl.SetFocus()
+            textCtrl.Refresh()
+            return False
         else:
             # Add a success message here
-            textCtrl.SetBackgroundColour(
-                wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
             textCtrl.Refresh()
             return True
 
@@ -128,7 +146,7 @@ class CalGainValidator(Validator.Validator):
             event.Skip()
             return
 
-        if chr(key) in string.digits or chr(key) == '.':
+        if chr(key) in string.digits or chr(key) == '.' or chr(key) == '-':
             event.Skip()
             return
 

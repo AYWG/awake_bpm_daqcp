@@ -33,10 +33,9 @@ class CtrlWindow(wx.Frame):
                                                                 data_processor=data_processor)
         # self.status_panel = StatusPanel.StatusPanel(parent=self, title='Status')
 
-        # Add event bindings
-
         self.__set_properties()
         self.__do_layout()
+        self.__attach_events()
 
     def __set_properties(self):
         # Light-grey
@@ -76,3 +75,16 @@ class CtrlWindow(wx.Frame):
 
         # Set the minimum size of the window once all of the sizers have been set up.
         self.SetMinSize(self.GetSize())
+
+    def __attach_events(self):
+        self.Bind(wx.EVT_BUTTON, self.update_controls)
+
+    def update_controls(self, event):
+        self.address_panel.initialize_controls()
+        self.afectrl_panel.initialize_controls()
+        self.calgain_panel.initialize_controls()
+        self.chgain_panel.initialize_controls()
+        self.eventparam_panel.initialize_controls()
+        self.mode_panel.initialize_controls()
+        self.otherparam_panel.initialize_controls()
+

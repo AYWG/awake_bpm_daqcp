@@ -1,6 +1,8 @@
 import wx
 import string
-
+#
+# Custom parent validator
+#
 
 class Validator(wx.PyValidator):
     def __init__(self):
@@ -10,6 +12,7 @@ class Validator(wx.PyValidator):
     def Clone(self):
         pass
 
+    # All children have different requirements for validation
     def Validate(self, parent):
         pass
 
@@ -51,8 +54,6 @@ class Validator(wx.PyValidator):
     def is_float(val):
         try:
             float(val)
-        except ValueError:
+        except (ValueError, SyntaxError):
             return False
         return True
-
-
