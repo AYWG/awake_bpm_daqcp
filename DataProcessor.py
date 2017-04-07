@@ -81,8 +81,6 @@ class DataProcessor:
         # There is no plot at the beginning
         self.plot = Plots.NONE
 
-        # self.command_queue = command_queue
-
         plt.ion()
 
     def init_config(self):
@@ -450,6 +448,10 @@ class DataProcessor:
             plt.gcf().canvas.start_event_loop(0.1)
 
     def is_waveform_rdy(self):
+        """
+        Checks if there is enough data in the fast fifo for reading
+        :return: True | False
+        """
         self.samples_to_read = 16 * ((self.evt_len - self.bl_len - 4) // 16)
         samples_in_buf = self.IO.read_ffifo_wd(0)
         return samples_in_buf > self.samples_to_read

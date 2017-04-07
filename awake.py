@@ -107,6 +107,12 @@ def ctrl_gui_handler(data_processor):
 
 
 def plot_refresher(data_processor, command_queue):
+    """
+    For refreshing the plot while data is not being collected
+    :param data_processor:
+    :param command_queue:
+    :return:
+    """
     while data_processor.get_op_mode() == Modes.PAUSED:
         command_queue.put(Commands.REFRESH_PLOT)
         time.sleep(0.5)

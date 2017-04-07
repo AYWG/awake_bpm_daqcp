@@ -27,7 +27,7 @@ class AddressPanel(wx.Panel):
         self.txt_ip_address = []
         for _ in range(4): self.txt_ip_address.append(wx.TextCtrl(self, wx.ID_ANY, '', size=(40, -1)))
 
-        # self.lbl_ip_address = wx.StaticText(self, wx.ID_ANY, 'IP')
+        self.lbl_ip_address = wx.StaticText(self, wx.ID_ANY, 'IP')
         # self.txt_ip_address_0 = wx.TextCtrl(self, wx.ID_ANY, '', size=(40, -1))
         # self.txt_ip_address_1 = wx.TextCtrl(self, wx.ID_ANY, '', size=(40, -1))
         # self.txt_ip_address_2 = wx.TextCtrl(self, wx.ID_ANY, '', size=(40, -1))
@@ -86,19 +86,23 @@ class AddressPanel(wx.Panel):
 
         sizer_mac_address = wx.BoxSizer(wx.HORIZONTAL)
         sizer_mac_address.Add(self.lbl_mac_address, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_mac_address.Add(self.txt_mac_address_0, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
-        sizer_mac_address.Add(self.txt_mac_address_1, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
-        sizer_mac_address.Add(self.txt_mac_address_2, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
-        sizer_mac_address.Add(self.txt_mac_address_3, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
-        sizer_mac_address.Add(self.txt_mac_address_4, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
-        sizer_mac_address.Add(self.txt_mac_address_5, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        for i in range(len(self.txt_mac_address)):
+            sizer_mac_address.Add(self.txt_mac_address[i], 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_mac_address.Add(self.txt_mac_address_0, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_mac_address.Add(self.txt_mac_address_1, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_mac_address.Add(self.txt_mac_address_2, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_mac_address.Add(self.txt_mac_address_3, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_mac_address.Add(self.txt_mac_address_4, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_mac_address.Add(self.txt_mac_address_5, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
 
         sizer_ip_address = wx.BoxSizer(wx.HORIZONTAL)
         sizer_ip_address.Add(self.lbl_ip_address, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_ip_address.Add(self.txt_ip_address_0, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
-        sizer_ip_address.Add(self.txt_ip_address_1, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
-        sizer_ip_address.Add(self.txt_ip_address_2, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
-        sizer_ip_address.Add(self.txt_ip_address_3, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        for i in range(len(self.txt_ip_address)):
+            sizer_ip_address.Add(self.txt_ip_address[i], 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_ip_address.Add(self.txt_ip_address_0, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_ip_address.Add(self.txt_ip_address_1, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_ip_address.Add(self.txt_ip_address_2, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
+        # sizer_ip_address.Add(self.txt_ip_address_3, 0, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
 
         sizer_address_box.Add(self.btn_update_address, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_address_box.Add(sizer_mac_address, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
