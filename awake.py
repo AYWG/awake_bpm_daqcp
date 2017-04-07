@@ -68,6 +68,9 @@ def data_collector(data_processor, command_queue, lock):
             else:
                 lock.release()
                 break
+        else:
+            command_queue.put(Commands.REFRESH_PLOT)
+            time.sleep(0.5)
 
 
 
@@ -120,7 +123,7 @@ def plot_refresher(data_processor, command_queue):
 
 def process_data(host, port, command_queue):
     data_processor = DataProcessor.DataProcessor(host, port)
-    # data_processor.init_config()
+    data_processor.init_config()
 
     op_mode_lock = threading.Lock()
 

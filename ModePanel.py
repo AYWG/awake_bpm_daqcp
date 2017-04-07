@@ -152,7 +152,7 @@ class ModePanel(wx.Panel):
         mode = 0x0
 
         # The value added represents in binary the number that must be written to the control register
-        # in order to enable that particular mode
+        # in order to enable that particular mode (same logic in LabVIEW)
         if self.chk_run.GetValue():
             mode += 0x1
         if self.chk_ext_trig.GetValue():

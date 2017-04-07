@@ -389,9 +389,11 @@ class DataProcessor:
     @staticmethod
     def enable_plot_interaction():
         """
-        This method allows the user to interact with a plot when data is not being collected (i.e. op_mode is PAUSED)
+        This method allows the user to interact with a plot when data is not being collected (i.e. op_mode is PAUSED
+        or op_mode is RUNNING but Run is not enabled in the GUI)
         """
-        plt.gcf().canvas.start_event_loop(0.1)
+        if plt.get_fignums():
+            plt.gcf().canvas.start_event_loop(0.1)
 
     # Updates the active plot, adjusting the appropriate axis based on the data collected so far
     def update_plot(self):
