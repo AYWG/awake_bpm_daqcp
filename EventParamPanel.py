@@ -10,7 +10,7 @@ class EventParamPanel(wx.Panel):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_evt_param = wx.Button(self, wx.ID_ANY, 'Update')
-        self.btn_test = wx.Button(self, wx.ID_ANY, 'Test')
+        # self.btn_test = wx.Button(self, wx.ID_ANY, 'Test')
         self.lbl_trig_th = wx.StaticText(self, wx.ID_ANY, 'TRIG:TH')
         self.txt_trig_th = wx.TextCtrl(self, wx.ID_ANY, '')
         self.lbl_trig_dt = wx.StaticText(self, wx.ID_ANY, 'TRIG:DT')
@@ -67,7 +67,7 @@ class EventParamPanel(wx.Panel):
         sizer_bl_len.Add(self.txt_bl_len, 2, wx.EXPAND)
 
         sizer_event_param_box.Add(self.btn_update_evt_param, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
-        sizer_event_param_box.Add(self.btn_test, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
+        # sizer_event_param_box.Add(self.btn_test, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_event_param_box.Add(sizer_trig_th, 0, wx.ALL | wx.EXPAND, 4)
         sizer_event_param_box.Add(sizer_trig_dt, 0, wx.ALL | wx.EXPAND, 4)
         sizer_event_param_box.Add(sizer_trig_dl, 0, wx.ALL | wx.EXPAND, 4)
@@ -84,7 +84,7 @@ class EventParamPanel(wx.Panel):
 
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_evt_param)
-        self.Bind(wx.EVT_BUTTON, self.OnTest, self.btn_test)
+        # self.Bind(wx.EVT_BUTTON, self.OnTest, self.btn_test)
 
     def initialize_controls(self):
         self.txt_trig_th.SetValue(str(self.data_processor.get_trig_th()))
@@ -94,11 +94,11 @@ class EventParamPanel(wx.Panel):
         self.txt_evt_tail.SetValue(str(self.data_processor.get_evt_tail()))
         self.txt_bl_len.SetValue(str(self.data_processor.get_bl_len()))
 
-    def OnTest(self, e):
-        trig_th_val = str(self.data_processor.get_trig_th())
-        dlg = wx.MessageDialog(self, trig_th_val, "Updated trig th", wx.OK)
-        dlg.ShowModal()  # Show it
-        dlg.Destroy()  # finally destroy it when finished.
+    # def OnTest(self, e):
+    #     trig_th_val = str(self.data_processor.get_trig_th())
+    #     dlg = wx.MessageDialog(self, trig_th_val, "Updated trig th", wx.OK)
+    #     dlg.ShowModal()  # Show it
+    #     dlg.Destroy()  # finally destroy it when finished.
 
     def OnUpdate(self, e):
         if self.Validate():
