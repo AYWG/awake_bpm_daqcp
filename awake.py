@@ -21,8 +21,14 @@ import CtrlGUI
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 
-# thread that reads from the FPGA and updates the plots
 def data_collector(data_processor, command_queue, lock):
+    """
+    thread that reads from the FPGA and updates the plots
+    :param data_processor:
+    :param command_queue:
+    :param lock:
+    :return:
+    """
     while True:
 
         # if data_processor.is_new_data_rdy():
@@ -49,6 +55,7 @@ def data_collector(data_processor, command_queue, lock):
         #     if data_processor.get_plot() == Plots.WAVEFORM:
         #         command_queue.put(Commands.UPDATE_PLOT)
 
+        # Roughly the same logic as in LabVIEW
         if data_processor.is_waveform_rdy():
             lock.acquire()
             if data_processor.get_op_mode() == Modes.RUNNING:
@@ -77,16 +84,24 @@ def data_collector(data_processor, command_queue, lock):
 #             command_queue.put(Commands.UPDATE_WAVEFORM)
 
 
-# Checks if there's a thread that's alive and has the given name
 def is_thread_active(name):
+    """
+    Checks if there's a thread that's alive and has the given name
+    :param name:
+    :return:
+    """
     for t in threading.enumerate():
         if t.name == name:
             return True
     return False
 
 
-# thread that creates the control GUI and runs it until it is closed
 def ctrl_gui_handler(data_processor):
+    """
+    Creates the control GUI and keeps it running until the user closes it
+    :param data_processor:
+    :return:
+    """
     gui = CtrlGUI.CtrlGUI(data_processor)
     gui.MainLoop()
 
@@ -99,7 +114,7 @@ def plot_refresher(data_processor, command_queue):
 
 def process_data(host, port, command_queue):
     data_processor = DataProcessor.DataProcessor(host, port)
-    data_processor.init_config()
+    # data_processor.init_config()
 
     op_mode_lock = threading.Lock()
 

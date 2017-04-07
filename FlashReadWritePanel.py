@@ -46,3 +46,4 @@ class FlashReadWritePanel(wx.Panel):
 
     def OnWrite(self, event):
         self.data_processor.wr_flash()
+        wx.MessageBox("Write to Flash Successful", "Success")

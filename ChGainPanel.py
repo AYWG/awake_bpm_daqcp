@@ -127,7 +127,7 @@ class ChGainValidator(Validator.Validator):
             textCtrl.Refresh()
             return False
         elif float(val) > gain_upper_limit or float(val) < gain_lower_limit:
-            wx.MessageBox("Please enter a value that is within the accepted range (+/- 5.0)", "Out of Range")
+            wx.MessageBox("Please enter a value that is within the accepted range (+/- " + str(gain_upper_limit) + ")", "Out of Range")
             textCtrl.SetBackgroundColour("pink")
             textCtrl.SetFocus()
             textCtrl.Refresh()

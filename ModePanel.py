@@ -176,7 +176,6 @@ class ModePanel(wx.Panel):
         if self.chk_onfly_cal.GetValue():
             mode += 0x4000
 
-        # print mode
         self.data_processor.set_mode(mode)
 
         wx.MessageBox("Mode successfully updated", "Update Successful")

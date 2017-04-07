@@ -147,8 +147,6 @@ class EventParamValidator(Validator.Validator):
             textCtrl.Refresh()
             return False
         else:
-            # Add a success message here
-            textCtrl.SetBackgroundColour(
-                wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
             textCtrl.Refresh()
             return True
