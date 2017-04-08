@@ -348,10 +348,13 @@ class DataProcessor:
                     ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
                     ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
                     # Display running average
-                    self.x_pos_avg = ax1.text(0.05, 0.90, str(self.get_average(self.x_pos_data)),
-                                              transform=ax1.transAxes, fontsize=10)
-                    self.y_pos_avg = ax1.text(0.05, 0.80, str(self.get_average(self.y_pos_data)),
-                                              transform=ax1.transAxes, fontsize=10)
+                    ax1.text(1.02, 0.2, 'X Avg:', transform=ax1.transAxes, fontsize=8)
+                    self.x_pos_avg = ax1.text(1.1, 0.2, str(self.get_average(self.x_pos_data)),
+                                                                        transform=ax1.transAxes, fontsize=8)
+
+                    ax1.text(1.02, 0.1, 'Y Avg:', transform=ax1.transAxes, fontsize=8)
+                    self.y_pos_avg = ax1.text(1.1, 0.1, str(self.get_average(self.y_pos_data)),
+                                              transform=ax1.transAxes, fontsize=8)
                 elif plot == Plots.POWER:
                     ax1.set_title('Power')
                     ax1.set_ylabel('Power AB')
@@ -361,14 +364,18 @@ class DataProcessor:
                     ax2.plot(self.time_data, self.power_c_data, 'b-', label='C')
                     ax2.plot(self.time_data, self.power_d_data, 'r-', label='D')
                     # Display running average
-                    self.power_a_avg = ax1.text(0.05, 0.90, str(self.get_average(self.power_a_data)),
-                                                transform=ax1.transAxes, fontsize=10)
-                    self.power_b_avg = ax1.text(0.05, 0.80, str(self.get_average(self.power_b_data)),
-                                                transform=ax1.transAxes, fontsize=10)
-                    self.power_c_avg = ax2.text(0.05, 0.90, str(self.get_average(self.power_c_data)),
-                                                transform=ax2.transAxes, fontsize=10)
-                    self.power_d_avg = ax2.text(0.05, 0.80, str(self.get_average(self.power_d_data)),
-                                                transform=ax2.transAxes, fontsize=10)
+                    ax1.text(1.02, 0.2, 'A Avg:', transform=ax1.transAxes, fontsize=8)
+                    self.power_a_avg = ax1.text(1.1, 0.2, str(self.get_average(self.power_a_data)),
+                                                transform=ax1.transAxes, fontsize=8)
+                    ax1.text(1.02, 0.1, 'B Avg:', transform=ax1.transAxes, fontsize=8)
+                    self.power_b_avg = ax1.text(1.1, 0.1, str(self.get_average(self.power_b_data)),
+                                                transform=ax1.transAxes, fontsize=8)
+                    ax2.text(1.02, 0.2, 'C Avg:', transform=ax2.transAxes, fontsize=8)
+                    self.power_c_avg = ax2.text(1.1, 0.2, str(self.get_average(self.power_c_data)),
+                                                transform=ax2.transAxes, fontsize=8)
+                    ax2.text(1.02, 0.1, 'D Avg:', transform=ax2.transAxes, fontsize=8)
+                    self.power_d_avg = ax2.text(1.1, 0.1, str(self.get_average(self.power_d_data)),
+                                                transform=ax2.transAxes, fontsize=8)
 
                 # Add a legend to distinguish plots on the same axes
                 box1 = ax1.get_position()
@@ -458,8 +465,11 @@ class DataProcessor:
         samples_in_buf = self.IO.read_ffifo_wd(0)
         return samples_in_buf > self.samples_to_read
 
-    # Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA.
     def is_new_data_rdy(self):
+        """
+        Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA
+        :return: True | False
+        """
         samples_in_sfifo = self.IO.read_sfifo_wd()
         return samples_in_sfifo > 16
 

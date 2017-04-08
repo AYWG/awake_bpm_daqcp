@@ -1,5 +1,3 @@
-# Panel for setting the IP and MAC addresses
-
 import wx
 import string
 import Validator
@@ -9,15 +7,21 @@ DIGIT_ONLY = 2
 
 
 class AddressPanel(wx.Panel):
+    """
+    Panel for setting the IP and MAC address of the BPM
+    """
+
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_address = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_mac_address = wx.StaticText(self, wx.ID_ANY, 'MAC')
 
+        # MAC address is made up of 6 components
         self.txt_mac_address = []
         for _ in range(6): self.txt_mac_address.append(wx.TextCtrl(self, wx.ID_ANY, '', size=(30, -1)))
 
+        # IP address is made up of 4 components
         self.txt_ip_address = []
         for _ in range(4): self.txt_ip_address.append(wx.TextCtrl(self, wx.ID_ANY, '', size=(40, -1)))
 
@@ -35,7 +39,7 @@ class AddressPanel(wx.Panel):
         for i in range(len(self.txt_mac_address)):
             # Each portion of the MAC address is 2 characters
             self.txt_mac_address[i].SetMaxLength(2)
-            # Only hexadecimal are allowed
+            # Only hexadecimals are allowed
             self.txt_mac_address[i].SetValidator(AddressValidator(HEX_ONLY))
 
         for i in range(len(self.txt_ip_address)):
@@ -75,6 +79,10 @@ class AddressPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_address)
 
     def initialize_controls(self):
+        """
+        Writes the current MAC/IP address (stored in the BPM's flash buffer) to the appropriate TextCtrl boxes.
+        """
+
         for i in range(len(self.txt_mac_address)):
             self.txt_mac_address[i].SetValue(format(self.data_processor.get_mac_address(i), 'x'))
 
@@ -84,6 +92,11 @@ class AddressPanel(wx.Panel):
             self.txt_ip_address[i].SetValue(str(self.data_processor.get_ip_address(i)))
 
     def OnUpdate(self, event):
+        """
+
+        :param event:
+        :return:
+        """
         if self.Validate():
 
             for i in range(len(self.txt_mac_address)):
@@ -163,8 +176,7 @@ class AddressValidator(Validator.Validator):
                 return False
             else:
                 # Add a success message here
-                textCtrl.SetBackgroundColour(
-                    wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+                textCtrl.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
                 textCtrl.Refresh()
                 return True
 

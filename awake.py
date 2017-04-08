@@ -127,71 +127,78 @@ def process_data(host, port, command_queue):
 
     op_mode_lock = threading.Lock()
 
+    import Tkinter as tk
+
     while True:
-        command = command_queue.get()
+        try:
+            command = command_queue.get()
 
-        if command == Commands.START_MEASURING_DATA:
-            # only take action if currently paused
-            if data_processor.get_op_mode() == Modes.PAUSED:
-                op_mode_lock.acquire()
-                data_processor.set_op_mode(Modes.RUNNING)
-                op_mode_lock.release()
-                t_data_collector = threading.Thread(target=data_collector,
-                                                    args=(data_processor, command_queue, op_mode_lock),
-                                                    name='data_collector')
-                # t_waveform_collector = threading.Thread(target=waveform_collector,
-                #                                         args=(data_processor, command_queue, op_mode_lock),
-                #                                         name='waveform_collector')
-                t_data_collector.start()
-                # t_waveform_collector.start()
+            if command == Commands.START_MEASURING_DATA:
+                # only take action if currently paused
+                if data_processor.get_op_mode() == Modes.PAUSED:
+                    op_mode_lock.acquire()
+                    data_processor.set_op_mode(Modes.RUNNING)
+                    op_mode_lock.release()
+                    t_data_collector = threading.Thread(target=data_collector,
+                                                        args=(data_processor, command_queue, op_mode_lock),
+                                                        name='data_collector')
+                    # t_waveform_collector = threading.Thread(target=waveform_collector,
+                    #                                         args=(data_processor, command_queue, op_mode_lock),
+                    #                                         name='waveform_collector')
+                    t_data_collector.start()
+                    # t_waveform_collector.start()
 
-        elif command == Commands.PAUSE_MEASURING_DATA:
-            # only take action if currently running
-            if data_processor.get_op_mode() == Modes.RUNNING:
-                op_mode_lock.acquire()
-                data_processor.set_op_mode(Modes.PAUSED)
-                op_mode_lock.release()
+            elif command == Commands.PAUSE_MEASURING_DATA:
+                # only take action if currently running
+                if data_processor.get_op_mode() == Modes.RUNNING:
+                    op_mode_lock.acquire()
+                    data_processor.set_op_mode(Modes.PAUSED)
+                    op_mode_lock.release()
 
-        elif command == Commands.CLEAR_DATA:
-            data_processor.clear_data()
+            elif command == Commands.CLEAR_DATA:
+                data_processor.clear_data()
 
-        elif command == Commands.EDIT_SETTINGS:
-            t = threading.Thread(target=ctrl_gui_handler, args=(data_processor,))
-            t.start()
+            elif command == Commands.EDIT_SETTINGS:
+                t = threading.Thread(target=ctrl_gui_handler, args=(data_processor,))
+                t.start()
 
-        elif command == Commands.VIEW_WAVEFORM_DATA:
-            data_processor.setup_plot(Plots.WAVEFORM)
+            elif command == Commands.VIEW_WAVEFORM_DATA:
+                data_processor.setup_plot(Plots.WAVEFORM)
 
-        elif command == Commands.VIEW_POSITION_DATA:
-            data_processor.setup_plot(Plots.POSITION)
+            elif command == Commands.VIEW_POSITION_DATA:
+                data_processor.setup_plot(Plots.POSITION)
 
-        elif command == Commands.VIEW_INTENSITY_DATA:
-            data_processor.setup_plot(Plots.INTENSITY)
+            elif command == Commands.VIEW_INTENSITY_DATA:
+                data_processor.setup_plot(Plots.INTENSITY)
 
-        elif command == Commands.VIEW_POWER_DATA:
-            data_processor.setup_plot(Plots.POWER)
+            elif command == Commands.VIEW_POWER_DATA:
+                data_processor.setup_plot(Plots.POWER)
 
-        elif command == Commands.CLOSE_WINDOWS:
+            elif command == Commands.CLOSE_WINDOWS:
+                data_processor.close_windows()
+
+            elif command == Commands.UPDATE_PLOT:
+                data_processor.update_plot()
+
+            elif command == Commands.UPDATE_WAVEFORM:
+                data_processor.update_waveform()
+
+            elif command == Commands.REFRESH_PLOT:
+                data_processor.enable_plot_interaction()
+
+            elif command == Commands.EXIT:
+                data_processor.shutdown()
+                break
+
+            if data_processor.get_plot() != Plots.NONE and data_processor.get_op_mode() == Modes.PAUSED and not is_thread_active(
+                    'plot_refresher'):
+                t_plot_refresher = threading.Thread(target=plot_refresher, args=(data_processor, command_queue),
+                                                    name='plot_refresher')
+                t_plot_refresher.start()
+        except tk.TclError:
+            # Will get this error if trying to close the plot window via the 'X' button
+            # Thus, we catch it and do what is intended by the user
             data_processor.close_windows()
-
-        elif command == Commands.UPDATE_PLOT:
-            data_processor.update_plot()
-
-        elif command == Commands.UPDATE_WAVEFORM:
-            data_processor.update_waveform()
-
-        elif command == Commands.REFRESH_PLOT:
-            data_processor.enable_plot_interaction()
-
-        elif command == Commands.EXIT:
-            data_processor.shutdown()
-            break
-
-        if data_processor.get_plot() != Plots.NONE and data_processor.get_op_mode() == Modes.PAUSED and not is_thread_active(
-                'plot_refresher'):
-            t_plot_refresher = threading.Thread(target=plot_refresher, args=(data_processor, command_queue),
-                                                name='plot_refresher')
-            t_plot_refresher.start()
 
 
 # -------------------------------------------------------------------------------
