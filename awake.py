@@ -159,8 +159,10 @@ def process_data(host, port, command_queue):
                 data_processor.clear_data()
 
             elif command == Commands.EDIT_SETTINGS:
-                t = threading.Thread(target=ctrl_gui_handler, args=(data_processor,))
-                t.start()
+                # Only one settings window active
+                if not is_thread_active('ctrl_gui_handler'):
+                    t = threading.Thread(target=ctrl_gui_handler, args=(data_processor,), name='ctrl_gui_handler')
+                    t.start()
 
             elif command == Commands.VIEW_WAVEFORM_DATA:
                 data_processor.setup_plot(Plots.WAVEFORM)

@@ -17,8 +17,4 @@ class CtrlGUI(wx.App):
 
         windowCtrl.Show()
         windowCtrl.Restore()
-        # windowCtrl.Maximize(True)
-        # print windowCtrl.IsMaximized()
-        # windowCtrl.Raise()
-        # windowCtrl.Iconize(False)
         return True

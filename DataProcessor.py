@@ -7,6 +7,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import Modes
 import Plots
+import threading
 
 
 class DataProcessor:
@@ -75,6 +76,8 @@ class DataProcessor:
         self.IO = TCP.TCP(host, port)
         self.PACKET_ID = 0x4142504D
 
+        self.lock = threading.Lock()
+
         # Initial mode of operation is PAUSED
         self.op_mode = Modes.PAUSED
 
@@ -84,173 +87,215 @@ class DataProcessor:
         plt.ion()
 
     def init_config(self):
-        print self.IO.read_MBver()
+        with self.lock:
+            print self.IO.read_MBver()
 
-        if self.IO.write_reg('BPM:DIA', self.bpm_dia) is False: sys.exit()
-        time.sleep(0.1)
-        if self.IO.write_reg('TRIG:TH', self.trig_th) is False: sys.exit()
-        time.sleep(0.1)
-        if self.IO.write_reg('TRIG:DT', self.trig_dt) is False: sys.exit()
-        time.sleep(0.1)
-        if self.IO.write_reg('TRIG:DL', self.trig_dl) is False: sys.exit()
-        time.sleep(0.1)
-        if self.IO.write_reg('EVT:LEN', self.evt_len) is False: sys.exit()
-        time.sleep(0.1)
-        if self.IO.write_reg('EVT:TAIL', self.evt_tail) is False: sys.exit()
-        time.sleep(0.1)
-        if self.IO.write_reg('BL:LEN', self.bl_len) is False: sys.exit()
-        time.sleep(0.1)
-        if self.IO.write_reg('AFE:CTRL', self.gain) is False: sys.exit()
-        time.sleep(0.1)
-        if self.IO.write_reg('CR', self.mode) is False: sys.exit()
-        time.sleep(0.1)
+            if self.IO.write_reg('BPM:DIA', self.bpm_dia) is False: sys.exit()
+            time.sleep(0.1)
+            if self.IO.write_reg('TRIG:TH', self.trig_th) is False: sys.exit()
+            time.sleep(0.1)
+            if self.IO.write_reg('TRIG:DT', self.trig_dt) is False: sys.exit()
+            time.sleep(0.1)
+            if self.IO.write_reg('TRIG:DL', self.trig_dl) is False: sys.exit()
+            time.sleep(0.1)
+            if self.IO.write_reg('EVT:LEN', self.evt_len) is False: sys.exit()
+            time.sleep(0.1)
+            if self.IO.write_reg('EVT:TAIL', self.evt_tail) is False: sys.exit()
+            time.sleep(0.1)
+            if self.IO.write_reg('BL:LEN', self.bl_len) is False: sys.exit()
+            time.sleep(0.1)
+            if self.IO.write_reg('AFE:CTRL', self.gain) is False: sys.exit()
+            time.sleep(0.1)
+            if self.IO.write_reg('CR', self.mode) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_mode(self):
-        return self.IO.read_reg('CR?')
+        with self.lock:
+            return self.IO.read_reg('CR?')
 
     def set_mode(self, mode):
-        if self.IO.write_reg('CR', mode) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CR', mode) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_afe_gain(self):
-        return self.IO.read_reg('AFE:CTRL?')
+        with self.lock:
+            return self.IO.read_reg('AFE:CTRL?')
 
     def set_afe_gain(self, gain):
-        if self.IO.write_reg('AFE:CTRL', gain) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('AFE:CTRL', gain) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_bl_len(self):
-        return self.IO.read_reg('BL:LEN?')
+        with self.lock:
+            return self.IO.read_reg('BL:LEN?')
 
     def set_bl_len(self, bl_len):
-        if self.IO.write_reg('BL:LEN', bl_len) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('BL:LEN', bl_len) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_evt_len(self):
-        return self.IO.read_reg('EVT:LEN?')
+        with self.lock:
+            return self.IO.read_reg('EVT:LEN?')
 
     def set_evt_len(self, evt_len):
-        if self.IO.write_reg('EVT:LEN', evt_len) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('EVT:LEN', evt_len) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_evt_tail(self):
-        return self.IO.read_reg('EVT:TAIL?')
+        with self.lock:
+            return self.IO.read_reg('EVT:TAIL?')
 
     def set_evt_tail(self, evt_tail):
-        if self.IO.write_reg('EVT:TAIL', evt_tail) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('EVT:TAIL', evt_tail) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_trig_th(self):
-        return self.IO.read_reg('TRIG:TH?')
+        with self.lock:
+            return self.IO.read_reg('TRIG:TH?')
 
     def set_trig_th(self, trig_th):
-        if self.IO.write_reg('TRIG:TH', trig_th) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('TRIG:TH', trig_th) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_trig_dt(self):
-        return self.IO.read_reg('TRIG:DT?')
+        with self.lock:
+            return self.IO.read_reg('TRIG:DT?')
 
     def set_trig_dt(self, trig_dt):
-        if self.IO.write_reg('TRIG:DT', trig_dt) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('TRIG:DT', trig_dt) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_trig_dl(self):
-        return self.IO.read_reg('TRIG:DL?')
+        with self.lock:
+            return self.IO.read_reg('TRIG:DL?')
 
     def set_trig_dl(self, trig_dl):
-        if self.IO.write_reg('TRIG:DL', trig_dl) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('TRIG:DL', trig_dl) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_bpm_dia(self):
-        return self.IO.read_reg('BPM:DIA?')
+        with self.lock:
+            return self.IO.read_reg('BPM:DIA?')
 
     def set_bpm_dia(self, bpm_dia):
-        if self.IO.write_reg('BPM:DIA', bpm_dia) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('BPM:DIA', bpm_dia) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_cal_gain_a(self):
-        return self.IO.read_reg('CAL:GAIN:A?')
+        with self.lock:
+            return self.IO.read_reg('CAL:GAIN:A?')
 
     def set_cal_gain_a(self, cal_gain_a):
-        if self.IO.write_reg('CAL:GAIN:A', cal_gain_a) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CAL:GAIN:A', cal_gain_a) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_cal_gain_b(self):
-        return self.IO.read_reg('CAL:GAIN:B?')
+        with self.lock:
+            return self.IO.read_reg('CAL:GAIN:B?')
 
     def set_cal_gain_b(self, cal_gain_b):
-        if self.IO.write_reg('CAL:GAIN:B', cal_gain_b) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CAL:GAIN:B', cal_gain_b) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_cal_gain_c(self):
-        return self.IO.read_reg('CAL:GAIN:C?')
+        with self.lock:
+            return self.IO.read_reg('CAL:GAIN:C?')
 
     def set_cal_gain_c(self, cal_gain_c):
-        if self.IO.write_reg('CAL:GAIN:C', cal_gain_c) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CAL:GAIN:C', cal_gain_c) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_cal_gain_d(self):
-        return self.IO.read_reg('CAL:GAIN:D?')
+        with self.lock:
+            return self.IO.read_reg('CAL:GAIN:D?')
 
     def set_cal_gain_d(self, cal_gain_d):
-        if self.IO.write_reg('CAL:GAIN:D', cal_gain_d) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CAL:GAIN:D', cal_gain_d) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_ch_gain_a(self):
-        return self.IO.read_reg('CH:GAIN:A?')
+        with self.lock:
+            return self.IO.read_reg('CH:GAIN:A?')
 
     def set_ch_gain_a(self, ch_gain_a):
-        if self.IO.write_reg('CH:GAIN:A', ch_gain_a) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CH:GAIN:A', ch_gain_a) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_ch_gain_b(self):
-        return self.IO.read_reg('CH:GAIN:B?')
+        with self.lock:
+            return self.IO.read_reg('CH:GAIN:B?')
 
     def set_ch_gain_b(self, ch_gain_b):
-        if self.IO.write_reg('CH:GAIN:B', ch_gain_b) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CH:GAIN:B', ch_gain_b) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_ch_gain_c(self):
-        return self.IO.read_reg('CH:GAIN:C?')
+        with self.lock:
+            return self.IO.read_reg('CH:GAIN:C?')
 
     def set_ch_gain_c(self, ch_gain_c):
-        if self.IO.write_reg('CH:GAIN:C', ch_gain_c) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CH:GAIN:C', ch_gain_c) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_ch_gain_d(self):
-        return self.IO.read_reg('CH:GAIN:D?')
+        with self.lock:
+            return self.IO.read_reg('CH:GAIN:D?')
 
     def set_ch_gain_d(self, ch_gain_d):
-        if self.IO.write_reg('CH:GAIN:D', ch_gain_d) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('CH:GAIN:D', ch_gain_d) is False: sys.exit()
+            time.sleep(0.1)
 
     def wr_flash_buf(self):
-        if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
+            time.sleep(0.1)
 
     def rd_flash(self):
-        if self.IO.write_reg('FLASH:READ', 0) is False: sys.exit()  # the 0 is arbitrary
-        time.sleep(0.1)
-        if self.IO.write_reg('FLASHBUF:TO:FPGA', 0) is False: sys.exit()  # the 0 is arbitrary
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('FLASH:READ', 0) is False: sys.exit()  # the 0 is arbitrary
+            time.sleep(0.1)
+            if self.IO.write_reg('FLASHBUF:TO:FPGA', 0) is False: sys.exit()  # the 0 is arbitrary
+            time.sleep(0.1)
 
     def wr_flash(self):
-        if self.IO.write_reg('FLASH:WRIT', 0) is False: sys.exit()  # the 0 is arbitrary
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('FLASH:WRIT', 0) is False: sys.exit()  # the 0 is arbitrary
+            time.sleep(0.1)
 
     def get_mac_address(self, index):
-        return self.IO.read_reg('FL:BUF:MAC:' + str(index) + '?')
+        with self.lock:
+            return self.IO.read_reg('FL:BUF:MAC:' + str(index) + '?')
 
     def set_mac_address(self, index, value):
-        if self.IO.write_reg('FL:BUF:MAC:' + str(index), value) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('FL:BUF:MAC:' + str(index), value) is False: sys.exit()
+            time.sleep(0.1)
 
     def get_ip_address(self, index):
-        return self.IO.read_reg('FL:BUF:IP:' + str(index) + '?')
+        with self.lock:
+            return self.IO.read_reg('FL:BUF:IP:' + str(index) + '?')
 
     def set_ip_address(self, index, value):
-        if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()
-        time.sleep(0.1)
+        with self.lock:
+            if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()
+            time.sleep(0.1)
 
     def float_to_int(self, f):
         """
@@ -461,61 +506,65 @@ class DataProcessor:
         Checks if there is enough data in the fast fifo for reading
         :return: True | False
         """
-        self.samples_to_read = 16 * ((self.evt_len - self.bl_len - 4) // 16)
-        samples_in_buf = self.IO.read_ffifo_wd(0)
-        return samples_in_buf > self.samples_to_read
+        with self.lock:
+            self.samples_to_read = 16 * ((self.evt_len - self.bl_len - 4) // 16)
+            samples_in_buf = self.IO.read_ffifo_wd(0)
+            return samples_in_buf > self.samples_to_read
 
     def is_new_data_rdy(self):
         """
         Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA
         :return: True | False
         """
-        samples_in_sfifo = self.IO.read_sfifo_wd()
-        return samples_in_sfifo > 16
+        with self.lock:
+            samples_in_sfifo = self.IO.read_sfifo_wd()
+            return samples_in_sfifo > 16
 
     def read_data(self):
         """
         Read a packet of data from the slow fifo in the FPGA and update the appropriate data buffers (x, y, etc.)
         """
-        packet = self.IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
-        if packet[0] != self.PACKET_ID:
-            raise TypeError('Packet ID error!')
+        with self.lock:
+            packet = self.IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
+            if packet[0] != self.PACKET_ID:
+                raise TypeError('Packet ID error!')
 
-        self.current_time += 1
-        # extract new data from packet
-        x = TCP.s16(packet[3] >> 16)
-        y = TCP.s16(packet[3] & 0xFFFF)
-        s = TCP.s16(packet[4] >> 16)
-        PA = packet[5]
-        PB = packet[6]
-        PC = packet[7]
-        PD = packet[8]
+            self.current_time += 1
+            # extract new data from packet
+            x = TCP.s16(packet[3] >> 16)
+            y = TCP.s16(packet[3] & 0xFFFF)
+            s = TCP.s16(packet[4] >> 16)
+            PA = packet[5]
+            PB = packet[6]
+            PC = packet[7]
+            PD = packet[8]
 
-        # add new data to old data
-        self.time_data.append(self.current_time)
-        self.x_pos_data.append(x)
-        self.y_pos_data.append(y)
-        self.s_data.append(s)
-        self.power_a_data.append(PA)
-        self.power_b_data.append(PB)
-        self.power_c_data.append(PC)
-        self.power_d_data.append(PD)
+            # add new data to old data
+            self.time_data.append(self.current_time)
+            self.x_pos_data.append(x)
+            self.y_pos_data.append(y)
+            self.s_data.append(s)
+            self.power_a_data.append(PA)
+            self.power_b_data.append(PB)
+            self.power_c_data.append(PC)
+            self.power_d_data.append(PD)
 
-        x_rms = int(TCP.rms(self.x_pos_data))
-        y_rms = int(TCP.rms(self.y_pos_data))
-        self.x_rms_data.append(x_rms)
-        self.y_rms_data.append(y_rms)
+            x_rms = int(TCP.rms(self.x_pos_data))
+            y_rms = int(TCP.rms(self.y_pos_data))
+            self.x_rms_data.append(x_rms)
+            self.y_rms_data.append(y_rms)
 
     def read_waveform(self):
-        waveform_AB = self.IO.read_waveform(self.ChAB, self.samples_to_read)
-        waveform_CD = self.IO.read_waveform(self.ChCD, self.samples_to_read)
-        # False if waveform not successfully read
-        if waveform_AB:
-            self.raw_adc_a_data = waveform_AB[0]
-            self.raw_adc_b_data = waveform_AB[1]
-        if waveform_CD:
-            self.raw_adc_c_data = waveform_CD[0]
-            self.raw_adc_d_data = waveform_CD[1]
+        with self.lock:
+            waveform_AB = self.IO.read_waveform(self.ChAB, self.samples_to_read)
+            waveform_CD = self.IO.read_waveform(self.ChCD, self.samples_to_read)
+            # False if waveform not successfully read
+            if waveform_AB:
+                self.raw_adc_a_data = waveform_AB[0]
+                self.raw_adc_b_data = waveform_AB[1]
+            if waveform_CD:
+                self.raw_adc_c_data = waveform_CD[0]
+                self.raw_adc_d_data = waveform_CD[1]
 
     def clear_data(self):
         """
