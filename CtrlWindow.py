@@ -45,8 +45,8 @@ class CtrlWindow(wx.Frame):
         self.__attach_events()
         # self.check_for_close_signal()
         # wx.CallLater(500, self.check_for_close_signal)
-        # self.t = threading.Thread(target=self.check_for_close_signal)
-        # self.t.start()
+        self.t = threading.Thread(target=self.check_for_close_signal)
+        self.t.start()
 
     def __set_properties(self):
         # Light-grey
@@ -89,7 +89,7 @@ class CtrlWindow(wx.Frame):
 
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.update_controls)
-        # self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
         # self.Bind(wx.EVT_TIMER, self.check_for_close_signal)
 
     def update_controls(self, event):
