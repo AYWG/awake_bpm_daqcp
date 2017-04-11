@@ -87,18 +87,14 @@ class EventParamPanel(wx.Panel):
         # self.Bind(wx.EVT_BUTTON, self.OnTest, self.btn_test)
 
     def initialize_controls(self):
+        # self.txt_trig_th.SetValue('300')
+        # print 'trig th: ', self.data_processor.get_trig_th()
         self.txt_trig_th.SetValue(str(self.data_processor.get_trig_th()))
         self.txt_trig_dt.SetValue(str(self.data_processor.get_trig_dt()))
         self.txt_trig_dl.SetValue(str(self.data_processor.get_trig_dl()))
         self.txt_evt_len.SetValue(str(self.data_processor.get_evt_len()))
         self.txt_evt_tail.SetValue(str(self.data_processor.get_evt_tail()))
         self.txt_bl_len.SetValue(str(self.data_processor.get_bl_len()))
-
-    # def OnTest(self, e):
-    #     trig_th_val = str(self.data_processor.get_trig_th())
-    #     dlg = wx.MessageDialog(self, trig_th_val, "Updated trig th", wx.OK)
-    #     dlg.ShowModal()  # Show it
-    #     dlg.Destroy()  # finally destroy it when finished.
 
     def OnUpdate(self, e):
         if self.Validate():

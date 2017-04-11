@@ -15,7 +15,7 @@ import DataProcessor
 import Commands
 import Modes
 import Plots
-import CtrlGUI
+
 
 # configure logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
@@ -105,6 +105,8 @@ def ctrl_gui_handler(data_processor):
     :param data_processor:
     :return:
     """
+    import CtrlGUI
+    data_processor.set_ctrl_gui_state(True)
     gui = CtrlGUI.CtrlGUI(data_processor)
     gui.MainLoop()
 
@@ -177,7 +179,8 @@ def process_data(host, port, command_queue):
                 data_processor.setup_plot(Plots.POWER)
 
             elif command == Commands.CLOSE_WINDOWS:
-                data_processor.close_windows()
+                # data_processor.close_windows()
+                data_processor.close_plot()
 
             elif command == Commands.UPDATE_PLOT:
                 data_processor.update_plot()
@@ -200,7 +203,7 @@ def process_data(host, port, command_queue):
         except tk.TclError:
             # Will get this error if trying to close the plot window via the 'X' button
             # Thus, we catch it and do what is intended by the user
-            data_processor.close_windows()
+            data_processor.close_plot()
 
 
 # -------------------------------------------------------------------------------

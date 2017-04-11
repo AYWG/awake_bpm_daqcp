@@ -1,6 +1,7 @@
 # Top-level control window
 
 import wx
+import Modes
 import AddressPanel
 import AFECtrlPanel
 import CalGainPanel
@@ -10,11 +11,14 @@ import FlashReadWritePanel
 import ModePanel
 import OtherParamPanel
 import StatusPanel
-
+import threading
+import time
 
 class CtrlWindow(wx.Frame):
     def __init__(self, parent, title, data_processor):
         wx.Frame.__init__(self, parent=parent, id=wx.ID_ANY, title=title)
+
+        self.data_processor = data_processor
 
         # Add panels
         self.address_panel = AddressPanel.AddressPanel(parent=self, title='Addresses', data_processor=data_processor)
@@ -35,7 +39,14 @@ class CtrlWindow(wx.Frame):
 
         self.__set_properties()
         self.__do_layout()
+
+        # self.timer = wx.Timer(self, wx.ID_ANY)
+        # self.timer.Start(500)
         self.__attach_events()
+        # self.check_for_close_signal()
+        # wx.CallLater(500, self.check_for_close_signal)
+        # self.t = threading.Thread(target=self.check_for_close_signal)
+        # self.t.start()
 
     def __set_properties(self):
         # Light-grey
@@ -78,6 +89,8 @@ class CtrlWindow(wx.Frame):
 
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.update_controls)
+        # self.Bind(wx.EVT_CLOSE, self.OnClose)
+        # self.Bind(wx.EVT_TIMER, self.check_for_close_signal)
 
     def update_controls(self, event):
         self.address_panel.initialize_controls()
@@ -88,3 +101,22 @@ class CtrlWindow(wx.Frame):
         self.mode_panel.initialize_controls()
         self.otherparam_panel.initialize_controls()
 
+        wx.MessageBox("Flash Read Successful - All Settings Updated", "Success")
+
+
+    def check_for_close_signal(self):
+        while True:
+            if not self.data_processor.get_ctrl_gui_state():
+                # self.Close()
+                wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
+                break
+            time.sleep(0.5)
+            # self.Destroy()
+
+        # wx.CallLater(500, self.check_for_close_signal)
+
+    def OnClose(self, event):
+        self.data_processor.set_ctrl_gui_state(False)
+        print 'a'
+        self.Destroy()
+        print 'b'

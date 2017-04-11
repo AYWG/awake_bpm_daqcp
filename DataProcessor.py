@@ -84,6 +84,9 @@ class DataProcessor:
         # There is no plot at the beginning
         self.plot = Plots.NONE
 
+        # There is no control window at the beginning
+        self.is_ctrl_gui_active = False
+
         plt.ion()
 
     def init_config(self):
@@ -161,7 +164,7 @@ class DataProcessor:
     def set_trig_th(self, trig_th):
         with self.lock:
             if self.IO.write_reg('TRIG:TH', trig_th) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_trig_dt(self):
         with self.lock:
@@ -270,9 +273,12 @@ class DataProcessor:
     def rd_flash(self):
         with self.lock:
             if self.IO.write_reg('FLASH:READ', 0) is False: sys.exit()  # the 0 is arbitrary
+            # print 'new data in flash buf'
             time.sleep(0.1)
             if self.IO.write_reg('FLASHBUF:TO:FPGA', 0) is False: sys.exit()  # the 0 is arbitrary
+            # print 'new data in fpga'
             time.sleep(0.1)
+
 
     def wr_flash(self):
         with self.lock:
@@ -434,7 +440,6 @@ class DataProcessor:
                 # Both axes share the same x label, so we only need one
                 ax2.set_xlabel('Time(s)')
 
-            fig.canvas.mpl_connect('close_event', self.close_windows)
             fig.canvas.draw()
             fig.canvas.start_event_loop(0.5)
 
@@ -506,10 +511,11 @@ class DataProcessor:
         Checks if there is enough data in the fast fifo for reading
         :return: True | False
         """
+
+        self.samples_to_read = 16 * ((self.evt_len - self.bl_len - 4) // 16)
         with self.lock:
-            self.samples_to_read = 16 * ((self.evt_len - self.bl_len - 4) // 16)
             samples_in_buf = self.IO.read_ffifo_wd(0)
-            return samples_in_buf > self.samples_to_read
+        return samples_in_buf > self.samples_to_read
 
     def is_new_data_rdy(self):
         """
@@ -518,7 +524,7 @@ class DataProcessor:
         """
         with self.lock:
             samples_in_sfifo = self.IO.read_sfifo_wd()
-            return samples_in_sfifo > 16
+        return samples_in_sfifo > 16
 
     def read_data(self):
         """
@@ -526,45 +532,45 @@ class DataProcessor:
         """
         with self.lock:
             packet = self.IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
-            if packet[0] != self.PACKET_ID:
-                raise TypeError('Packet ID error!')
+        if packet[0] != self.PACKET_ID:
+            raise TypeError('Packet ID error!')
 
-            self.current_time += 1
-            # extract new data from packet
-            x = TCP.s16(packet[3] >> 16)
-            y = TCP.s16(packet[3] & 0xFFFF)
-            s = TCP.s16(packet[4] >> 16)
-            PA = packet[5]
-            PB = packet[6]
-            PC = packet[7]
-            PD = packet[8]
+        self.current_time += 1
+        # extract new data from packet
+        x = TCP.s16(packet[3] >> 16)
+        y = TCP.s16(packet[3] & 0xFFFF)
+        s = TCP.s16(packet[4] >> 16)
+        PA = packet[5]
+        PB = packet[6]
+        PC = packet[7]
+        PD = packet[8]
 
-            # add new data to old data
-            self.time_data.append(self.current_time)
-            self.x_pos_data.append(x)
-            self.y_pos_data.append(y)
-            self.s_data.append(s)
-            self.power_a_data.append(PA)
-            self.power_b_data.append(PB)
-            self.power_c_data.append(PC)
-            self.power_d_data.append(PD)
+        # add new data to old data
+        self.time_data.append(self.current_time)
+        self.x_pos_data.append(x)
+        self.y_pos_data.append(y)
+        self.s_data.append(s)
+        self.power_a_data.append(PA)
+        self.power_b_data.append(PB)
+        self.power_c_data.append(PC)
+        self.power_d_data.append(PD)
 
-            x_rms = int(TCP.rms(self.x_pos_data))
-            y_rms = int(TCP.rms(self.y_pos_data))
-            self.x_rms_data.append(x_rms)
-            self.y_rms_data.append(y_rms)
+        x_rms = int(TCP.rms(self.x_pos_data))
+        y_rms = int(TCP.rms(self.y_pos_data))
+        self.x_rms_data.append(x_rms)
+        self.y_rms_data.append(y_rms)
 
     def read_waveform(self):
         with self.lock:
             waveform_AB = self.IO.read_waveform(self.ChAB, self.samples_to_read)
             waveform_CD = self.IO.read_waveform(self.ChCD, self.samples_to_read)
-            # False if waveform not successfully read
-            if waveform_AB:
-                self.raw_adc_a_data = waveform_AB[0]
-                self.raw_adc_b_data = waveform_AB[1]
-            if waveform_CD:
-                self.raw_adc_c_data = waveform_CD[0]
-                self.raw_adc_d_data = waveform_CD[1]
+        # False if waveform not successfully read
+        if waveform_AB:
+            self.raw_adc_a_data = waveform_AB[0]
+            self.raw_adc_b_data = waveform_AB[1]
+        if waveform_CD:
+            self.raw_adc_c_data = waveform_CD[0]
+            self.raw_adc_d_data = waveform_CD[1]
 
     def clear_data(self):
         """
@@ -586,10 +592,20 @@ class DataProcessor:
         del self.x_rms_data[:]
         del self.y_rms_data[:]
 
-    # Closes control window and any active plots
-    def close_windows(self):
+    def close_plot(self):
         self.set_plot(Plots.NONE)
         plt.close('all')
+
+    def get_ctrl_gui_state(self):
+        return self.is_ctrl_gui_active
+
+    def set_ctrl_gui_state(self, state):
+        self.is_ctrl_gui_active = state
+
+    # Closes control window and any active plots
+    def close_windows(self):
+        self.close_plot()
+        self.set_ctrl_gui_state(False)
 
     def shutdown(self):
         self.close_windows()
