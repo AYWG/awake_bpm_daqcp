@@ -40,11 +40,7 @@ class CtrlWindow(wx.Frame):
         self.__set_properties()
         self.__do_layout()
 
-        # self.timer = wx.Timer(self, wx.ID_ANY)
-        # self.timer.Start(500)
         self.__attach_events()
-        # self.check_for_close_signal()
-        # wx.CallLater(500, self.check_for_close_signal)
         self.t = threading.Thread(target=self.check_for_close_signal)
         self.t.start()
 
@@ -106,17 +102,13 @@ class CtrlWindow(wx.Frame):
 
     def check_for_close_signal(self):
         while True:
-            if not self.data_processor.get_ctrl_gui_state():
-                # self.Close()
-                wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
-                break
-            time.sleep(0.5)
-            # self.Destroy()
+            if self:
+                if not self.data_processor.get_ctrl_gui_state():
+                    wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
+                    break
+                time.sleep(0.5)
 
-        # wx.CallLater(500, self.check_for_close_signal)
 
     def OnClose(self, event):
         self.data_processor.set_ctrl_gui_state(False)
-        print 'a'
         self.Destroy()
-        print 'b'
