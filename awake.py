@@ -30,61 +30,20 @@ def data_collector(data_processor, command_queue, lock):
     :return:
     """
     while True:
-
-        # if data_processor.is_new_data_rdy():
-        #     lock.acquire()
-        #     # check if we're still running
-        #     if data_processor.get_op_mode() == Modes.RUNNING:
-        #         # read the slow fifo and update the collected data
-        #         data_processor.read_data()
-        #         lock.release()
-        #     else:
-        #         lock.release()
-        #         break
-        #     # if data_processor.get_plot() != Plots.WAVEFORM:
-        #     command_queue.put(Commands.UPDATE_PLOT)
-
-        # if data_processor.is_waveform_rdy():
-        #     lock.acquire()
-        #     if data_processor.get_op_mode() == Modes.RUNNING:
-        #         data_processor.read_waveform()
-        #         lock.release()
-        #     else:
-        #         lock.release()
-        #         break
-        #     if data_processor.get_plot() == Plots.WAVEFORM:
-        #         command_queue.put(Commands.UPDATE_PLOT)
-
         # Roughly the same logic as in LabVIEW
         if data_processor.is_waveform_rdy():
-            lock.acquire()
-            if data_processor.get_op_mode() == Modes.RUNNING:
-                data_processor.read_waveform()
-                command_queue.put(Commands.UPDATE_WAVEFORM)
-                if data_processor.is_new_data_rdy():
-                    data_processor.read_data()
-                    command_queue.put(Commands.UPDATE_PLOT)
-                lock.release()
-            else:
-                lock.release()
-                break
+            with lock:
+                if data_processor.get_op_mode() == Modes.RUNNING:
+                    data_processor.read_waveform()
+                    command_queue.put(Commands.UPDATE_WAVEFORM)
+                    if data_processor.is_new_data_rdy():
+                        data_processor.read_data()
+                        command_queue.put(Commands.UPDATE_CALCULATIONS)
+                else:
+                    break
         else:
             command_queue.put(Commands.REFRESH_PLOT)
             time.sleep(0.5)
-
-
-
-# def waveform_collector(data_processor, command_queue, lock):
-#     while True:
-#         if data_processor.is_waveform_rdy():
-#             lock.acquire()
-#             if data_processor.get_op_mode() == Modes.RUNNING:
-#                 data_processor.read_waveform()
-#                 lock.release()
-#             else:
-#                 lock.release()
-#                 break
-#             command_queue.put(Commands.UPDATE_WAVEFORM)
 
 
 def is_thread_active(name):
@@ -110,15 +69,19 @@ def ctrl_gui_handler(data_processor):
     gui.MainLoop()
 
 
-def plot_refresher(data_processor, command_queue):
+def plot_refresher(data_processor, command_queue, lock):
     """
     For refreshing the plot while data is not being collected
     :param data_processor:
     :param command_queue:
     :return:
     """
-    while data_processor.get_op_mode() == Modes.PAUSED:
-        command_queue.put(Commands.REFRESH_PLOT)
+    while True:
+        with lock:
+            if data_processor.get_op_mode() == Modes.PAUSED:
+                command_queue.put(Commands.REFRESH_PLOT)
+            else:
+                break
         time.sleep(0.5)
 
 
@@ -128,7 +91,7 @@ def process_data(host, port, command_queue):
 
     op_mode_lock = threading.Lock()
 
-    import Tkinter as tk
+    import Tkinter as tk # for the exception
 
     while True:
         try:
@@ -143,11 +106,7 @@ def process_data(host, port, command_queue):
                     t_data_collector = threading.Thread(target=data_collector,
                                                         args=(data_processor, command_queue, op_mode_lock),
                                                         name='data_collector')
-                    # t_waveform_collector = threading.Thread(target=waveform_collector,
-                    #                                         args=(data_processor, command_queue, op_mode_lock),
-                    #                                         name='waveform_collector')
                     t_data_collector.start()
-                    # t_waveform_collector.start()
 
             elif command == Commands.PAUSE_MEASURING_DATA:
                 # only take action if currently running
@@ -162,8 +121,9 @@ def process_data(host, port, command_queue):
             elif command == Commands.EDIT_SETTINGS:
                 # Only one settings window active
                 if not is_thread_active('ctrl_gui_handler'):
-                    t = threading.Thread(target=ctrl_gui_handler, args=(data_processor,), name='ctrl_gui_handler')
-                    t.start()
+                    t_ctrl_gui_handler = threading.Thread(target=ctrl_gui_handler, args=(data_processor,),
+                                                          name='ctrl_gui_handler')
+                    t_ctrl_gui_handler.start()
 
             elif command == Commands.VIEW_WAVEFORM_DATA:
                 data_processor.setup_plot(Plots.WAVEFORM)
@@ -179,10 +139,9 @@ def process_data(host, port, command_queue):
 
             elif command == Commands.CLOSE_WINDOWS:
                 data_processor.close_windows()
-                # data_processor.close_plot()
 
-            elif command == Commands.UPDATE_PLOT:
-                data_processor.update_plot()
+            elif command == Commands.UPDATE_CALCULATIONS:
+                data_processor.update_calculations()
 
             elif command == Commands.UPDATE_WAVEFORM:
                 data_processor.update_waveform()
@@ -194,11 +153,15 @@ def process_data(host, port, command_queue):
                 data_processor.shutdown()
                 break
 
-            if data_processor.get_plot() != Plots.NONE and data_processor.get_op_mode() == Modes.PAUSED and not is_thread_active(
-                    'plot_refresher'):
-                t_plot_refresher = threading.Thread(target=plot_refresher, args=(data_processor, command_queue),
+            if (data_processor.get_plot() != Plots.NONE and
+                data_processor.get_op_mode() == Modes.PAUSED and not
+                is_thread_active('plot_refresher')):
+
+                t_plot_refresher = threading.Thread(target=plot_refresher,
+                                                    args=(data_processor, command_queue, op_mode_lock),
                                                     name='plot_refresher')
                 t_plot_refresher.start()
+
         except tk.TclError:
             # Will get this error if trying to close the plot window via the 'X' button
             # Thus, we catch it and do what is intended by the user

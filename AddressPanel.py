@@ -94,8 +94,6 @@ class AddressPanel(wx.Panel):
     def OnUpdate(self, event):
         """
 
-        :param event:
-        :return:
         """
         if self.Validate():
 
@@ -107,7 +105,7 @@ class AddressPanel(wx.Panel):
             for i in range(len(self.txt_ip_address)):
                 self.data_processor.set_ip_address(i, int(self.txt_ip_address[i].GetValue()))
 
-            wx.MessageBox("Addresses successfully updated", "Update Successful")
+            wx.MessageBox("Addresses successfully updated", "Success")
 
     def _format_mac_address(self):
         """
@@ -125,6 +123,7 @@ class AddressPanel(wx.Panel):
 class AddressValidator(Validator.Validator):
     def __init__(self, flag):
         Validator.Validator.__init__(self)
+        # The flag is for determining whether the MAC address or the IP address is being validated
         self.flag = flag
 
     def Clone(self):

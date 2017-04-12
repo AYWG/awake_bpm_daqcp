@@ -9,6 +9,7 @@ import EventParamPanel
 import FlashReadWritePanel
 import ModePanel
 import OtherParamPanel
+import StatusPanel
 import threading
 import time
 
@@ -34,6 +35,7 @@ class CtrlWindow(wx.Frame):
         self.mode_panel = ModePanel.ModePanel(parent=self, title='Mode Register', data_processor=data_processor)
         self.otherparam_panel = OtherParamPanel.OtherParamPanel(parent=self, title='Other Parameters',
                                                                 data_processor=data_processor)
+        self.status_panel = StatusPanel.StatusPanel(parent=self, title='Status', data_processor=data_processor)
 
         self.__set_properties()
         self.__do_layout()
@@ -63,11 +65,11 @@ class CtrlWindow(wx.Frame):
         sizer_mid_row.Add(self.mode_panel, 1, wx.EXPAND | wx.ALL, 4)
         sizer_mid_row.Add(sizer_mid_right, 1, wx.EXPAND | wx.ALL, 4)
 
-        # sizer_top_row = wx.BoxSizer(wx.HORIZONTAL)
-        # sizer_top_row.Add(self.status_panel, 1, wx.EXPAND | wx.ALL, 4)
+        sizer_top_row = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_top_row.Add(self.status_panel, 1, wx.EXPAND | wx.ALL, 4)
 
         sizer_vert = wx.BoxSizer(wx.VERTICAL)
-        # sizer_vert.Add(sizer_top_row, 1, wx.EXPAND)
+        sizer_vert.Add(sizer_top_row, 1, wx.EXPAND)
         sizer_vert.Add(sizer_mid_row, 2, wx.EXPAND)
         sizer_vert.Add(sizer_btm_row, 1, wx.EXPAND)
 
@@ -94,12 +96,13 @@ class CtrlWindow(wx.Frame):
         self.eventparam_panel.initialize_controls()
         self.mode_panel.initialize_controls()
         self.otherparam_panel.initialize_controls()
+        self.status_panel.initialize_controls()
 
         wx.MessageBox("Flash Read Successful - All Settings Updated", "Success")
 
     def check_for_close_signal(self):
         """
-        Worker thread that checks
+        Worker thread that checks if the GUI should still be open
         """
         while True:
             if self:
@@ -107,6 +110,8 @@ class CtrlWindow(wx.Frame):
                     wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
                     break
                 time.sleep(0.5)
+            else:
+                break
 
     def OnClose(self, event):
         self.data_processor.set_ctrl_gui_state(False)

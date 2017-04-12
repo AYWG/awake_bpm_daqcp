@@ -124,7 +124,7 @@ class DataProcessor:
     def set_mode(self, mode):
         with self.lock:
             if self.IO.write_reg('CR', mode) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_afe_gain(self):
         with self.lock:
@@ -133,7 +133,7 @@ class DataProcessor:
     def set_afe_gain(self, gain):
         with self.lock:
             if self.IO.write_reg('AFE:CTRL', gain) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_bl_len(self):
         with self.lock:
@@ -142,7 +142,7 @@ class DataProcessor:
     def set_bl_len(self, bl_len):
         with self.lock:
             if self.IO.write_reg('BL:LEN', bl_len) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_evt_len(self):
         with self.lock:
@@ -151,7 +151,7 @@ class DataProcessor:
     def set_evt_len(self, evt_len):
         with self.lock:
             if self.IO.write_reg('EVT:LEN', evt_len) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_evt_tail(self):
         with self.lock:
@@ -160,7 +160,7 @@ class DataProcessor:
     def set_evt_tail(self, evt_tail):
         with self.lock:
             if self.IO.write_reg('EVT:TAIL', evt_tail) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_trig_th(self):
         with self.lock:
@@ -178,7 +178,7 @@ class DataProcessor:
     def set_trig_dt(self, trig_dt):
         with self.lock:
             if self.IO.write_reg('TRIG:DT', trig_dt) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_trig_dl(self):
         with self.lock:
@@ -187,7 +187,7 @@ class DataProcessor:
     def set_trig_dl(self, trig_dl):
         with self.lock:
             if self.IO.write_reg('TRIG:DL', trig_dl) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_bpm_dia(self):
         with self.lock:
@@ -196,84 +196,30 @@ class DataProcessor:
     def set_bpm_dia(self, bpm_dia):
         with self.lock:
             if self.IO.write_reg('BPM:DIA', bpm_dia) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
-    def get_cal_gain_a(self):
+    def get_cal_gain(self, channel):
         with self.lock:
-            return self.IO.read_reg('CAL:GAIN:A?')
+            return self.IO.read_reg('CAL:GAIN:' + channel + '?')
 
-    def set_cal_gain_a(self, cal_gain_a):
+    def set_cal_gain(self, channel, cal_gain):
         with self.lock:
-            if self.IO.write_reg('CAL:GAIN:A', cal_gain_a) is False: sys.exit()
-            time.sleep(0.1)
+            if self.IO.write_reg('CAL:GAIN:' + channel, cal_gain) is False: sys.exit()
+        time.sleep(0.1)
 
-    def get_cal_gain_b(self):
+    def get_ch_gain(self, channel):
         with self.lock:
-            return self.IO.read_reg('CAL:GAIN:B?')
+            return self.IO.read_reg('CH:GAIN:' + channel + '?')
 
-    def set_cal_gain_b(self, cal_gain_b):
+    def set_ch_gain(self, channel, ch_gain):
         with self.lock:
-            if self.IO.write_reg('CAL:GAIN:B', cal_gain_b) is False: sys.exit()
-            time.sleep(0.1)
-
-    def get_cal_gain_c(self):
-        with self.lock:
-            return self.IO.read_reg('CAL:GAIN:C?')
-
-    def set_cal_gain_c(self, cal_gain_c):
-        with self.lock:
-            if self.IO.write_reg('CAL:GAIN:C', cal_gain_c) is False: sys.exit()
-            time.sleep(0.1)
-
-    def get_cal_gain_d(self):
-        with self.lock:
-            return self.IO.read_reg('CAL:GAIN:D?')
-
-    def set_cal_gain_d(self, cal_gain_d):
-        with self.lock:
-            if self.IO.write_reg('CAL:GAIN:D', cal_gain_d) is False: sys.exit()
-            time.sleep(0.1)
-
-    def get_ch_gain_a(self):
-        with self.lock:
-            return self.IO.read_reg('CH:GAIN:A?')
-
-    def set_ch_gain_a(self, ch_gain_a):
-        with self.lock:
-            if self.IO.write_reg('CH:GAIN:A', ch_gain_a) is False: sys.exit()
-            time.sleep(0.1)
-
-    def get_ch_gain_b(self):
-        with self.lock:
-            return self.IO.read_reg('CH:GAIN:B?')
-
-    def set_ch_gain_b(self, ch_gain_b):
-        with self.lock:
-            if self.IO.write_reg('CH:GAIN:B', ch_gain_b) is False: sys.exit()
-            time.sleep(0.1)
-
-    def get_ch_gain_c(self):
-        with self.lock:
-            return self.IO.read_reg('CH:GAIN:C?')
-
-    def set_ch_gain_c(self, ch_gain_c):
-        with self.lock:
-            if self.IO.write_reg('CH:GAIN:C', ch_gain_c) is False: sys.exit()
-            time.sleep(0.1)
-
-    def get_ch_gain_d(self):
-        with self.lock:
-            return self.IO.read_reg('CH:GAIN:D?')
-
-    def set_ch_gain_d(self, ch_gain_d):
-        with self.lock:
-            if self.IO.write_reg('CH:GAIN:D', ch_gain_d) is False: sys.exit()
-            time.sleep(0.1)
+            if self.IO.write_reg('CH:GAIN:' + channel, ch_gain) is False: sys.exit()
+        time.sleep(0.1)
 
     def wr_flash_buf(self):
         with self.lock:
             if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def rd_flash(self):
         with self.lock:
@@ -282,12 +228,12 @@ class DataProcessor:
             time.sleep(0.1)
             if self.IO.write_reg('FLASHBUF:TO:FPGA', 0) is False: sys.exit()  # the 0 is arbitrary
             # print 'new data in fpga'
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def wr_flash(self):
         with self.lock:
             if self.IO.write_reg('FLASH:WRIT', 0) is False: sys.exit()  # the 0 is arbitrary
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_mac_address(self, index):
         with self.lock:
@@ -296,16 +242,21 @@ class DataProcessor:
     def set_mac_address(self, index, value):
         with self.lock:
             if self.IO.write_reg('FL:BUF:MAC:' + str(index), value) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def get_ip_address(self, index):
+        """
+
+        :param index:
+        :return:
+        """
         with self.lock:
             return self.IO.read_reg('FL:BUF:IP:' + str(index) + '?')
 
     def set_ip_address(self, index, value):
         with self.lock:
             if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()
-            time.sleep(0.1)
+        time.sleep(0.1)
 
     def float_to_int(self, f):
         """
@@ -425,7 +376,7 @@ class DataProcessor:
 
                     # Label
                     ax1.text(1.02, 0.2, 'X Avg:', transform=ax1.transAxes, fontsize=8)
-                    # We need to save this as an attribute so it can be referenced in update_plot()
+                    # We need to save this as an attribute so it can be referenced in update_calculations()
                     self.x_pos_avg = ax1.text(1.1, 0.2, str(self.get_average(self.x_pos_data)),
                                               transform=ax1.transAxes, fontsize=8)
 
@@ -479,8 +430,11 @@ class DataProcessor:
         if plt.get_fignums():
             plt.gcf().canvas.start_event_loop(0.1)
 
-    # Updates the active plot, adjusting the appropriate axis based on the data collected so far
-    def update_plot(self):
+    def update_calculations(self):
+        """
+        Updates the active plot by adjusting the x/y axis based on the data collected so far.
+        Assumes the plot is one of: Position, Intensity, or Power
+        """
         # Only take action if there's an active plot
         if self.get_plot() != Plots.NONE:
             if self.get_plot() == Plots.INTENSITY:
@@ -488,11 +442,6 @@ class DataProcessor:
                 ax1.get_lines()[0].set_data(self.time_data, self.s_data)
             else:
                 ax1, ax2 = plt.gcf().get_axes()
-                # if self.get_plot() == Plots.WAVEFORM:
-                #     ax1.get_lines()[0].set_data(range(len(self.raw_adc_a_data)), self.raw_adc_a_data)
-                #     ax1.get_lines()[1].set_data(range(len(self.raw_adc_b_data)), self.raw_adc_b_data)
-                #     ax2.get_lines()[0].set_data(range(len(self.raw_adc_c_data)), self.raw_adc_c_data)
-                #     ax2.get_lines()[1].set_data(range(len(self.raw_adc_d_data)), self.raw_adc_d_data)
                 if self.get_plot() == Plots.POSITION:
                     ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
                     ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
@@ -520,6 +469,11 @@ class DataProcessor:
             plt.gcf().canvas.start_event_loop(0.5)
 
     def update_waveform(self):
+        """
+        Assuming the active plot is the waveform plot, this updates the plot in the same manner as update_calculations().
+        Note that this functionality is separated from update_calculations() since the calculations are not necessarily
+        updated at the same time as the waveform.
+        """
         if self.get_plot() == Plots.WAVEFORM:
             ax1, ax2 = plt.gcf().get_axes()
             ax1.get_lines()[0].set_data(range(len(self.raw_adc_a_data)), self.raw_adc_a_data)
@@ -538,7 +492,6 @@ class DataProcessor:
         Checks if there is enough data in the fast fifo for reading
         :return: True | False
         """
-
         self.samples_to_read = 16 * ((self.evt_len - self.bl_len - 4) // 16)
         with self.lock:
             samples_in_buf = self.IO.read_ffifo_wd(0)
@@ -567,10 +520,10 @@ class DataProcessor:
         x = TCP.s16(packet[3] >> 16)
         y = TCP.s16(packet[3] & 0xFFFF)
         s = TCP.s16(packet[4] >> 16)
-        PA = packet[5]
-        PB = packet[6]
-        PC = packet[7]
-        PD = packet[8]
+        PA = self.int_to_float(packet[5])
+        PB = self.int_to_float(packet[6])
+        PC = self.int_to_float(packet[7])
+        PD = self.int_to_float(packet[8])
 
         # add new data to old data
         self.time_data.append(self.current_time)
@@ -588,6 +541,9 @@ class DataProcessor:
         self.y_rms_data.append(y_rms)
 
     def read_waveform(self):
+        """
+        Read the fast fifos in the FPGA for waveform data
+        """
         with self.lock:
             waveform_AB = self.IO.read_waveform(self.ChAB, self.samples_to_read)
             waveform_CD = self.IO.read_waveform(self.ChCD, self.samples_to_read)
@@ -620,6 +576,9 @@ class DataProcessor:
         del self.y_rms_data[:]
 
     def close_plot(self):
+        """
+        Closes the plot window
+        """
         self.set_plot(Plots.NONE)
         plt.close('all')
 
@@ -627,15 +586,21 @@ class DataProcessor:
         return self.is_ctrl_gui_active
 
     def set_ctrl_gui_state(self, state):
+        """
+        :param state: True | False
+        """
         self.is_ctrl_gui_active = state
 
-    # Closes control window and any active plots
     def close_windows(self):
+        """
+        Closes control window and any active plots
+        """
         self.close_plot()
         self.set_ctrl_gui_state(False)
 
     def shutdown(self):
         self.close_windows()
         self.clear_data()
-        self.IO.destroy()
+        with self.lock:
+            self.IO.destroy()
         plt.ioff()

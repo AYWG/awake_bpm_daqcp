@@ -3,21 +3,18 @@
 import wx
 import string
 import Validator
-
+import Channels
 
 class CalGainPanel(wx.Panel):
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_cal_gain = wx.Button(self, wx.ID_ANY, 'Update')
-        self.lbl_cal_gain_a = wx.StaticText(self, wx.ID_ANY, 'CAL:GAIN:A')
-        self.txt_cal_gain_a = wx.TextCtrl(self, wx.ID_ANY, '')
-        self.lbl_cal_gain_b = wx.StaticText(self, wx.ID_ANY, 'CAL:GAIN:B')
-        self.txt_cal_gain_b = wx.TextCtrl(self, wx.ID_ANY, '')
-        self.lbl_cal_gain_c = wx.StaticText(self, wx.ID_ANY, 'CAL:GAIN:C')
-        self.txt_cal_gain_c = wx.TextCtrl(self, wx.ID_ANY, '')
-        self.lbl_cal_gain_d = wx.StaticText(self, wx.ID_ANY, 'CAL:GAIN:D')
-        self.txt_cal_gain_d = wx.TextCtrl(self, wx.ID_ANY, '')
+        self.lbl_cal_gain = []
+        self.txt_cal_gain = []
+        for i in range(4):
+            self.lbl_cal_gain.append(wx.StaticText(self, wx.ID_ANY, 'CAL:GAIN:' + Channels.channels[i]))
+            self.txt_cal_gain.append(wx.TextCtrl(self, wx.ID_ANY, ''))
 
         self.cal_gain_box = wx.StaticBox(self, wx.ID_ANY, title)
 
@@ -27,35 +24,19 @@ class CalGainPanel(wx.Panel):
         self.initialize_controls()
 
     def __set_properties(self):
-        self.txt_cal_gain_a.SetValidator(CalGainValidator())
-        self.txt_cal_gain_b.SetValidator(CalGainValidator())
-        self.txt_cal_gain_c.SetValidator(CalGainValidator())
-        self.txt_cal_gain_d.SetValidator(CalGainValidator())
+        for i in range(len(self.txt_cal_gain)): self.txt_cal_gain[i].SetValidator(CalGainValidator())
 
     def __do_layout(self):
         sizer_cal_gain_box = wx.StaticBoxSizer(self.cal_gain_box, wx.VERTICAL)
-
-        sizer_cal_gain_a = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_cal_gain_a.Add(self.lbl_cal_gain_a, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_cal_gain_a.Add(self.txt_cal_gain_a, 2, wx.EXPAND, 0)
-
-        sizer_cal_gain_b = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_cal_gain_b.Add(self.lbl_cal_gain_b, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_cal_gain_b.Add(self.txt_cal_gain_b, 2, wx.EXPAND, 0)
-
-        sizer_cal_gain_c = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_cal_gain_c.Add(self.lbl_cal_gain_c, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_cal_gain_c.Add(self.txt_cal_gain_c, 2, wx.EXPAND, 0)
-
-        sizer_cal_gain_d = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_cal_gain_d.Add(self.lbl_cal_gain_d, 1, wx.ALL | wx.ALIGN_CENTER, 4)
-        sizer_cal_gain_d.Add(self.txt_cal_gain_d, 2, wx.EXPAND, 0)
-
         sizer_cal_gain_box.Add(self.btn_update_cal_gain, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
-        sizer_cal_gain_box.Add(sizer_cal_gain_a, 0, wx.ALL | wx.EXPAND, 4)
-        sizer_cal_gain_box.Add(sizer_cal_gain_b, 0, wx.ALL | wx.EXPAND, 4)
-        sizer_cal_gain_box.Add(sizer_cal_gain_c, 0, wx.ALL | wx.EXPAND, 4)
-        sizer_cal_gain_box.Add(sizer_cal_gain_d, 0, wx.ALL | wx.EXPAND, 4)
+
+        sizer_cal_gain = []
+
+        for i in range(len(self.txt_cal_gain)):
+            sizer_cal_gain.append(wx.BoxSizer(wx.HORIZONTAL))
+            sizer_cal_gain[i].Add(self.lbl_cal_gain[i], 1, wx.ALL | wx.ALIGN_CENTER, 4)
+            sizer_cal_gain[i].Add(self.txt_cal_gain[i], 2, wx.EXPAND, 0)
+            sizer_cal_gain_box.Add(sizer_cal_gain[i], 0, wx.ALL | wx.EXPAND, 4)
 
         sizer_main = wx.BoxSizer(wx.HORIZONTAL)
         sizer_main.Add(sizer_cal_gain_box, 1, wx.EXPAND, 0)
@@ -68,38 +49,23 @@ class CalGainPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_cal_gain)
 
     def initialize_controls(self):
-        cal_gain_a = self.data_processor.int_to_float(self.data_processor.get_cal_gain_a())
-        cal_gain_b = self.data_processor.int_to_float(self.data_processor.get_cal_gain_b())
-        cal_gain_c = self.data_processor.int_to_float(self.data_processor.get_cal_gain_c())
-        cal_gain_d = self.data_processor.int_to_float(self.data_processor.get_cal_gain_d())
-        self.txt_cal_gain_a.SetValue(str(cal_gain_a))
-        self.txt_cal_gain_b.SetValue(str(cal_gain_b))
-        self.txt_cal_gain_c.SetValue(str(cal_gain_c))
-        self.txt_cal_gain_d.SetValue(str(cal_gain_d))
+        for i in range(len(self.txt_cal_gain)):
+            cal_gain = self.data_processor.int_to_float(self.data_processor.get_cal_gain(Channels.channels[i]))
+            self.txt_cal_gain[i].SetValue(str(cal_gain))
 
     def OnUpdate(self, event):
         if self.Validate():
-            # Everything is validated, so convert the inputs to floats
-            cal_gain_a = float(self.txt_cal_gain_a.GetValue())
-            cal_gain_b = float(self.txt_cal_gain_b.GetValue())
-            cal_gain_c = float(self.txt_cal_gain_c.GetValue())
-            cal_gain_d = float(self.txt_cal_gain_d.GetValue())
+            for i in range(len(self.txt_cal_gain)):
+                # Everything is validated, so convert the inputs to floats
+                cal_gain = float(self.txt_cal_gain[i].GetValue())
+                # We then need to convert the values to the IEEE 754 representation as integers
+                cal_gain = self.data_processor.float_to_int(cal_gain)
+                # Load the relevant data to the FPGA
+                self.data_processor.set_cal_gain(Channels.channels[i], cal_gain)
 
-            # We then need to convert the values to the IEEE 754 representation as integers
-            cal_gain_a = self.data_processor.float_to_int(cal_gain_a)
-            cal_gain_b = self.data_processor.float_to_int(cal_gain_b)
-            cal_gain_c = self.data_processor.float_to_int(cal_gain_c)
-            cal_gain_d = self.data_processor.float_to_int(cal_gain_d)
-
-            # First load the relevant data to the FPGA
-            self.data_processor.set_cal_gain_a(cal_gain_a)
-            self.data_processor.set_cal_gain_b(cal_gain_b)
-            self.data_processor.set_cal_gain_c(cal_gain_c)
-            self.data_processor.set_cal_gain_d(cal_gain_d)
-
-            # Then write to the flash buffer
+            # Finally, write to the flash buffer
             self.data_processor.wr_flash_buf()
-            wx.MessageBox("Cal Gain successfully updated", "Update Successful")
+            wx.MessageBox("Ch Gain successfully updated", "Success")
 
 
 class CalGainValidator(Validator.Validator):

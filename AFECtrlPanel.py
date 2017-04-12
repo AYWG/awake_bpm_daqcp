@@ -10,6 +10,7 @@ class AFECtrlPanel(wx.Panel):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_gain = wx.Button(self, wx.ID_ANY, 'Update')
+
         self.lbl_1_db_vga = wx.StaticText(self, wx.ID_ANY, '-1 dB')
         self.chk_1_db_vga = wx.CheckBox(self, wx.ID_ANY)
         self.lbl_2_db_vga = wx.StaticText(self, wx.ID_ANY, '-2 dB')

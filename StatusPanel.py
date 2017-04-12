@@ -1,17 +1,101 @@
-# Panel for showing what settings are currently enabled (akin to the LED indicators in the LabVIEW GUI
-# (Not required yet)
 import wx
-from LED import LED
+import LED
 
 class StatusPanel(wx.Panel):
-    def __init__(self, parent, title):
+    """
+    Panel for showing what settings are currently enabled (akin to the LED indicators in the LabVIEW GUI)
+    """
+
+    def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=title)
+        self.data_processor = data_processor
+        self.btn_update_status = wx.Button(self, wx.ID_ANY, 'Update')
+
+        self.lbl_mode_LEDs = wx.StaticText(self, wx.ID_ANY, 'MODE REGISTER')
+        self.lbl_afe_ctrl_LEDs = wx.StaticText(self, wx.ID_ANY, 'AFE CONTROL REGISTER')
+        self.lbl_status_LEDs = wx.StaticText(self, wx.ID_ANY, 'STATUS REGISTER')
+
+        # List of LEDs for Mode Register, AFE Control Register, and Status
+        self.mode_LEDs = []
+        self.afe_ctrl_LEDs = []
+        self.status_LEDs = []
+
+        for _ in range(16):
+            self.mode_LEDs.append(LED.LED(self))
+            self.afe_ctrl_LEDs.append(LED.LED(self))
+            self.status_LEDs.append(LED.LED(self))
+
+        self.status_box = wx.StaticBox(self, wx.ID_ANY, title)
 
         self.__set_properties()
         self.__do_layout()
+        self.__attach_events()
+        self.initialize_controls()
 
     def __set_properties(self):
         pass
 
     def __do_layout(self):
+        BOX_BORDER_WIDTH = 4
+
+        sizer_status_box = wx.StaticBoxSizer(self.status_box, wx.VERTICAL)
+
+        # MODE REGISTER
+        sizer_mode_LED_box = wx.BoxSizer(wx.HORIZONTAL)
+        mode_LED_sizers = []
+        for i in range(len(self.mode_LEDs)):
+            mode_LED_sizers.append(wx.BoxSizer(wx.VERTICAL))
+            mode_LED_sizers[i].Add(self.mode_LEDs[i], 1, wx.ALIGN_CENTER | wx.SHAPED, 0)
+            mode_LED_sizers[i].Add(wx.StaticText(self, wx.ID_ANY, str(i)), 1, wx.ALIGN_CENTER | wx.SHAPED, 0)
+            sizer_mode_LED_box.Add(mode_LED_sizers[i], 1, wx.EXPAND, 0)
+
+        sizer_mode_box = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_mode_box.Add(self.lbl_mode_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_mode_box.Add(sizer_mode_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+
+        # AFE CONTROL REGISTER
+        sizer_afe_ctrl_LED_box = wx.BoxSizer(wx.HORIZONTAL)
+        afe_ctrl_LED_sizers = []
+        for i in range(len(self.afe_ctrl_LEDs)):
+            afe_ctrl_LED_sizers.append(wx.BoxSizer(wx.VERTICAL))
+            afe_ctrl_LED_sizers[i].Add(self.afe_ctrl_LEDs[i], 1, wx.ALIGN_CENTER | wx.SHAPED, 0)
+            afe_ctrl_LED_sizers[i].Add(wx.StaticText(self, wx.ID_ANY, str(i)), 1, wx.ALIGN_CENTER | wx.SHAPED, 0)
+            sizer_afe_ctrl_LED_box.Add(afe_ctrl_LED_sizers[i], 1, wx.EXPAND, 0)
+
+        sizer_afe_ctrl_box = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_afe_ctrl_box.Add(self.lbl_afe_ctrl_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_afe_ctrl_box.Add(sizer_afe_ctrl_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+
+        # STATUS REGISTER
+        sizer_status_LED_box = wx.BoxSizer(wx.HORIZONTAL)
+        status_LED_sizers = []
+        for i in range(len(self.status_LEDs)):
+            status_LED_sizers.append(wx.BoxSizer(wx.VERTICAL))
+            status_LED_sizers[i].Add(self.status_LEDs[i], 1, wx.ALIGN_CENTER | wx.SHAPED, 0)
+            status_LED_sizers[i].Add(wx.StaticText(self, wx.ID_ANY, str(i)), 1, wx.ALIGN_CENTER | wx.SHAPED, 0)
+            sizer_status_LED_box.Add(status_LED_sizers[i], 1, wx.EXPAND, 0)
+
+        sizer_status_reg_box = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_status_reg_box.Add(self.lbl_status_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_status_reg_box.Add(sizer_status_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+
+        sizer_status_box.Add(self.btn_update_status, 1, wx.SHAPED | wx.ALIGN_CENTER, 0)
+        sizer_status_box.Add(sizer_mode_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_status_box.Add(sizer_afe_ctrl_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_status_box.Add(sizer_status_reg_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+
+        sizer_main = wx.BoxSizer(wx.VERTICAL)
+        sizer_main.Add(sizer_status_box, 0, wx.EXPAND, 0)
+
+        self.SetSizer(sizer_main)
+        self.SetAutoLayout(True)
+        sizer_main.Fit(self)
+
+    def __attach_events(self):
+        self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_status)
+
+    def initialize_controls(self):
+        pass
+
+    def OnUpdate(self):
         pass
