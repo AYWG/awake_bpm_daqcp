@@ -1,7 +1,6 @@
 # Top-level control window
 
 import wx
-import Modes
 import AddressPanel
 import AFECtrlPanel
 import CalGainPanel
@@ -10,9 +9,9 @@ import EventParamPanel
 import FlashReadWritePanel
 import ModePanel
 import OtherParamPanel
-import StatusPanel
 import threading
 import time
+
 
 class CtrlWindow(wx.Frame):
     def __init__(self, parent, title, data_processor):
@@ -35,7 +34,6 @@ class CtrlWindow(wx.Frame):
         self.mode_panel = ModePanel.ModePanel(parent=self, title='Mode Register', data_processor=data_processor)
         self.otherparam_panel = OtherParamPanel.OtherParamPanel(parent=self, title='Other Parameters',
                                                                 data_processor=data_processor)
-        # self.status_panel = StatusPanel.StatusPanel(parent=self, title='Status')
 
         self.__set_properties()
         self.__do_layout()
@@ -99,15 +97,16 @@ class CtrlWindow(wx.Frame):
 
         wx.MessageBox("Flash Read Successful - All Settings Updated", "Success")
 
-
     def check_for_close_signal(self):
+        """
+        Worker thread that checks
+        """
         while True:
             if self:
                 if not self.data_processor.get_ctrl_gui_state():
                     wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
                     break
                 time.sleep(0.5)
-
 
     def OnClose(self, event):
         self.data_processor.set_ctrl_gui_state(False)

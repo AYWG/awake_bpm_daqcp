@@ -1,4 +1,5 @@
 # By SL, Sept.2,2016
+# Modifications by AW, Apr, 2017
 # this module to be imported into main progarm
 # TCP: Ethernet communication 
 
@@ -68,8 +69,12 @@ class TCP(object):
         return recv_msg
 
     def read_buffer(self, com):  # read back 16 words (Unsigned 32bit) from hardware, 16 is defined in MB firmware
-        if self.s.sendall(com + '\r\n') != None:
-            print "\nTCP_Error: sending command failed !", com
+        try:
+            if self.s.sendall(com + '\r\n') != None:
+                print "\nTCP_Error: sending command failed !", com
+                return False
+        except socket.error:
+            print "TCP_Error: socket closed!"
             return False
         try:
             recv_msg = self.s.recv(1024)
@@ -91,8 +96,12 @@ class TCP(object):
             msg = 'ABFIFO:WD?\r\n'
         else:
             msg = 'CDFIFO:WD?\r\n'
-        if self.s.sendall(msg) != None:
-            print "\nTCP_Error: sending command failed !"
+        try:
+            if self.s.sendall(msg) != None:
+                print "\nTCP_Error: sending command failed !"
+                return False
+        except socket.error:
+            print "TCP_Error: socket closed!"
             return False
         try:
             recv_msg = self.s.recv(64)
@@ -104,8 +113,12 @@ class TCP(object):
 
     def read_sfifo_wd(self):  # read back fast fifo occupancy
         msg = 'SFIFO:WD?\r\n'
-        if self.s.sendall(msg) != None:
-            print "\nTCP_Error: sending command failed !"
+        try:
+            if self.s.sendall(msg) != None:
+                print "\nTCP_Error: sending command failed !"
+                return False
+        except socket.error:
+            print "TCP_Error: socket closed!"
             return False
         try:
             recv_msg = self.s.recv(64)

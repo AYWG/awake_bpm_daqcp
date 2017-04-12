@@ -1,9 +1,11 @@
-# Panel for reading and writing to flash memory on the FPGA
-
 import wx
 
 
 class FlashReadWritePanel(wx.Panel):
+    """
+    Panel for reading and writing to flash memory on the FPGA
+    """
+
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
@@ -18,6 +20,7 @@ class FlashReadWritePanel(wx.Panel):
         self.__initialize_controls()
 
     def __set_properties(self):
+        # no special properties
         pass
 
     def __do_layout(self):
@@ -38,10 +41,13 @@ class FlashReadWritePanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnWrite, self.btn_flash_wr)
 
     def __initialize_controls(self):
+        # no initial control values (there're only 2 buttons)
         pass
 
     def OnRead(self, event):
         self.data_processor.rd_flash()
+        # We pass the event to the parent frame (CtrlWindow) so that it can update all the
+        # controls with data from the flash
         event.Skip()
 
     def OnWrite(self, event):

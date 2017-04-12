@@ -90,8 +90,8 @@ def data_collector(data_processor, command_queue, lock):
 def is_thread_active(name):
     """
     Checks if there's a thread that's alive and has the given name
-    :param name:
-    :return:
+    :param name: name of thread to search for
+    :return: True | False
     """
     for t in threading.enumerate():
         if t.name == name:
@@ -218,6 +218,7 @@ if __name__ == '__main__':
     host = "192.168.13."
     port = 23
 
+    # Get the IP address of the connected BPM
     try:
         IP = int(raw_input('Enter DSP IP address (last number 2 ~ 254):'))
         if (IP > 255) or (IP < 2) is True:
@@ -229,6 +230,7 @@ if __name__ == '__main__':
     host += str(IP)
     print "The DSP IP address is: ", host
 
+    # Need a synchronized queue to process commands from the user (as well as some internal commands)
     command_queue = multiprocessing.Queue()
     p = multiprocessing.Process(target=process_data, args=(host, port, command_queue))
     p.start()
@@ -236,6 +238,7 @@ if __name__ == '__main__':
     # Give time for other process to do its initial config
     time.sleep(1)
 
+    # Continuously ask for user input until termination
     while True:
         try:
             print """
@@ -266,5 +269,6 @@ if __name__ == '__main__':
             break
 
     # -- end of while loop------------------------------------
+    # Wait until other process finishes
     p.join()
 # ---- end of main --------------------------------------------------

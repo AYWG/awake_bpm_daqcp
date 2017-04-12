@@ -24,9 +24,15 @@ class Validator(wx.PyValidator):
         pass
 
     def TransferToWindow(self):
+        """
+        Don't really need to worry about this
+        """
         return True
 
     def TransferFromWindow(self):
+        """
+        Don't really need to worry about this
+        """
         return True
 
     def OnChar(self, event):

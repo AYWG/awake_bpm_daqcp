@@ -112,7 +112,6 @@ class AddressPanel(wx.Panel):
     def _format_mac_address(self):
         """
         Formats the values currently in the MAC address text boxes to be 2-character hex strings.
-        :return:
         """
         mac_address = []
 

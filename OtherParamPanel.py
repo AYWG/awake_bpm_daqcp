@@ -21,7 +21,6 @@ class OtherParamPanel(wx.Panel):
         self.initialize_controls()
 
     def __set_properties(self):
-        # self.SetExtraStyle(wx.WS_EX_VALIDATE_RECURSIVELY)
         self.txt_bpm_dia.SetValidator(OtherParamValidator())
 
     def __do_layout(self):

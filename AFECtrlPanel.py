@@ -1,9 +1,11 @@
-# Panel for controlling the amount of front-end attenuation
-
 import wx
 
 
 class AFECtrlPanel(wx.Panel):
+    """
+    Panel for controlling the amount of front-end attenuation
+    """
+
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
@@ -40,6 +42,7 @@ class AFECtrlPanel(wx.Panel):
         self.initialize_controls()
 
     def __set_properties(self):
+        # no special properties
         pass
 
     def __do_layout(self):
@@ -107,11 +110,6 @@ class AFECtrlPanel(wx.Panel):
 
         sizer_afe_ctrl_box.Add(self.btn_update_gain, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_afe_ctrl_box.Add(sizer_afe, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_1_db, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_2_db, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_4_db, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_8_db, 0, wx.ALL | wx.EXPAND, 4)
-        # sizer_afe_ctrl_box.Add(sizer_16_db, 0, wx.ALL | wx.EXPAND, 4)
 
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_main.Add(sizer_afe_ctrl_box, 0, wx.EXPAND, 0)
@@ -124,40 +122,48 @@ class AFECtrlPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_gain)
 
     def initialize_controls(self):
+        """
+        Initialize the AFE Control Register with values from the FPGA
+        """
         gain = self.data_processor.get_afe_gain()
 
-        if (gain - 8192 >= 0):
+        if gain - 8192 >= 0:
             gain -= 8192
             self.chk_16_db_digi.SetValue(True)
-        if (gain - 4096 >= 0):
+        if gain - 4096 >= 0:
             gain -= 4096
             self.chk_8_db_digi.SetValue(True)
-        if (gain - 2048 >= 0):
+        if gain - 2048 >= 0:
             gain -= 2048
             self.chk_4_db_digi.SetValue(True)
-        if (gain - 1024 >= 0):
+        if gain - 1024 >= 0:
             gain -= 1024
             self.chk_2_db_digi.SetValue(True)
-        if (gain - 512 >= 0):
+        if gain - 512 >= 0:
             gain -= 512
             self.chk_1_db_digi.SetValue(True)
-        if (gain - 16 >= 0):
+        if gain - 16 >= 0:
             gain -= 16
             self.chk_16_db_vga.SetValue(True)
-        if (gain - 8 >= 0):
+        if gain - 8 >= 0:
             gain -= 8
             self.chk_8_db_vga.SetValue(True)
-        if (gain - 4 >= 0):
+        if gain - 4 >= 0:
             gain -= 4
             self.chk_4_db_vga.SetValue(True)
-        if (gain - 2 >= 0):
+        if gain - 2 >= 0:
             gain -= 2
             self.chk_2_db_vga.SetValue(True)
-        if (gain - 1 >= 0):
+        if gain - 1 >= 0:
             gain -= 1
             self.chk_1_db_vga.SetValue(True)
 
     def OnUpdate(self, event):
+        """
+        When update button is clicked, the total gain represented by the checkboxes is written to the
+        appropriate FPGA register as well as the flash buffer.
+        """
+        # Each check box corresponds to a certain value that needs to be written to the FPGA's register
         gain = 0
         if self.chk_1_db_vga.GetValue():
             gain += 1
@@ -183,4 +189,4 @@ class AFECtrlPanel(wx.Panel):
         self.data_processor.set_afe_gain(gain)
         self.data_processor.wr_flash_buf()
 
-        wx.MessageBox("AFE Gain successfully updated", "Update Successful")
+        wx.MessageBox("AFE Gain successfully updated", "Success")

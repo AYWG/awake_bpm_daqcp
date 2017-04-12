@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import Modes
 import Plots
 import threading
+import warnings
+
+warnings.filterwarnings("ignore") # For suppressing a deprecating warning
 
 
 class DataProcessor:
@@ -38,9 +41,9 @@ class DataProcessor:
 
         # self.MODE_TEMP = 0x0020  # mode reg bit = Ena temperature reading                       0000 0000 0010 0000
 
-        self.mode = 0x101 # mode reg bit = RUN + External trigger + BLR readout
+        self.mode = 0x101  # mode reg bit = RUN + External trigger + BLR readout
 
-        self.gain = 0x1F # 31 dB attenuation
+        self.gain = 0x1F  # 31 dB attenuation
 
         self.ChAB = 0
         self.ChCD = 1
@@ -62,6 +65,7 @@ class DataProcessor:
         self.x_rms_data = []
         self.y_rms_data = []
 
+        # Averages are displayed in the plots as strings
         self.power_a_avg = ''
         self.power_b_avg = ''
         self.power_c_avg = ''
@@ -76,6 +80,7 @@ class DataProcessor:
         self.IO = TCP.TCP(host, port)
         self.PACKET_ID = 0x4142504D
 
+        # We need a lock for the ethernet communication
         self.lock = threading.Lock()
 
         # Initial mode of operation is PAUSED
@@ -279,7 +284,6 @@ class DataProcessor:
             # print 'new data in fpga'
             time.sleep(0.1)
 
-
     def wr_flash(self):
         with self.lock:
             if self.IO.write_reg('FLASH:WRIT', 0) is False: sys.exit()  # the 0 is arbitrary
@@ -308,8 +312,8 @@ class DataProcessor:
         Returns the integer representation of the IEEE 754 format of the given python
         floating point value.
         For example, 1.0 returns 1065353216
-        :param f:
-        :return:
+        :param f: Python float
+        :return: IEEE 754 formatted integer
         """
         import struct
         return struct.unpack('<i', struct.pack('<f', f))[0]
@@ -317,8 +321,8 @@ class DataProcessor:
     def int_to_float(self, i):
         """
         Returns the python floating point representation of the IEEE 754 format integer
-        :param i:
-        :return:
+        :param i: IEEE 754 formatted integer
+        :return: Python float
         """
         import struct
         return struct.unpack('<f', struct.pack('<i', i))[0]
@@ -342,15 +346,29 @@ class DataProcessor:
             return round(sum / len(data_buffer))
 
     def set_op_mode(self, op_mode):
+        """
+        Sets the current operation mode, which represents whether data is being collected or not
+        :param op_mode: The new operation mode (PAUSED or RUNNING)
+        :return:
+        """
         self.op_mode = op_mode
 
     def get_op_mode(self):
+        """
+        :return: The current operation mode
+        """
         return self.op_mode
 
     def set_plot(self, plot):
+        """
+        :param plot: The new active plot.
+        """
         self.plot = plot
 
     def get_plot(self):
+        """
+        :return: The current active plot.
+        """
         return self.plot
 
     def setup_plot(self, plot):
@@ -378,9 +396,13 @@ class DataProcessor:
             else:
                 ax1 = fig.add_subplot(211)
                 ax2 = fig.add_subplot(212)
-                # Disables scientific notation for tick labels
-                # ax1.get_yaxis().get_major_formatter().set_scientific(False)
-                # ax2.get_yaxis().get_major_formatter().set_scientific(False)
+                y_formatter = matplotlib.ticker.ScalarFormatter(useOffset=False)
+                ax1.yaxis.set_major_formatter(y_formatter)
+                ax2.yaxis.set_major_formatter(y_formatter)
+
+                # Disable scientific notation (set to True if need enabled)
+                ax1.get_yaxis().get_major_formatter().set_scientific(False)
+                ax2.get_yaxis().get_major_formatter().set_scientific(False)
                 if plot == Plots.WAVEFORM:
                     ax1.set_title('ADC 16 bit data RAW or after BLR/Gain Cor.')
                     ax1.set_ylabel('ADC output 16 bit')
@@ -392,29 +414,35 @@ class DataProcessor:
 
                 elif plot == Plots.POSITION:
                     ax1.set_title('Position and Res. RMS')
-                    ax1.set_ylabel('X/Y position (um)')
-                    ax2.set_ylabel('X/Y res. rms (um)')
+                    ax1.set_ylabel('X/Y position (um)', labelpad=10)
+                    ax2.set_ylabel('X/Y res. rms (um)', labelpad=10)
                     ax1.plot(self.time_data, self.x_pos_data, 'b-', label='X pos')
                     ax1.plot(self.time_data, self.y_pos_data, 'r-', label='Y pos')
                     ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
                     ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
+
                     # Display running average
+
+                    # Label
                     ax1.text(1.02, 0.2, 'X Avg:', transform=ax1.transAxes, fontsize=8)
+                    # We need to save this as an attribute so it can be referenced in update_plot()
                     self.x_pos_avg = ax1.text(1.1, 0.2, str(self.get_average(self.x_pos_data)),
-                                                                        transform=ax1.transAxes, fontsize=8)
+                                              transform=ax1.transAxes, fontsize=8)
 
                     ax1.text(1.02, 0.1, 'Y Avg:', transform=ax1.transAxes, fontsize=8)
                     self.y_pos_avg = ax1.text(1.1, 0.1, str(self.get_average(self.y_pos_data)),
                                               transform=ax1.transAxes, fontsize=8)
                 elif plot == Plots.POWER:
                     ax1.set_title('Power')
-                    ax1.set_ylabel('Power AB')
-                    ax2.set_ylabel('Power CD')
+                    ax1.set_ylabel('Power AB', labelpad=10)
+                    ax2.set_ylabel('Power CD', labelpad=10)
                     ax1.plot(self.time_data, self.power_a_data, 'b-', label='A')
                     ax1.plot(self.time_data, self.power_b_data, 'r-', label='B')
                     ax2.plot(self.time_data, self.power_c_data, 'b-', label='C')
                     ax2.plot(self.time_data, self.power_d_data, 'r-', label='D')
+
                     # Display running average
+
                     ax1.text(1.02, 0.2, 'A Avg:', transform=ax1.transAxes, fontsize=8)
                     self.power_a_avg = ax1.text(1.1, 0.2, str(self.get_average(self.power_a_data)),
                                                 transform=ax1.transAxes, fontsize=8)
@@ -428,10 +456,9 @@ class DataProcessor:
                     self.power_d_avg = ax2.text(1.1, 0.1, str(self.get_average(self.power_d_data)),
                                                 transform=ax2.transAxes, fontsize=8)
 
-                # Add a legend to distinguish plots on the same axes
                 box1 = ax1.get_position()
                 box2 = ax2.get_position()
-                # Shrink current axis's width by 10% on the right
+                # Shrink current axis's width by 10% on the right so we can fit a legend there
                 ax1.set_position([box1.x0, box1.y0, box1.width * 0.9, box1.height])
                 ax2.set_position([box2.x0, box2.y0, box2.width * 0.9, box2.height])
                 ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5))

@@ -10,7 +10,6 @@ class EventParamPanel(wx.Panel):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_evt_param = wx.Button(self, wx.ID_ANY, 'Update')
-        # self.btn_test = wx.Button(self, wx.ID_ANY, 'Test')
         self.lbl_trig_th = wx.StaticText(self, wx.ID_ANY, 'TRIG:TH')
         self.txt_trig_th = wx.TextCtrl(self, wx.ID_ANY, '')
         self.lbl_trig_dt = wx.StaticText(self, wx.ID_ANY, 'TRIG:DT')
@@ -32,6 +31,7 @@ class EventParamPanel(wx.Panel):
         self.initialize_controls()
 
     def __set_properties(self):
+        # Associate the validator with each input
         self.txt_trig_th.SetValidator(EventParamValidator())
         self.txt_trig_dt.SetValidator(EventParamValidator())
         self.txt_trig_dl.SetValidator(EventParamValidator())
@@ -67,7 +67,6 @@ class EventParamPanel(wx.Panel):
         sizer_bl_len.Add(self.txt_bl_len, 2, wx.EXPAND)
 
         sizer_event_param_box.Add(self.btn_update_evt_param, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
-        # sizer_event_param_box.Add(self.btn_test, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_event_param_box.Add(sizer_trig_th, 0, wx.ALL | wx.EXPAND, 4)
         sizer_event_param_box.Add(sizer_trig_dt, 0, wx.ALL | wx.EXPAND, 4)
         sizer_event_param_box.Add(sizer_trig_dl, 0, wx.ALL | wx.EXPAND, 4)
@@ -84,11 +83,8 @@ class EventParamPanel(wx.Panel):
 
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_evt_param)
-        # self.Bind(wx.EVT_BUTTON, self.OnTest, self.btn_test)
 
     def initialize_controls(self):
-        # self.txt_trig_th.SetValue('300')
-        # print 'trig th: ', self.data_processor.get_trig_th()
         self.txt_trig_th.SetValue(str(self.data_processor.get_trig_th()))
         self.txt_trig_dt.SetValue(str(self.data_processor.get_trig_dt()))
         self.txt_trig_dl.SetValue(str(self.data_processor.get_trig_dl()))
