@@ -1,6 +1,11 @@
 import wx
 import LED
 
+# LED states
+OFF = 0
+ON = 1
+
+
 class StatusPanel(wx.Panel):
     """
     Panel for showing what settings are currently enabled (akin to the LED indicators in the LabVIEW GUI)
@@ -95,7 +100,80 @@ class StatusPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_status)
 
     def initialize_controls(self):
-        pass
+        # Read Mode, AFE Control, and Status Registers
+        self._clear_LEDs()
+        self._update_mode_LEDs()
+        self._update_afe_ctrl_LEDs()
+        self._update_status_LEDs()
 
-    def OnUpdate(self):
-        pass
+    def _clear_LEDs(self):
+        for i in range(len(self.mode_LEDs)):
+            self.mode_LEDs[i].SetState(OFF)
+            self.afe_ctrl_LEDs[i].SetState(OFF)
+            self.status_LEDs[i].SetState(OFF)
+
+    def _update_mode_LEDs(self):
+        mode = self.data_processor.get_mode()
+
+        # On Fly Cal.
+        if mode - 0x4000 >= 0:
+            mode -= 0x4000
+            self.mode_LEDs[14].SetState(ON)
+        # AFE Cal.
+        if mode - 0x2000 >= 0:
+            mode -= 0x2000
+            self.mode_LEDs[13].SetState(ON)
+        # Bypass BLR
+        if mode - 0x200 >= 0:
+            mode -= 0x200
+            self.mode_LEDs[9].SetState(ON)
+        # BLR Readout
+        if mode - 0x100 >= 0:
+            mode -= 0x100
+            self.mode_LEDs[8].SetState(ON)
+        # Ena Temp Reading
+        if mode - 0x20 >= 0:
+            mode -= 0x20
+            self.mode_LEDs[5].SetState(ON)
+        # Ena Trig Output
+        if mode - 0x18 >= 0:
+            mode -= 0x18
+            self.mode_LEDs[4].SetState(ON)
+            self.mode_LEDs[3].SetState(ON)
+        # Internal Trig
+        if mode - 0x4 >= 0:
+            mode -= 0x4
+            self.mode_LEDs[2].SetState(ON)
+        # Self Trig
+        if mode - 0x2 >= 0:
+            mode -= 0x2
+            self.mode_LEDs[1].SetState(ON)
+        # Run
+        if mode - 0x1 >= 0:
+            mode -= 0x1
+            self.mode_LEDs[0].SetState(ON)
+
+    def _update_afe_ctrl_LEDs(self):
+        gain = self.data_processor.get_afe_gain()
+
+        for i in range(13, 8, -1):
+            if gain - (1 << i) >= 0:
+                gain -= 1 << i
+                self.afe_ctrl_LEDs[i].SetState(ON)
+
+        for i in range(4, -1, -1):
+            if gain - (1 << i) >= 0:
+                gain -= 1 << i
+                self.afe_ctrl_LEDs[i].SetState(ON)
+
+    def _update_status_LEDs(self):
+        status = self.data_processor.get_status()
+
+        for i in range(len(self.status_LEDs), -1, -1):
+            if status - (1 << i) >= 0:
+                status -= 1 << i
+                self.status_LEDs[i].SetState(ON)
+
+    def OnUpdate(self, event):
+        self.initialize_controls()
+        wx.MessageBox("Status successfully updated", "Success")

@@ -144,10 +144,6 @@ class ModePanel(wx.Panel):
             mode -= 0x1
             self.chk_run.SetValue(True)
 
-        self.chk_ext_trig.SetValue(True)
-        self.chk_raw_adc_rd.SetValue(True)
-
-
     def OnUpdate(self, event):
         mode = 0x0
 
@@ -157,9 +153,11 @@ class ModePanel(wx.Panel):
             mode += 0x1
         if self.chk_ext_trig.GetValue():
             mode += 0x0
-        if self.chk_self_trig.GetValue():
+        # Same logic as in LabVIEW (I'm not entirely sure why this is)
+        if self.chk_self_trig.GetValue() and not self.chk_ext_trig.GetValue():
             mode += 0x2
-        if self.chk_int_trig.GetValue():
+        # Same logic as in LabVIEW (I'm not entirely sure why this is)
+        if self.chk_int_trig.GetValue() and not self.chk_ext_trig.GetValue():
             mode += 0x4
         if self.chk_ena_trig_out.GetValue():
             mode += 0x18
@@ -178,4 +176,4 @@ class ModePanel(wx.Panel):
 
         self.data_processor.set_mode(mode)
 
-        wx.MessageBox("Mode successfully updated", "Update Successful")
+        wx.MessageBox("Mode successfully updated", "Success")

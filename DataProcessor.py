@@ -258,6 +258,10 @@ class DataProcessor:
             if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()
         time.sleep(0.1)
 
+    def get_status(self):
+        with self.lock:
+            return self.IO.read_reg('STS?')
+
     def float_to_int(self, f):
         """
         Returns the integer representation of the IEEE 754 format of the given python
