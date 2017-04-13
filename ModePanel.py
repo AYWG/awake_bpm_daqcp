@@ -46,6 +46,8 @@ class ModePanel(wx.Panel):
         BOX_BORDER_WIDTH = 4
         sizer_mode_box = wx.StaticBoxSizer(self.mode_box, wx.VERTICAL)
 
+        # Need a sizer for each mode, consisting of a label and a check box
+
         sizer_run = wx.BoxSizer(wx.HORIZONTAL)
         sizer_run.Add(self.lbl_run, 1, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
         sizer_run.Add(self.chk_run, 0, ((wx.LEFT | wx.RIGHT) | wx.wx.ALIGN_TOP), SIZER_BORDER_WIDTH)
@@ -90,6 +92,7 @@ class ModePanel(wx.Panel):
         sizer_onfly_cal.Add(self.lbl_onfly_cal, 1, ((wx.LEFT | wx.RIGHT) | wx.EXPAND), SIZER_BORDER_WIDTH)
         sizer_onfly_cal.Add(self.chk_onfly_cal, 0, ((wx.LEFT | wx.RIGHT) | wx.ALIGN_TOP), SIZER_BORDER_WIDTH)
 
+        # Combine update button and sizers for each mode into one vertical sizer
         sizer_mode_box.Add(self.btn_update_mode, 1, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_mode_box.Add(sizer_run, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
         sizer_mode_box.Add(sizer_ext_trig, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)

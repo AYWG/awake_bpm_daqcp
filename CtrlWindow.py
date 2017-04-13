@@ -10,6 +10,8 @@ import FlashReadWritePanel
 import ModePanel
 import OtherParamPanel
 import StatusPanel
+import FIFOOccupancyPanel
+import EventNumPanel
 import threading
 import time
 
@@ -36,12 +38,14 @@ class CtrlWindow(wx.Frame):
         self.otherparam_panel = OtherParamPanel.OtherParamPanel(parent=self, title='Other Parameters',
                                                                 data_processor=data_processor)
         self.status_panel = StatusPanel.StatusPanel(parent=self, title='Status', data_processor=data_processor)
+        self.fifo_occupancy_panel = FIFOOccupancyPanel.FIFOOccupancyPanel(parent=self, title='FIFO Occupancy', data_processor=data_processor)
+        self.event_num_panel = EventNumPanel.EventNumPanel(parent=self, title='Event #', data_processor=data_processor)
 
         self.__set_properties()
         self.__do_layout()
 
         self.__attach_events()
-        self.t = threading.Thread(target=self.check_for_close_signal)
+        self.t = threading.Thread(target=self._check_for_close_signal)
         self.t.start()
 
     def __set_properties(self):
@@ -56,8 +60,13 @@ class CtrlWindow(wx.Frame):
         sizer_btm_row.Add(self.calgain_panel, 1, wx.EXPAND | wx.ALL, 0)
         sizer_btm_row.Add(self.otherparam_panel, 1, wx.EXPAND | wx.ALL, 0)
 
+        sizer_mid_right_top = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_mid_right_top.Add(self.flashrdwr_panel, 0, wx.EXPAND, 0)
+        sizer_mid_right_top.Add(self.fifo_occupancy_panel, 0, wx.EXPAND, 0)
+        sizer_mid_right_top.Add(self.event_num_panel, 1, wx.EXPAND, 0)
+
         sizer_mid_right = wx.BoxSizer(wx.VERTICAL)
-        sizer_mid_right.Add(self.flashrdwr_panel, 0, wx.EXPAND | wx.ALL, 4)
+        sizer_mid_right.Add(sizer_mid_right_top, 0, wx.EXPAND | wx.ALL, 4)
         sizer_mid_right.Add(self.afectrl_panel, 1, wx.EXPAND | wx.ALL, 4)
         sizer_mid_right.Add(self.address_panel, 0, wx.EXPAND | wx.ALL, 4)
 
@@ -86,7 +95,6 @@ class CtrlWindow(wx.Frame):
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.update_controls)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        # self.Bind(wx.EVT_TIMER, self.check_for_close_signal)
 
     def update_controls(self, event):
         self.address_panel.initialize_controls()
@@ -100,7 +108,7 @@ class CtrlWindow(wx.Frame):
 
         wx.MessageBox("Flash Read Successful - All Settings Updated", "Success")
 
-    def check_for_close_signal(self):
+    def _check_for_close_signal(self):
         """
         Worker thread that checks if the GUI should still be open
         """

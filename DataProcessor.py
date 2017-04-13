@@ -10,7 +10,7 @@ import Plots
 import threading
 import warnings
 
-warnings.filterwarnings("ignore") # For suppressing a deprecating warning
+warnings.filterwarnings("ignore")  # For suppressing a deprecating warning
 
 
 class DataProcessor:
@@ -75,13 +75,20 @@ class DataProcessor:
         self.y_pos_avg = ''
 
         self.samples_to_read = 0
+        self.evt_num = 0
+        self.ffifo_ab_words = 0
+        self.ffifo_cd_words = 0
+        self.sfifo_words = 0
 
         # ethernet communication
         self.IO = TCP.TCP(host, port)
         self.PACKET_ID = 0x4142504D
 
         # We need a lock for the ethernet communication
-        self.lock = threading.Lock()
+        self.eth_lock = threading.Lock()
+
+        # We need a lock for managing collected data
+        self.data_lock = threading.Lock()
 
         # Initial mode of operation is PAUSED
         self.op_mode = Modes.PAUSED
@@ -95,7 +102,7 @@ class DataProcessor:
         plt.ion()
 
     def init_config(self):
-        with self.lock:
+        with self.eth_lock:
             print self.IO.read_MBver()
 
             if self.IO.write_reg('BPM:DIA', self.bpm_dia) is False: sys.exit()
@@ -117,112 +124,135 @@ class DataProcessor:
             if self.IO.write_reg('CR', self.mode) is False: sys.exit()
             time.sleep(0.1)
 
+    def get_ffifo_words(self, channels):
+        with self.eth_lock:
+            return self.IO.read_ffifo_wd(channels)
+
+    def get_sfifo_words(self):
+        with self.eth_lock:
+            return self.IO.read_sfifo_wd()
+
+    def get_ffifo_words_cached(self, channels):
+        with self.data_lock:
+            if channels == self.ChAB:
+                return self.ffifo_ab_words
+            elif channels == self.ChCD:
+                return self.ffifo_cd_words
+
+    def get_sfifo_words_cached(self):
+        with self.data_lock:
+            return self.sfifo_words
+
+    def get_evt_num_cached(self):
+        with self.data_lock:
+            return self.evt_num
+
     def get_mode(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('CR?')
 
     def set_mode(self, mode):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('CR', mode) is False: sys.exit()
         time.sleep(0.1)
 
     def get_afe_gain(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('AFE:CTRL?')
 
     def set_afe_gain(self, gain):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('AFE:CTRL', gain) is False: sys.exit()
         time.sleep(0.1)
 
     def get_bl_len(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('BL:LEN?')
 
     def set_bl_len(self, bl_len):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('BL:LEN', bl_len) is False: sys.exit()
         time.sleep(0.1)
 
     def get_evt_len(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('EVT:LEN?')
 
     def set_evt_len(self, evt_len):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('EVT:LEN', evt_len) is False: sys.exit()
         time.sleep(0.1)
 
     def get_evt_tail(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('EVT:TAIL?')
 
     def set_evt_tail(self, evt_tail):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('EVT:TAIL', evt_tail) is False: sys.exit()
         time.sleep(0.1)
 
     def get_trig_th(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('TRIG:TH?')
 
     def set_trig_th(self, trig_th):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('TRIG:TH', trig_th) is False: sys.exit()
         time.sleep(0.1)
 
     def get_trig_dt(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('TRIG:DT?')
 
     def set_trig_dt(self, trig_dt):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('TRIG:DT', trig_dt) is False: sys.exit()
         time.sleep(0.1)
 
     def get_trig_dl(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('TRIG:DL?')
 
     def set_trig_dl(self, trig_dl):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('TRIG:DL', trig_dl) is False: sys.exit()
         time.sleep(0.1)
 
     def get_bpm_dia(self):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('BPM:DIA?')
 
     def set_bpm_dia(self, bpm_dia):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('BPM:DIA', bpm_dia) is False: sys.exit()
         time.sleep(0.1)
 
     def get_cal_gain(self, channel):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('CAL:GAIN:' + channel + '?')
 
     def set_cal_gain(self, channel, cal_gain):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('CAL:GAIN:' + channel, cal_gain) is False: sys.exit()
         time.sleep(0.1)
 
     def get_ch_gain(self, channel):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('CH:GAIN:' + channel + '?')
 
     def set_ch_gain(self, channel, ch_gain):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('CH:GAIN:' + channel, ch_gain) is False: sys.exit()
         time.sleep(0.1)
 
     def wr_flash_buf(self):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
         time.sleep(0.1)
 
     def rd_flash(self):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('FLASH:READ', 0) is False: sys.exit()  # the 0 is arbitrary
             # print 'new data in flash buf'
             time.sleep(0.1)
@@ -231,16 +261,16 @@ class DataProcessor:
         time.sleep(0.1)
 
     def wr_flash(self):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('FLASH:WRIT', 0) is False: sys.exit()  # the 0 is arbitrary
         time.sleep(0.1)
 
     def get_mac_address(self, index):
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('FL:BUF:MAC:' + str(index) + '?')
 
     def set_mac_address(self, index, value):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('FL:BUF:MAC:' + str(index), value) is False: sys.exit()
         time.sleep(0.1)
 
@@ -250,16 +280,19 @@ class DataProcessor:
         :param index:
         :return:
         """
-        with self.lock:
+        with self.eth_lock:
             return self.IO.read_reg('FL:BUF:IP:' + str(index) + '?')
 
     def set_ip_address(self, index, value):
-        with self.lock:
+        with self.eth_lock:
             if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()
         time.sleep(0.1)
 
     def get_status(self):
-        with self.lock:
+        """
+        :return: the value of the status register in the FPGA
+        """
+        with self.eth_lock:
             return self.IO.read_reg('STS?')
 
     def float_to_int(self, f):
@@ -347,7 +380,8 @@ class DataProcessor:
                 ax.set_ylabel('S Intensity', labelpad=10)
                 ax.set_xlabel('Time (s)')
                 # ax.tick_params(axis='both', which='major', pad=15)
-                ax.plot(self.time_data, self.s_data)
+                with self.data_lock:
+                    ax.plot(self.time_data, self.s_data)
             else:
                 ax1 = fig.add_subplot(211)
                 ax2 = fig.add_subplot(212)
@@ -358,58 +392,59 @@ class DataProcessor:
                 # Disable scientific notation (set to True if need enabled)
                 ax1.get_yaxis().get_major_formatter().set_scientific(False)
                 ax2.get_yaxis().get_major_formatter().set_scientific(False)
-                if plot == Plots.WAVEFORM:
-                    ax1.set_title('ADC 16 bit data RAW or after BLR/Gain Cor.')
-                    ax1.set_ylabel('ADC output 16 bit')
-                    ax2.set_ylabel('ADC output 16 bit')
-                    ax1.plot(range(len(self.raw_adc_a_data)), self.raw_adc_a_data, 'b-', label='A')
-                    ax1.plot(range(len(self.raw_adc_b_data)), self.raw_adc_b_data, 'r-', label='B')
-                    ax2.plot(range(len(self.raw_adc_c_data)), self.raw_adc_c_data, 'b-', label='C')
-                    ax2.plot(range(len(self.raw_adc_d_data)), self.raw_adc_d_data, 'r-', label='D')
+                with self.data_lock:
+                    if plot == Plots.WAVEFORM:
+                        ax1.set_title('ADC 16 bit data RAW or after BLR/Gain Cor.')
+                        ax1.set_ylabel('ADC output 16 bit')
+                        ax2.set_ylabel('ADC output 16 bit')
+                        ax1.plot(range(len(self.raw_adc_a_data)), self.raw_adc_a_data, 'b-', label='A')
+                        ax1.plot(range(len(self.raw_adc_b_data)), self.raw_adc_b_data, 'r-', label='B')
+                        ax2.plot(range(len(self.raw_adc_c_data)), self.raw_adc_c_data, 'b-', label='C')
+                        ax2.plot(range(len(self.raw_adc_d_data)), self.raw_adc_d_data, 'r-', label='D')
 
-                elif plot == Plots.POSITION:
-                    ax1.set_title('Position and Res. RMS')
-                    ax1.set_ylabel('X/Y position (um)', labelpad=10)
-                    ax2.set_ylabel('X/Y res. rms (um)', labelpad=10)
-                    ax1.plot(self.time_data, self.x_pos_data, 'b-', label='X pos')
-                    ax1.plot(self.time_data, self.y_pos_data, 'r-', label='Y pos')
-                    ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
-                    ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
+                    elif plot == Plots.POSITION:
+                        ax1.set_title('Position and Res. RMS')
+                        ax1.set_ylabel('X/Y position (um)', labelpad=10)
+                        ax2.set_ylabel('X/Y res. rms (um)', labelpad=10)
+                        ax1.plot(self.time_data, self.x_pos_data, 'b-', label='X pos')
+                        ax1.plot(self.time_data, self.y_pos_data, 'r-', label='Y pos')
+                        ax2.plot(self.time_data, self.x_rms_data, 'b-', label='X rms')
+                        ax2.plot(self.time_data, self.y_rms_data, 'r-', label='Y rms')
 
-                    # Display running average
+                        # Display running average
 
-                    # Label
-                    ax1.text(1.02, 0.2, 'X Avg:', transform=ax1.transAxes, fontsize=8)
-                    # We need to save this as an attribute so it can be referenced in update_calculations()
-                    self.x_pos_avg = ax1.text(1.1, 0.2, str(self.get_average(self.x_pos_data)),
-                                              transform=ax1.transAxes, fontsize=8)
+                        # Label
+                        ax1.text(1.02, 0.2, 'X Avg:', transform=ax1.transAxes, fontsize=8)
+                        # We need to save this as an attribute so it can be referenced in update_calculations()
+                        self.x_pos_avg = ax1.text(1.1, 0.2, str(self.get_average(self.x_pos_data)),
+                                                  transform=ax1.transAxes, fontsize=8)
 
-                    ax1.text(1.02, 0.1, 'Y Avg:', transform=ax1.transAxes, fontsize=8)
-                    self.y_pos_avg = ax1.text(1.1, 0.1, str(self.get_average(self.y_pos_data)),
-                                              transform=ax1.transAxes, fontsize=8)
-                elif plot == Plots.POWER:
-                    ax1.set_title('Power')
-                    ax1.set_ylabel('Power AB', labelpad=10)
-                    ax2.set_ylabel('Power CD', labelpad=10)
-                    ax1.plot(self.time_data, self.power_a_data, 'b-', label='A')
-                    ax1.plot(self.time_data, self.power_b_data, 'r-', label='B')
-                    ax2.plot(self.time_data, self.power_c_data, 'b-', label='C')
-                    ax2.plot(self.time_data, self.power_d_data, 'r-', label='D')
+                        ax1.text(1.02, 0.1, 'Y Avg:', transform=ax1.transAxes, fontsize=8)
+                        self.y_pos_avg = ax1.text(1.1, 0.1, str(self.get_average(self.y_pos_data)),
+                                                  transform=ax1.transAxes, fontsize=8)
+                    elif plot == Plots.POWER:
+                        ax1.set_title('Power')
+                        ax1.set_ylabel('Power AB', labelpad=10)
+                        ax2.set_ylabel('Power CD', labelpad=10)
+                        ax1.plot(self.time_data, self.power_a_data, 'b-', label='A')
+                        ax1.plot(self.time_data, self.power_b_data, 'r-', label='B')
+                        ax2.plot(self.time_data, self.power_c_data, 'b-', label='C')
+                        ax2.plot(self.time_data, self.power_d_data, 'r-', label='D')
 
-                    # Display running average
+                        # Display running average
 
-                    ax1.text(1.02, 0.2, 'A Avg:', transform=ax1.transAxes, fontsize=8)
-                    self.power_a_avg = ax1.text(1.1, 0.2, str(self.get_average(self.power_a_data)),
-                                                transform=ax1.transAxes, fontsize=8)
-                    ax1.text(1.02, 0.1, 'B Avg:', transform=ax1.transAxes, fontsize=8)
-                    self.power_b_avg = ax1.text(1.1, 0.1, str(self.get_average(self.power_b_data)),
-                                                transform=ax1.transAxes, fontsize=8)
-                    ax2.text(1.02, 0.2, 'C Avg:', transform=ax2.transAxes, fontsize=8)
-                    self.power_c_avg = ax2.text(1.1, 0.2, str(self.get_average(self.power_c_data)),
-                                                transform=ax2.transAxes, fontsize=8)
-                    ax2.text(1.02, 0.1, 'D Avg:', transform=ax2.transAxes, fontsize=8)
-                    self.power_d_avg = ax2.text(1.1, 0.1, str(self.get_average(self.power_d_data)),
-                                                transform=ax2.transAxes, fontsize=8)
+                        ax1.text(1.02, 0.2, 'A Avg:', transform=ax1.transAxes, fontsize=8)
+                        self.power_a_avg = ax1.text(1.1, 0.2, str(self.get_average(self.power_a_data)),
+                                                    transform=ax1.transAxes, fontsize=8)
+                        ax1.text(1.02, 0.1, 'B Avg:', transform=ax1.transAxes, fontsize=8)
+                        self.power_b_avg = ax1.text(1.1, 0.1, str(self.get_average(self.power_b_data)),
+                                                    transform=ax1.transAxes, fontsize=8)
+                        ax2.text(1.02, 0.2, 'C Avg:', transform=ax2.transAxes, fontsize=8)
+                        self.power_c_avg = ax2.text(1.1, 0.2, str(self.get_average(self.power_c_data)),
+                                                    transform=ax2.transAxes, fontsize=8)
+                        ax2.text(1.02, 0.1, 'D Avg:', transform=ax2.transAxes, fontsize=8)
+                        self.power_d_avg = ax2.text(1.1, 0.1, str(self.get_average(self.power_d_data)),
+                                                    transform=ax2.transAxes, fontsize=8)
 
                 box1 = ax1.get_position()
                 box2 = ax2.get_position()
@@ -443,25 +478,27 @@ class DataProcessor:
         if self.get_plot() != Plots.NONE:
             if self.get_plot() == Plots.INTENSITY:
                 ax1, = plt.gcf().get_axes()
-                ax1.get_lines()[0].set_data(self.time_data, self.s_data)
+                with self.data_lock:
+                    ax1.get_lines()[0].set_data(self.time_data, self.s_data)
             else:
                 ax1, ax2 = plt.gcf().get_axes()
-                if self.get_plot() == Plots.POSITION:
-                    ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
-                    ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
-                    ax2.get_lines()[0].set_data(self.time_data, self.x_rms_data)
-                    ax2.get_lines()[1].set_data(self.time_data, self.y_rms_data)
-                    self.x_pos_avg.set_text(str(self.get_average(self.x_pos_data)))
-                    self.y_pos_avg.set_text(str(self.get_average(self.y_pos_data)))
-                elif self.get_plot() == Plots.POWER:
-                    ax1.get_lines()[0].set_data(self.time_data, self.power_a_data)
-                    ax1.get_lines()[1].set_data(self.time_data, self.power_b_data)
-                    ax2.get_lines()[0].set_data(self.time_data, self.power_c_data)
-                    ax2.get_lines()[1].set_data(self.time_data, self.power_d_data)
-                    self.power_a_avg.set_text(str(self.get_average(self.power_a_data)))
-                    self.power_b_avg.set_text(str(self.get_average(self.power_b_data)))
-                    self.power_c_avg.set_text(str(self.get_average(self.power_c_data)))
-                    self.power_d_avg.set_text(str(self.get_average(self.power_d_data)))
+                with self.data_lock:
+                    if self.get_plot() == Plots.POSITION:
+                        ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
+                        ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
+                        ax2.get_lines()[0].set_data(self.time_data, self.x_rms_data)
+                        ax2.get_lines()[1].set_data(self.time_data, self.y_rms_data)
+                        self.x_pos_avg.set_text(str(self.get_average(self.x_pos_data)))
+                        self.y_pos_avg.set_text(str(self.get_average(self.y_pos_data)))
+                    elif self.get_plot() == Plots.POWER:
+                        ax1.get_lines()[0].set_data(self.time_data, self.power_a_data)
+                        ax1.get_lines()[1].set_data(self.time_data, self.power_b_data)
+                        ax2.get_lines()[0].set_data(self.time_data, self.power_c_data)
+                        ax2.get_lines()[1].set_data(self.time_data, self.power_d_data)
+                        self.power_a_avg.set_text(str(self.get_average(self.power_a_data)))
+                        self.power_b_avg.set_text(str(self.get_average(self.power_b_data)))
+                        self.power_c_avg.set_text(str(self.get_average(self.power_c_data)))
+                        self.power_d_avg.set_text(str(self.get_average(self.power_d_data)))
 
                 ax2.relim()
                 ax2.autoscale_view()
@@ -480,10 +517,11 @@ class DataProcessor:
         """
         if self.get_plot() == Plots.WAVEFORM:
             ax1, ax2 = plt.gcf().get_axes()
-            ax1.get_lines()[0].set_data(range(len(self.raw_adc_a_data)), self.raw_adc_a_data)
-            ax1.get_lines()[1].set_data(range(len(self.raw_adc_b_data)), self.raw_adc_b_data)
-            ax2.get_lines()[0].set_data(range(len(self.raw_adc_c_data)), self.raw_adc_c_data)
-            ax2.get_lines()[1].set_data(range(len(self.raw_adc_d_data)), self.raw_adc_d_data)
+            with self.data_lock:
+                ax1.get_lines()[0].set_data(range(len(self.raw_adc_a_data)), self.raw_adc_a_data)
+                ax1.get_lines()[1].set_data(range(len(self.raw_adc_b_data)), self.raw_adc_b_data)
+                ax2.get_lines()[0].set_data(range(len(self.raw_adc_c_data)), self.raw_adc_c_data)
+                ax2.get_lines()[1].set_data(range(len(self.raw_adc_d_data)), self.raw_adc_d_data)
             ax1.relim()
             ax1.autoscale_view()
             ax2.relim()
@@ -496,88 +534,93 @@ class DataProcessor:
         Checks if there is enough data in the fast fifo for reading
         :return: True | False
         """
-        self.samples_to_read = 16 * ((self.evt_len - self.bl_len - 4) // 16)
-        with self.lock:
-            samples_in_buf = self.IO.read_ffifo_wd(0)
-        return samples_in_buf > self.samples_to_read
+        self.samples_to_read = 16 * ((self.get_evt_len() - self.get_bl_len() - 4) // 16)
+        with self.data_lock:
+            self.ffifo_ab_words = self.get_ffifo_words(self.ChAB)
+            self.ffifo_cd_words = self.get_ffifo_words(self.ChCD)
+            return self.ffifo_ab_words > self.samples_to_read
 
     def is_new_data_rdy(self):
         """
         Determines if a a new packet of data is ready to be read from the slow fifo in the FPGA
         :return: True | False
         """
-        with self.lock:
-            samples_in_sfifo = self.IO.read_sfifo_wd()
-        return samples_in_sfifo > 16
+        with self.data_lock:
+            self.sfifo_words = self.get_sfifo_words()
+            return self.sfifo_words > 16
 
     def read_data(self):
         """
         Read a packet of data from the slow fifo in the FPGA and update the appropriate data buffers (x, y, etc.)
         """
-        with self.lock:
+        with self.eth_lock:
             packet = self.IO.read_buffer('SFIFO:DATA?')  # read one packet from FPGA buffer
         if packet[0] != self.PACKET_ID:
             raise TypeError('Packet ID error!')
 
-        self.current_time += 1
-        # extract new data from packet
-        x = TCP.s16(packet[3] >> 16)
-        y = TCP.s16(packet[3] & 0xFFFF)
-        s = TCP.s16(packet[4] >> 16)
-        PA = self.int_to_float(packet[5])
-        PB = self.int_to_float(packet[6])
-        PC = self.int_to_float(packet[7])
-        PD = self.int_to_float(packet[8])
+        with self.data_lock:
+            self.evt_num = packet[1] & 0xFFFF
+            self.current_time += 1
+            # extract new data from packet
+            x = TCP.s16(packet[3] >> 16)
+            y = TCP.s16(packet[3] & 0xFFFF)
+            s = TCP.s16(packet[4] >> 16)
+            PA = self.int_to_float(packet[5])
+            PB = self.int_to_float(packet[6])
+            PC = self.int_to_float(packet[7])
+            PD = self.int_to_float(packet[8])
 
-        # add new data to old data
-        self.time_data.append(self.current_time)
-        self.x_pos_data.append(x)
-        self.y_pos_data.append(y)
-        self.s_data.append(s)
-        self.power_a_data.append(PA)
-        self.power_b_data.append(PB)
-        self.power_c_data.append(PC)
-        self.power_d_data.append(PD)
+            # add new data to old data
+            self.time_data.append(self.current_time)
+            self.x_pos_data.append(x)
+            self.y_pos_data.append(y)
+            self.s_data.append(s)
+            self.power_a_data.append(PA)
+            self.power_b_data.append(PB)
+            self.power_c_data.append(PC)
+            self.power_d_data.append(PD)
 
-        x_rms = int(TCP.rms(self.x_pos_data))
-        y_rms = int(TCP.rms(self.y_pos_data))
-        self.x_rms_data.append(x_rms)
-        self.y_rms_data.append(y_rms)
+            x_rms = int(TCP.rms(self.x_pos_data))
+            y_rms = int(TCP.rms(self.y_pos_data))
+            self.x_rms_data.append(x_rms)
+            self.y_rms_data.append(y_rms)
 
     def read_waveform(self):
         """
         Read the fast fifos in the FPGA for waveform data
         """
-        with self.lock:
+        with self.eth_lock:
             waveform_AB = self.IO.read_waveform(self.ChAB, self.samples_to_read)
             waveform_CD = self.IO.read_waveform(self.ChCD, self.samples_to_read)
         # False if waveform not successfully read
-        if waveform_AB:
-            self.raw_adc_a_data = waveform_AB[0]
-            self.raw_adc_b_data = waveform_AB[1]
-        if waveform_CD:
-            self.raw_adc_c_data = waveform_CD[0]
-            self.raw_adc_d_data = waveform_CD[1]
+        with self.data_lock:
+            if waveform_AB:
+                self.raw_adc_a_data = waveform_AB[0]
+                self.raw_adc_b_data = waveform_AB[1]
+            if waveform_CD:
+                self.raw_adc_c_data = waveform_CD[0]
+                self.raw_adc_d_data = waveform_CD[1]
 
     def clear_data(self):
         """
         Resets all data buffers and sets the current time to 0
         """
-        self.current_time = 0
-        del self.raw_adc_a_data[:]
-        del self.raw_adc_b_data[:]
-        del self.raw_adc_c_data[:]
-        del self.raw_adc_d_data[:]
-        del self.time_data[:]
-        del self.x_pos_data[:]
-        del self.y_pos_data[:]
-        del self.s_data[:]
-        del self.power_a_data[:]
-        del self.power_b_data[:]
-        del self.power_c_data[:]
-        del self.power_d_data[:]
-        del self.x_rms_data[:]
-        del self.y_rms_data[:]
+        with self.data_lock:
+            self.current_time = 0
+            del self.raw_adc_a_data[:]
+            del self.raw_adc_b_data[:]
+            del self.raw_adc_c_data[:]
+            del self.raw_adc_d_data[:]
+            del self.time_data[:]
+            del self.x_pos_data[:]
+            del self.y_pos_data[:]
+            del self.s_data[:]
+            del self.power_a_data[:]
+            del self.power_b_data[:]
+            del self.power_c_data[:]
+            del self.power_d_data[:]
+            del self.x_rms_data[:]
+            del self.y_rms_data[:]
 
     def close_plot(self):
         """
@@ -605,6 +648,6 @@ class DataProcessor:
     def shutdown(self):
         self.close_windows()
         self.clear_data()
-        with self.lock:
+        with self.eth_lock:
             self.IO.destroy()
         plt.ioff()

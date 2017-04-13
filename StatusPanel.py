@@ -17,7 +17,7 @@ class StatusPanel(wx.Panel):
         self.btn_update_status = wx.Button(self, wx.ID_ANY, 'Update')
 
         self.lbl_mode_LEDs = wx.StaticText(self, wx.ID_ANY, 'MODE REGISTER')
-        self.lbl_afe_ctrl_LEDs = wx.StaticText(self, wx.ID_ANY, 'AFE CONTROL REGISTER')
+        self.lbl_afe_ctrl_LEDs = wx.StaticText(self, wx.ID_ANY, 'AFE CTRL REGISTER')
         self.lbl_status_LEDs = wx.StaticText(self, wx.ID_ANY, 'STATUS REGISTER')
 
         # List of LEDs for Mode Register, AFE Control Register, and Status
@@ -55,7 +55,7 @@ class StatusPanel(wx.Panel):
             sizer_mode_LED_box.Add(mode_LED_sizers[i], 1, wx.EXPAND, 0)
 
         sizer_mode_box = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_mode_box.Add(self.lbl_mode_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_mode_box.Add(self.lbl_mode_LEDs, 0, (wx.RIGHT | wx.LEFT) | wx.EXPAND, 10) # Fix this
         sizer_mode_box.Add(sizer_mode_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
 
         # AFE CONTROL REGISTER
