@@ -20,8 +20,8 @@ class EventNumPanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
-        self.t = threading.Thread(target=self._update_event_num)
-        self.t.start()
+        # self.t = threading.Thread(target=self._update_event_num)
+        # self.t.start()
 
     def __set_properties(self):
         # no special properties
@@ -59,3 +59,6 @@ class EventNumPanel(wx.Panel):
                 time.sleep(0.5)
             else:
                 break
+
+    def update_event_num(self):
+        self.txt_event_num.SetValue(str(self.data_processor.get_evt_num_cached()))

@@ -25,8 +25,8 @@ class FIFOOccupancyPanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
-        self.t = threading.Thread(target=self._update_fifo_occupancy)
-        self.t.start()
+        # self.t = threading.Thread(target=self._update_fifo_occupancy)
+        # self.t.start()
 
     def __set_properties(self):
         # no special properties
@@ -79,3 +79,7 @@ class FIFOOccupancyPanel(wx.Panel):
             else:
                 break
 
+    def update_fifo_occupancy(self):
+        self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB)))
+        self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChCD)))
+        self.txt_sfifo_words.SetValue(str(self.data_processor.get_sfifo_words_cached()))
