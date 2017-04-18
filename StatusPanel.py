@@ -1,4 +1,5 @@
 import wx
+import  wx.lib.scrolledpanel as scrolled
 import LED
 
 # LED states
@@ -6,13 +7,15 @@ OFF = 0
 ON = 1
 
 
-class StatusPanel(wx.Panel):
+# class StatusPanel(wx.Panel):
+class StatusPanel(scrolled.ScrolledPanel):
     """
     Panel for showing what settings are currently enabled (akin to the LED indicators in the LabVIEW GUI)
     """
 
     def __init__(self, parent, title, data_processor):
-        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=title)
+        # wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=title)
+        scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_status = wx.Button(self, wx.ID_ANY, 'Update')
 
@@ -36,6 +39,7 @@ class StatusPanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
+        self.SetupScrolling()
 
     def __set_properties(self):
         pass
@@ -84,7 +88,7 @@ class StatusPanel(wx.Panel):
         sizer_status_reg_box.Add(self.lbl_status_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
         sizer_status_reg_box.Add(sizer_status_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
 
-        sizer_status_box.Add(self.btn_update_status, 1, wx.SHAPED | wx.ALIGN_CENTER, 0)
+        sizer_status_box.Add(self.btn_update_status, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_status_box.Add(sizer_mode_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
         sizer_status_box.Add(sizer_afe_ctrl_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
         sizer_status_box.Add(sizer_status_reg_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)

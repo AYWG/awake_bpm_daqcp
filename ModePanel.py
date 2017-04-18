@@ -1,11 +1,13 @@
 # Panel for setting the BPM mode
 
 import wx
+import  wx.lib.scrolledpanel as scrolled
 
-
-class ModePanel(wx.Panel):
+# class ModePanel(wx.Panel):
+class ModePanel(scrolled.ScrolledPanel):
     def __init__(self, parent, title, data_processor):
-        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
+        # wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_mode = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_run = wx.StaticText(self, wx.ID_ANY, 'Run')
@@ -37,6 +39,7 @@ class ModePanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
+        self.SetupScrolling()
 
     def __set_properties(self):
         pass
@@ -93,7 +96,7 @@ class ModePanel(wx.Panel):
         sizer_onfly_cal.Add(self.chk_onfly_cal, 0, ((wx.LEFT | wx.RIGHT) | wx.ALIGN_TOP), SIZER_BORDER_WIDTH)
 
         # Combine update button and sizers for each mode into one vertical sizer
-        sizer_mode_box.Add(self.btn_update_mode, 1, wx.SHAPED | wx.ALIGN_CENTER, 0)
+        sizer_mode_box.Add(self.btn_update_mode, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_mode_box.Add(sizer_run, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
         sizer_mode_box.Add(sizer_ext_trig, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
         sizer_mode_box.Add(sizer_self_trig, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)

@@ -90,7 +90,7 @@ class CtrlWindow(wx.Frame):
         sizer_main.Fit(self)
 
         # Set the minimum size of the window once all of the sizers have been set up.
-        self.SetMinSize(self.GetSize())
+        # self.SetMinSize(self.GetSize())
 
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.update_controls)
