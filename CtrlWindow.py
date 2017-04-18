@@ -108,6 +108,9 @@ class CtrlWindow(wx.Frame):
 
         wx.MessageBox("Flash Read Successful - All Settings Updated", "Success")
 
+    def get_thread(self):
+        return self.t
+
     def _check_for_close_signal(self):
         """
         Worker thread that checks if the GUI should still be open
@@ -117,14 +120,17 @@ class CtrlWindow(wx.Frame):
                 if not self.data_processor.get_ctrl_gui_state():
                     wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
                     break
-                else:
-                    self.fifo_occupancy_panel.update_fifo_occupancy()
-                    self.event_num_panel.update_event_num()
                 time.sleep(0.5)
             else:
                 break
 
     def OnClose(self, event):
-        self.data_processor.set_ctrl_gui_state(False)
-        self.t.join()
+        with self.data_processor.get_main_lock():
+            self.data_processor.set_ctrl_gui_state(False)
+            self.fifo_occupancy_panel.set_stop_flag(True)
+            self.event_num_panel.set_stop_flag(True)
+
+        self.fifo_occupancy_panel.get_thread().join()
+        self.event_num_panel.get_thread().join()
+        self.get_thread().join()
         self.Destroy()

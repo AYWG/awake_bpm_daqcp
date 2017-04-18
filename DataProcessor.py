@@ -90,6 +90,8 @@ class DataProcessor:
         # We need a lock for managing collected data
         self.data_lock = threading.Lock()
 
+        self.main_lock = threading.Lock()
+
         # Initial mode of operation is PAUSED
         self.op_mode = Modes.PAUSED
 
@@ -123,6 +125,9 @@ class DataProcessor:
             time.sleep(0.1)
             if self.IO.write_reg('CR', self.mode) is False: sys.exit()
             time.sleep(0.1)
+
+    def get_main_lock(self):
+        return self.main_lock
 
     def get_ffifo_words(self, channels):
         with self.eth_lock:
@@ -643,7 +648,8 @@ class DataProcessor:
         Closes control window and any active plots
         """
         self.close_plot()
-        self.set_ctrl_gui_state(False)
+        with self.get_main_lock():
+            self.set_ctrl_gui_state(False)
 
     def shutdown(self):
         self.close_windows()

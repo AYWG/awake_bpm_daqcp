@@ -25,8 +25,9 @@ class FIFOOccupancyPanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
-        # self.t = threading.Thread(target=self._update_fifo_occupancy)
-        # self.t.start()
+        self.stop = False
+        self.t = threading.Thread(target=self._update_fifo_occupancy)
+        self.t.start()
 
     def __set_properties(self):
         # no special properties
@@ -66,20 +67,27 @@ class FIFOOccupancyPanel(wx.Panel):
         self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words(self.data_processor.ChCD)))
         self.txt_sfifo_words.SetValue(str(self.data_processor.get_sfifo_words()))
 
+    def get_stop_flag(self):
+        return self.stop
+
+    def set_stop_flag(self, state):
+        self.stop = state
+
+    def get_thread(self):
+        return self.t
+
     def _update_fifo_occupancy(self):
         """
         Worker thread that checks the current FIFO occupancy and updates the values displayed in the GUI
         """
-        while True:
-            if self:
-                self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB)))
-                self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChCD)))
-                self.txt_sfifo_words.SetValue(str(self.data_processor.get_sfifo_words_cached()))
-                time.sleep(0.5)
-            else:
-                break
 
-    def update_fifo_occupancy(self):
-        self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB)))
-        self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChCD)))
-        self.txt_sfifo_words.SetValue(str(self.data_processor.get_sfifo_words_cached()))
+        while True:
+            with self.data_processor.get_main_lock():
+                if not self.get_stop_flag():
+                    self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB)))
+                    self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChCD)))
+                    self.txt_sfifo_words.SetValue(str(self.data_processor.get_sfifo_words_cached()))
+                else:
+                    break
+
+            time.sleep(0.5)
