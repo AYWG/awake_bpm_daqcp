@@ -1,6 +1,7 @@
 # Top-level control window
 
 import wx
+import wx.lib.scrolledpanel as scrolled
 import AddressPanel
 import AFECtrlPanel
 import CalGainPanel
@@ -12,13 +13,14 @@ import OtherParamPanel
 import StatusPanel
 import FIFOOccupancyPanel
 import EventNumPanel
-import threading
-import time
+# import threading
+# import time
 
-
-class CtrlWindow(wx.Frame):
-    def __init__(self, parent, title, data_processor):
-        wx.Frame.__init__(self, parent=parent, id=wx.ID_ANY, title=title)
+# class CtrlWindow(wx.Frame):
+class CtrlWindow(scrolled.ScrolledPanel):
+    def __init__(self, parent, data_processor):
+        # wx.Frame.__init__(self, parent=parent, id=wx.ID_ANY, title=title)
+        scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
 
         self.data_processor = data_processor
 
@@ -45,13 +47,15 @@ class CtrlWindow(wx.Frame):
         self.__do_layout()
 
         self.__attach_events()
-        self.t = threading.Thread(target=self._check_for_close_signal)
-        self.t.start()
+        # self.t = threading.Thread(target=self._check_for_close_signal)
+        # self.t.start()
+        self.SetupScrolling()
 
     def __set_properties(self):
+        pass
         # Light-grey
         # self.SetBackgroundColour(wx.Colour(240, 240, 240))
-        self.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+        # self.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
 
     def __do_layout(self):
         sizer_btm_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -94,7 +98,7 @@ class CtrlWindow(wx.Frame):
 
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.update_controls)
-        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        # self.Bind(wx.EVT_CLOSE, self.OnClose)
 
     def update_controls(self, event):
         self.address_panel.initialize_controls()
@@ -108,29 +112,29 @@ class CtrlWindow(wx.Frame):
 
         wx.MessageBox("Flash Read Successful - All Settings Updated", "Success")
 
-    def get_thread(self):
-        return self.t
+    # def get_thread(self):
+    #     return self.t
+    #
+    # def _check_for_close_signal(self):
+    #     """
+    #     Worker thread that checks if the GUI should still be open
+    #     """
+    #     while True:
+    #         if self:
+    #             if not self.data_processor.get_ctrl_gui_state():
+    #                 wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
+    #                 break
+    #             time.sleep(0.5)
+    #         else:
+    #             break
 
-    def _check_for_close_signal(self):
-        """
-        Worker thread that checks if the GUI should still be open
-        """
-        while True:
-            if self:
-                if not self.data_processor.get_ctrl_gui_state():
-                    wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
-                    break
-                time.sleep(0.5)
-            else:
-                break
-
-    def OnClose(self, event):
-        with self.data_processor.get_main_lock():
-            self.data_processor.set_ctrl_gui_state(False)
-            self.fifo_occupancy_panel.set_stop_flag(True)
-            self.event_num_panel.set_stop_flag(True)
-
-        self.fifo_occupancy_panel.get_thread().join()
-        self.event_num_panel.get_thread().join()
-        self.get_thread().join()
-        self.Destroy()
+    # def OnClose(self, event):
+    #     with self.data_processor.get_main_lock():
+    #         self.data_processor.set_ctrl_gui_state(False)
+    #         self.fifo_occupancy_panel.set_stop_flag(True)
+    #         self.event_num_panel.set_stop_flag(True)
+    #
+    #     self.fifo_occupancy_panel.get_thread().join()
+    #     self.event_num_panel.get_thread().join()
+    #     self.get_thread().join()
+    #     self.Destroy()

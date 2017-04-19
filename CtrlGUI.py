@@ -1,6 +1,7 @@
 import wx
 
-from CtrlWindow import CtrlWindow
+# from CtrlWindow import CtrlWindow
+from CtrlFrame import CtrlFrame
 
 
 class CtrlGUI(wx.App):
@@ -11,10 +12,9 @@ class CtrlGUI(wx.App):
 
     def OnInit(self):
         iconCtrl = wx.Icon('triumf.ico', wx.BITMAP_TYPE_ICO)
-        windowCtrl = CtrlWindow(parent=None, title='AWAKE BPM Settings', data_processor=self.data_processor)
-        windowCtrl.SetIcon(iconCtrl)
-        self.SetTopWindow(windowCtrl)
-
-        windowCtrl.Show()
-        windowCtrl.Restore()
+        frameCtrl = CtrlFrame(parent=None, title='AWAKE BPM Settings', data_processor=self.data_processor)
+        frameCtrl.SetIcon(iconCtrl)
+        self.SetTopWindow(frameCtrl)
+        frameCtrl.Show()
+        frameCtrl.Maximize(True)
         return True

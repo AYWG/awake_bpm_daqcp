@@ -1,9 +1,10 @@
 # Panel for setting the BPM mode
 
 import wx
-import  wx.lib.scrolledpanel as scrolled
-
+import wx.lib.scrolledpanel as scrolled
 # class ModePanel(wx.Panel):
+
+
 class ModePanel(scrolled.ScrolledPanel):
     def __init__(self, parent, title, data_processor):
         scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
