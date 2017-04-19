@@ -122,6 +122,10 @@ class ModePanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_mode)
 
     def initialize_controls(self):
+        """
+        Initialize the Mode Register Panel with values from the FPGA
+        """
+
         mode = self.data_processor.get_mode()
 
         if mode - 0x4000 >= 0:

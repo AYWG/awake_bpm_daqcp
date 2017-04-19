@@ -86,6 +86,9 @@ class EventParamPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_evt_param)
 
     def initialize_controls(self):
+        """
+        Initialize the Event Parameters with values from the FPGA
+        """
         self.txt_trig_th.SetValue(str(self.data_processor.get_trig_th()))
         self.txt_trig_dt.SetValue(str(self.data_processor.get_trig_dt()))
         self.txt_trig_dl.SetValue(str(self.data_processor.get_trig_dl()))

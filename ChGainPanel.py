@@ -27,6 +27,7 @@ class ChGainPanel(wx.Panel):
         self.initialize_controls()
 
     def __set_properties(self):
+        # Associate the validator with each input
         for i in range(len(self.txt_ch_gain)): self.txt_ch_gain[i].SetValidator(ChGainValidator())
 
     def __do_layout(self):
@@ -52,6 +53,9 @@ class ChGainPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_ch_gain)
 
     def initialize_controls(self):
+        """
+        Initialize the ch gain panel with values from the FPGA
+        """
         for i in range(len(self.txt_ch_gain)):
             ch_gain = self.data_processor.int_to_float(self.data_processor.get_ch_gain(Channels.channels[i]))
             self.txt_ch_gain[i].SetValue(str(ch_gain))
@@ -72,6 +76,10 @@ class ChGainPanel(wx.Panel):
 
 
 class ChGainValidator(Validator.Validator):
+    """
+    Validator subclass for validating ch gain inputs
+    """
+
     def __init__(self):
         Validator.Validator.__init__(self)
 
@@ -110,16 +118,12 @@ class ChGainValidator(Validator.Validator):
 
     def OnChar(self, event):
         key = event.GetKeyCode()
-
         if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
             event.Skip()
             return
-
         if chr(key) in string.digits or chr(key) == '.' or chr(key) == '-':
             event.Skip()
             return
-
         if not wx.Validator_IsSilent():
             wx.Bell()
-
         return

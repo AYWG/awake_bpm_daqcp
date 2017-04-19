@@ -105,7 +105,7 @@ class DataProcessor:
         # There is no plot at the beginning
         self.plot = Plots.NONE
 
-        # There is no control window at the beginning
+        # There is no GUI loaded at the beginning
         self.is_ctrl_gui_active = False
 
         plt.ion()

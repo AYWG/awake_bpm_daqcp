@@ -94,6 +94,9 @@ class CtrlWindow(scrolled.ScrolledPanel):
         self.Bind(wx.EVT_BUTTON, self.update_controls)
 
     def update_controls(self, event):
+        """
+        Update all the panels
+        """
         self.address_panel.initialize_controls()
         self.afectrl_panel.initialize_controls()
         self.calgain_panel.initialize_controls()
@@ -104,4 +107,5 @@ class CtrlWindow(scrolled.ScrolledPanel):
         self.status_panel.initialize_controls()
         # No data in the flash for fifo occupancy and event num, so those panels are ignored
 
+        # This event handler is only executed as the last step for a flash read
         wx.MessageBox("Flash Read Successful - All Settings Updated", "Success")

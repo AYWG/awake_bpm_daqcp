@@ -91,9 +91,6 @@ class AddressPanel(wx.Panel):
             self.txt_ip_address[i].SetValue(str(self.data_processor.get_ip_address(i)))
 
     def OnUpdate(self, event):
-        """
-
-        """
         if self.Validate():
 
             for i in range(len(self.txt_mac_address)):

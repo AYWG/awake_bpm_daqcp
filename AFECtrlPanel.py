@@ -16,6 +16,7 @@ class AFECtrlPanel(wx.Panel):
         self.lbl_db_digi = []
         self.chk_db_digi = []
 
+        # 5 pairs of labels and check boxes for both VGA and Digi
         for i in range(5):
             self.lbl_db_vga.append(wx.StaticText(self, wx.ID_ANY, '-' + str(1 << i) + ' dB'))
             self.lbl_db_digi.append(wx.StaticText(self, wx.ID_ANY, '-' + str(1 << i) + ' dB'))
@@ -49,7 +50,7 @@ class AFECtrlPanel(wx.Panel):
             sizer_db_vga[i].Add(self.lbl_db_vga[i], 1, wx.ALL | wx.ALIGN_CENTER, SIZER_WIDTH)
             sizer_db_vga[i].Add(self.chk_db_vga[i], 0, wx.EXPAND)
             sizer_vga_main.Add(sizer_db_vga[i], 0, wx.ALL | wx.EXPAND, SIZER_WIDTH)
-        sizer_vga_main.Add(self.lbl_vga_att, 0, wx.ALL | wx.EXPAND, 4)
+        sizer_vga_main.Add(self.lbl_vga_att, 0, wx.ALL | wx.EXPAND, SIZER_WIDTH)
 
         sizer_db_digi = []
         sizer_digi_main = wx.BoxSizer(wx.VERTICAL)
@@ -58,14 +59,14 @@ class AFECtrlPanel(wx.Panel):
             sizer_db_digi[i].Add(self.lbl_db_digi[i], 1, wx.ALL | wx.ALIGN_CENTER, SIZER_WIDTH)
             sizer_db_digi[i].Add(self.chk_db_digi[i], 0, wx.EXPAND)
             sizer_digi_main.Add(sizer_db_digi[i], 0, wx.ALL | wx.EXPAND, SIZER_WIDTH)
-        sizer_digi_main.Add(self.lbl_digi_att, 0, wx.ALL | wx.EXPAND, 4)
+        sizer_digi_main.Add(self.lbl_digi_att, 0, wx.ALL | wx.EXPAND, SIZER_WIDTH)
 
         sizer_afe = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_afe.Add(sizer_digi_main, 1, wx.ALL | wx.EXPAND, 4)
-        sizer_afe.Add(sizer_vga_main, 1, wx.ALL | wx.EXPAND, 4)
+        sizer_afe.Add(sizer_digi_main, 1, wx.ALL | wx.EXPAND, SIZER_WIDTH)
+        sizer_afe.Add(sizer_vga_main, 1, wx.ALL | wx.EXPAND, SIZER_WIDTH)
 
         sizer_afe_ctrl_box.Add(self.btn_update_gain, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
-        sizer_afe_ctrl_box.Add(sizer_afe, 0, wx.ALL | wx.EXPAND, 4)
+        sizer_afe_ctrl_box.Add(sizer_afe, 0, wx.ALL | wx.EXPAND, SIZER_WIDTH)
 
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_main.Add(sizer_afe_ctrl_box, 0, wx.EXPAND, 0)
@@ -79,7 +80,7 @@ class AFECtrlPanel(wx.Panel):
 
     def initialize_controls(self):
         """
-        Initialize the AFE Control Register with values from the FPGA
+        Initialize the AFE Control Register Panel with values from the FPGA
         """
         gain = self.data_processor.get_afe_gain()
 

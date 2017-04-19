@@ -71,7 +71,7 @@ def ctrl_gui_handler(data_processor):
 
 def plot_refresher(data_processor, command_queue, lock):
     """
-    For refreshing the plot while data is not being collected
+    Refreshes the plot while data is not being collected
     :param data_processor:
     :param command_queue:
     :return:
@@ -95,6 +95,7 @@ def process_data(host, port, command_queue):
 
     while True:
         try:
+            # Blocks until a command is available
             command = command_queue.get()
 
             if command == Commands.START_MEASURING_DATA:
@@ -226,6 +227,7 @@ if __name__ == '__main__':
         if command < 1 or command > 10:
             print 'Not a valid command!'
         else:
+            # valid command, so add it to the queue
             command_queue.put(command)
 
         if command == Commands.EXIT:
