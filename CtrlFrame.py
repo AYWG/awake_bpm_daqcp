@@ -5,6 +5,10 @@ import CtrlWindow
 
 
 class CtrlFrame(wx.Frame):
+    """
+    Top level frame for the GUI. Has one child window (CtrlWindow) that houses all of the different panels.
+    """
+
     def __init__(self, parent, title, data_processor):
         wx.Frame.__init__(self, parent=parent, id=wx.ID_ANY, title=title)
         self.data_processor = data_processor
@@ -54,11 +58,12 @@ class CtrlFrame(wx.Frame):
                 break
 
     def OnClose(self, event):
-        with self.data_processor.get_main_lock():
+        with self.data_processor.get_gui_lock():
             self.data_processor.set_ctrl_gui_state(False)
             self.ctrl_window.fifo_occupancy_panel.set_stop_flag(True)
             self.ctrl_window.event_num_panel.set_stop_flag(True)
 
+        # Need to wait until all child threads terminate before destroying the GUI
         self.ctrl_window.fifo_occupancy_panel.get_thread().join()
         self.ctrl_window.event_num_panel.get_thread().join()
         self.get_thread().join()

@@ -1,6 +1,4 @@
 import wx
-
-# from CtrlWindow import CtrlWindow
 from CtrlFrame import CtrlFrame
 
 
@@ -16,5 +14,6 @@ class CtrlGUI(wx.App):
         frameCtrl.SetIcon(iconCtrl)
         self.SetTopWindow(frameCtrl)
         frameCtrl.Show()
+        # GUI opens up maximized
         frameCtrl.Maximize(True)
         return True

@@ -1,5 +1,5 @@
 import wx
-import  wx.lib.scrolledpanel as scrolled
+# import  wx.lib.scrolledpanel as scrolled
 import LED
 
 # LED states
@@ -7,15 +7,15 @@ OFF = 0
 ON = 1
 
 
-# class StatusPanel(wx.Panel):
-class StatusPanel(scrolled.ScrolledPanel):
+class StatusPanel(wx.Panel):
+# class StatusPanel(scrolled.ScrolledPanel):
     """
     Panel for showing what settings are currently enabled (akin to the LED indicators in the LabVIEW GUI)
     """
 
     def __init__(self, parent, title, data_processor):
-        # wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=title)
-        scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=title)
+        # scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_status = wx.Button(self, wx.ID_ANY, 'Update')
 
@@ -39,7 +39,7 @@ class StatusPanel(scrolled.ScrolledPanel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
-        self.SetupScrolling()
+        # self.SetupScrolling()
 
     def __set_properties(self):
         pass
@@ -59,8 +59,8 @@ class StatusPanel(scrolled.ScrolledPanel):
             sizer_mode_LED_box.Add(mode_LED_sizers[i], 1, wx.EXPAND, 0)
 
         sizer_mode_box = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_mode_box.Add(self.lbl_mode_LEDs, 0, (wx.RIGHT | wx.LEFT) | wx.EXPAND, 10) # Fix this
-        sizer_mode_box.Add(sizer_mode_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_mode_box.Add(self.lbl_mode_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_mode_box.Add(sizer_mode_LED_box, 1, (wx.TOP | wx.BOTTOM) | wx.EXPAND, BOX_BORDER_WIDTH)
 
         # AFE CONTROL REGISTER
         sizer_afe_ctrl_LED_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -89,9 +89,9 @@ class StatusPanel(scrolled.ScrolledPanel):
         sizer_status_reg_box.Add(sizer_status_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
 
         sizer_status_box.Add(self.btn_update_status, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
-        sizer_status_box.Add(sizer_mode_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
-        sizer_status_box.Add(sizer_afe_ctrl_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
-        sizer_status_box.Add(sizer_status_reg_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_status_box.Add(sizer_mode_box, 1, wx.EXPAND, 0)
+        sizer_status_box.Add(sizer_afe_ctrl_box, 1, wx.EXPAND, 0)
+        sizer_status_box.Add(sizer_status_reg_box, 1, wx.EXPAND, 0)
 
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_main.Add(sizer_status_box, 0, wx.EXPAND, 0)

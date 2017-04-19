@@ -20,6 +20,7 @@ class EventNumPanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
+        # Stop flag for worker thread
         self.stop = False
         self.t = threading.Thread(target=self._update_event_num)
         self.t.start()
@@ -45,6 +46,7 @@ class EventNumPanel(wx.Panel):
         sizer_main.Fit(self)
 
     def __attach_events(self):
+        # no events
         pass
 
     def initialize_controls(self):
@@ -65,7 +67,7 @@ class EventNumPanel(wx.Panel):
         """
 
         while True:
-            with self.data_processor.get_main_lock():
+            with self.data_processor.get_gui_lock():
                 if not self.get_stop_flag():
                     self.txt_event_num.SetValue(str(self.data_processor.get_evt_num_cached()))
                 else:

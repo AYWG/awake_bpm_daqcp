@@ -25,6 +25,7 @@ class FIFOOccupancyPanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
+        # Stop flag for worker thread
         self.stop = False
         self.t = threading.Thread(target=self._update_fifo_occupancy)
         self.t.start()
@@ -63,9 +64,9 @@ class FIFOOccupancyPanel(wx.Panel):
         pass
 
     def initialize_controls(self):
-        self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words(self.data_processor.ChAB)))
-        self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words(self.data_processor.ChCD)))
-        self.txt_sfifo_words.SetValue(str(self.data_processor.get_sfifo_words()))
+        self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB)))
+        self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChCD)))
+        self.txt_sfifo_words.SetValue(str(self.data_processor.get_sfifo_words_cached()))
 
     def get_stop_flag(self):
         return self.stop
@@ -82,7 +83,7 @@ class FIFOOccupancyPanel(wx.Panel):
         """
 
         while True:
-            with self.data_processor.get_main_lock():
+            with self.data_processor.get_gui_lock():
                 if not self.get_stop_flag():
                     self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB)))
                     self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChCD)))

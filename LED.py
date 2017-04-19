@@ -11,7 +11,12 @@ def change_intensity(color, fac):
         
     return wx.Colour(*rgb)    
 
+
 class LED(wx.Control):
+    """
+    Class that provides an LED object
+    """
+
     # Two states: Off, on
     # Off: Colour = (50,90, 65)
     # On: Colour = (10, 220, 10)

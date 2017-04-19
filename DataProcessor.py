@@ -14,6 +14,12 @@ warnings.filterwarnings("ignore")  # For suppressing a deprecating warning
 
 
 class DataProcessor:
+    """
+    Main class responsible for
+    - communicating with the BPM via ethernet
+    - managing the plots
+    """
+
     def __init__(self, host, port):
         # Initial Parameters
         self.bpm_dia = 40
@@ -90,7 +96,8 @@ class DataProcessor:
         # We need a lock for managing collected data
         self.data_lock = threading.Lock()
 
-        self.main_lock = threading.Lock()
+        # We need a lock for the GUI
+        self.gui_lock = threading.Lock()
 
         # Initial mode of operation is PAUSED
         self.op_mode = Modes.PAUSED
@@ -126,10 +133,14 @@ class DataProcessor:
             if self.IO.write_reg('CR', self.mode) is False: sys.exit()
             time.sleep(0.1)
 
-    def get_main_lock(self):
-        return self.main_lock
+    def get_gui_lock(self):
+        return self.gui_lock
 
     def get_ffifo_words(self, channels):
+        """
+        :param channels: 0 or 1, where 0 corresponds to Channels A & B and 1 corresponds to Channels C & D
+        :return: the # of words in the fast fifo corresponding to channels
+        """
         with self.eth_lock:
             return self.IO.read_ffifo_wd(channels)
 
@@ -138,6 +149,7 @@ class DataProcessor:
             return self.IO.read_sfifo_wd()
 
     def get_ffifo_words_cached(self, channels):
+
         with self.data_lock:
             if channels == self.ChAB:
                 return self.ffifo_ab_words
@@ -234,35 +246,63 @@ class DataProcessor:
         time.sleep(0.1)
 
     def get_cal_gain(self, channel):
+        """
+        :param channel: uppercase character corresponding to the appropriate channel, e.g. 'A'
+        :return: the cal gain value for channel in IEEE 754 SP floating format
+        """
         with self.eth_lock:
             return self.IO.read_reg('CAL:GAIN:' + channel + '?')
 
     def set_cal_gain(self, channel, cal_gain):
+        """
+
+        :param channel: uppercase character corresponding to the appropriate channel, e.g. 'A'
+        :param cal_gain:
+        """
         with self.eth_lock:
             if self.IO.write_reg('CAL:GAIN:' + channel, cal_gain) is False: sys.exit()
         time.sleep(0.1)
 
     def get_ch_gain(self, channel):
+        """
+
+        :param channel: uppercase character corresponding to the appropriate channel, e.g. 'A'
+        :return:
+        """
         with self.eth_lock:
             return self.IO.read_reg('CH:GAIN:' + channel + '?')
 
     def set_ch_gain(self, channel, ch_gain):
+        """
+
+        :param channel: uppercase character corresponding to the appropriate channel, e.g. 'A'
+        :param ch_gain:
+        :return:
+        """
         with self.eth_lock:
             if self.IO.write_reg('CH:GAIN:' + channel, ch_gain) is False: sys.exit()
         time.sleep(0.1)
 
     def wr_flash_buf(self):
+        """
+        Copies data currently in the FPGA to the MicroBlaze flash buffer. If data is to be written from the FPGA to
+        flash memory, then this method needs to be called before wr_flash.
+        """
         with self.eth_lock:
             if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
         time.sleep(0.1)
 
     def rd_flash(self):
+        """
+        Copies data currently in the flash memory to the flash buffer as well as the FPGA
+        """
         with self.eth_lock:
+            # First, read from the flash memory, which transfers data from the flash into the flash buffer.
+            # Then, transfer the data from the flash buffer to the FPGA. (There is currently no command to directly
+            # send data from flash memory to the FPGA)
             if self.IO.write_reg('FLASH:READ', 0) is False: sys.exit()  # the 0 is arbitrary
-            # print 'new data in flash buf'
             time.sleep(0.1)
             if self.IO.write_reg('FLASHBUF:TO:FPGA', 0) is False: sys.exit()  # the 0 is arbitrary
-            # print 'new data in fpga'
         time.sleep(0.1)
 
     def wr_flash(self):
@@ -281,14 +321,24 @@ class DataProcessor:
 
     def get_ip_address(self, index):
         """
-
-        :param index:
-        :return:
+        Get the integer value at index of the IP address stored in the MicroBlaze flash buffer (see set_ip_address)
+        :param index: which portion of the IP address to read from
+        :return: the integer value of that portion [0-255]
         """
         with self.eth_lock:
             return self.IO.read_reg('FL:BUF:IP:' + str(index) + '?')
 
     def set_ip_address(self, index, value):
+        """
+        Writes a new value for the IP address at position index to the MicroBlaze flash buffer, where index is an
+        integer in the range [0, 3] that corresponds to one of the 6 portions of an IP address.
+        E.g. for the IP address 192.168.13.10, 192 corresponds to index 0, 168 corresponds to index 1, etc.
+        Value is an integer in the range [0, 255]
+
+        :param index: which portion of the IP address to write to
+        :param value: the integer value to write
+        :return:
+        """
         with self.eth_lock:
             if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()
         time.sleep(0.1)
@@ -348,7 +398,7 @@ class DataProcessor:
 
     def get_op_mode(self):
         """
-        :return: The current operation mode
+        :return: The current operation mode (PAUSED or RUNNING)
         """
         return self.op_mode
 
@@ -489,10 +539,12 @@ class DataProcessor:
                 ax1, ax2 = plt.gcf().get_axes()
                 with self.data_lock:
                     if self.get_plot() == Plots.POSITION:
+                        # Update x/y data
                         ax1.get_lines()[0].set_data(self.time_data, self.x_pos_data)
                         ax1.get_lines()[1].set_data(self.time_data, self.y_pos_data)
                         ax2.get_lines()[0].set_data(self.time_data, self.x_rms_data)
                         ax2.get_lines()[1].set_data(self.time_data, self.y_rms_data)
+                        # Update averages
                         self.x_pos_avg.set_text(str(self.get_average(self.x_pos_data)))
                         self.y_pos_avg.set_text(str(self.get_average(self.y_pos_data)))
                     elif self.get_plot() == Plots.POWER:
@@ -648,7 +700,7 @@ class DataProcessor:
         Closes control window and any active plots
         """
         self.close_plot()
-        with self.get_main_lock():
+        with self.get_gui_lock():
             self.set_ctrl_gui_state(False)
 
     def shutdown(self):

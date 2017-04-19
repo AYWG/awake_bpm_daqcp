@@ -1,11 +1,12 @@
-# Panel for editing event parameters (e.g. event length)
-
 import wx
-import string
 import Validator
 
 
 class EventParamPanel(wx.Panel):
+    """
+    Panel for editing event parameters (e.g. event length)
+    """
+
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
@@ -116,6 +117,10 @@ class EventParamPanel(wx.Panel):
 
 
 class EventParamValidator(Validator.Validator):
+    """
+    Validator subclass for validating event parameter inputs
+    """
+
     def __init__(self):
         Validator.Validator.__init__(self)
 

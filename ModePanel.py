@@ -1,14 +1,15 @@
-# Panel for setting the BPM mode
-
 import wx
-import wx.lib.scrolledpanel as scrolled
-# class ModePanel(wx.Panel):
+# import wx.lib.scrolledpanel as scrolled
 
 
-class ModePanel(scrolled.ScrolledPanel):
+class ModePanel(wx.Panel):
+    """
+    Panel for setting the BPM mode
+    """
+# class ModePanel(scrolled.ScrolledPanel):
     def __init__(self, parent, title, data_processor):
-        scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
-        # wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        # scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_mode = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_run = wx.StaticText(self, wx.ID_ANY, 'Run')
@@ -40,7 +41,7 @@ class ModePanel(scrolled.ScrolledPanel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
-        self.SetupScrolling()
+        # self.SetupScrolling()
 
     def __set_properties(self):
         pass

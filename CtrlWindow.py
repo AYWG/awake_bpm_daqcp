@@ -1,5 +1,3 @@
-# Top-level control window
-
 import wx
 import wx.lib.scrolledpanel as scrolled
 import AddressPanel
@@ -13,13 +11,16 @@ import OtherParamPanel
 import StatusPanel
 import FIFOOccupancyPanel
 import EventNumPanel
-# import threading
-# import time
 
-# class CtrlWindow(wx.Frame):
+
 class CtrlWindow(scrolled.ScrolledPanel):
+    """
+    Main window of the GUI that houses all of the different panels needed for AWAKE BPM.
+    Implemented for the sake of having a top-level class that inherits scrolling functionality
+    (wx.Frame does not)
+    """
+
     def __init__(self, parent, data_processor):
-        # wx.Frame.__init__(self, parent=parent, id=wx.ID_ANY, title=title)
         scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
 
         self.data_processor = data_processor
@@ -47,15 +48,11 @@ class CtrlWindow(scrolled.ScrolledPanel):
         self.__do_layout()
 
         self.__attach_events()
-        # self.t = threading.Thread(target=self._check_for_close_signal)
-        # self.t.start()
+        # Enables scrolling when not all the contents of this window are visible in the top-level frame
         self.SetupScrolling()
 
     def __set_properties(self):
         pass
-        # Light-grey
-        # self.SetBackgroundColour(wx.Colour(240, 240, 240))
-        # self.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
 
     def __do_layout(self):
         sizer_btm_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -65,8 +62,8 @@ class CtrlWindow(scrolled.ScrolledPanel):
         sizer_btm_row.Add(self.otherparam_panel, 1, wx.EXPAND | wx.ALL, 0)
 
         sizer_mid_right_top = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_mid_right_top.Add(self.flashrdwr_panel, 0, wx.EXPAND, 0)
-        sizer_mid_right_top.Add(self.fifo_occupancy_panel, 0, wx.EXPAND, 0)
+        sizer_mid_right_top.Add(self.flashrdwr_panel, 1, wx.EXPAND, 0)
+        sizer_mid_right_top.Add(self.fifo_occupancy_panel, 1, wx.EXPAND, 0)
         sizer_mid_right_top.Add(self.event_num_panel, 1, wx.EXPAND, 0)
 
         sizer_mid_right = wx.BoxSizer(wx.VERTICAL)
@@ -93,12 +90,8 @@ class CtrlWindow(scrolled.ScrolledPanel):
         self.SetAutoLayout(True)
         sizer_main.Fit(self)
 
-        # Set the minimum size of the window once all of the sizers have been set up.
-        # self.SetMinSize(self.GetSize())
-
     def __attach_events(self):
         self.Bind(wx.EVT_BUTTON, self.update_controls)
-        # self.Bind(wx.EVT_CLOSE, self.OnClose)
 
     def update_controls(self, event):
         self.address_panel.initialize_controls()
@@ -109,32 +102,6 @@ class CtrlWindow(scrolled.ScrolledPanel):
         self.mode_panel.initialize_controls()
         self.otherparam_panel.initialize_controls()
         self.status_panel.initialize_controls()
+        # No data in the flash for fifo occupancy and event num, so those panels are ignored
 
         wx.MessageBox("Flash Read Successful - All Settings Updated", "Success")
-
-    # def get_thread(self):
-    #     return self.t
-    #
-    # def _check_for_close_signal(self):
-    #     """
-    #     Worker thread that checks if the GUI should still be open
-    #     """
-    #     while True:
-    #         if self:
-    #             if not self.data_processor.get_ctrl_gui_state():
-    #                 wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
-    #                 break
-    #             time.sleep(0.5)
-    #         else:
-    #             break
-
-    # def OnClose(self, event):
-    #     with self.data_processor.get_main_lock():
-    #         self.data_processor.set_ctrl_gui_state(False)
-    #         self.fifo_occupancy_panel.set_stop_flag(True)
-    #         self.event_num_panel.set_stop_flag(True)
-    #
-    #     self.fifo_occupancy_panel.get_thread().join()
-    #     self.event_num_panel.get_thread().join()
-    #     self.get_thread().join()
-    #     self.Destroy()

@@ -35,7 +35,7 @@ class AddressPanel(wx.Panel):
         self.initialize_controls()
 
     def __set_properties(self):
-
+        # Associate the appropriate validator to each address input
         for i in range(len(self.txt_mac_address)):
             # Each portion of the MAC address is 2 characters
             self.txt_mac_address[i].SetMaxLength(2)
@@ -82,7 +82,6 @@ class AddressPanel(wx.Panel):
         """
         Writes the current MAC/IP address (stored in the BPM's flash buffer) to the appropriate TextCtrl boxes.
         """
-
         for i in range(len(self.txt_mac_address)):
             self.txt_mac_address[i].SetValue(format(self.data_processor.get_mac_address(i), 'x'))
 
@@ -121,6 +120,10 @@ class AddressPanel(wx.Panel):
 
 
 class AddressValidator(Validator.Validator):
+    """
+    Validator subclass for validating address inputs
+    """
+
     def __init__(self, flag):
         Validator.Validator.__init__(self)
         # The flag is for determining whether the MAC address or the IP address is being validated
@@ -173,26 +176,21 @@ class AddressValidator(Validator.Validator):
                 textCtrl.Refresh()
                 return False
             else:
-                # Add a success message here
                 textCtrl.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
                 textCtrl.Refresh()
                 return True
 
     def OnChar(self, event):
         key = event.GetKeyCode()
-
         if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
             event.Skip()
             return
-
         if self.flag == HEX_ONLY and chr(key) in string.hexdigits:
             event.Skip()
             return
-
         if self.flag == DIGIT_ONLY and chr(key) in string.digits:
             event.Skip()
             return
-
         if not wx.Validator_IsSilent():
             wx.Bell()
 
