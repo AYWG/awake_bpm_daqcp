@@ -62,29 +62,29 @@ class CtrlWindow(scrolled.ScrolledPanel):
         sizer_btm_row.Add(self.otherparam_panel, 1, wx.EXPAND | wx.ALL, 0)
 
         sizer_mid_right_top = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_mid_right_top.Add(self.flashrdwr_panel, 1, wx.EXPAND, 0)
-        sizer_mid_right_top.Add(self.fifo_occupancy_panel, 1, wx.EXPAND, 0)
-        sizer_mid_right_top.Add(self.event_num_panel, 1, wx.EXPAND, 0)
+        sizer_mid_right_top.Add(self.flashrdwr_panel, 0, wx.EXPAND, 0)
+        sizer_mid_right_top.Add(self.fifo_occupancy_panel, 0, wx.EXPAND, 0)
+        sizer_mid_right_top.Add(self.event_num_panel, 0, wx.EXPAND, 0)
 
         sizer_mid_right = wx.BoxSizer(wx.VERTICAL)
         sizer_mid_right.Add(sizer_mid_right_top, 0, wx.EXPAND | wx.ALL, 4)
-        sizer_mid_right.Add(self.afectrl_panel, 1, wx.EXPAND | wx.ALL, 4)
+        sizer_mid_right.Add(self.afectrl_panel, 0, wx.EXPAND | wx.ALL, 4)
         sizer_mid_right.Add(self.address_panel, 0, wx.EXPAND | wx.ALL, 4)
 
         sizer_mid_row = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_mid_row.Add(self.mode_panel, 1, wx.EXPAND | wx.ALL, 4)
-        sizer_mid_row.Add(sizer_mid_right, 1, wx.EXPAND | wx.ALL, 4)
+        sizer_mid_row.Add(self.mode_panel, 0, wx.EXPAND | wx.ALL, 4)
+        sizer_mid_row.Add(sizer_mid_right, 0, wx.EXPAND | wx.ALL, 4)
 
         sizer_top_row = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_top_row.Add(self.status_panel, 1, wx.EXPAND | wx.ALL, 4)
+        sizer_top_row.Add(self.status_panel, 1, wx.SHAPED | wx.ALL, 4)
 
         sizer_vert = wx.BoxSizer(wx.VERTICAL)
-        sizer_vert.Add(sizer_top_row, 1, wx.EXPAND)
-        sizer_vert.Add(sizer_mid_row, 2, wx.EXPAND)
-        sizer_vert.Add(sizer_btm_row, 1, wx.EXPAND)
+        sizer_vert.Add(sizer_top_row, 0, wx.EXPAND)
+        sizer_vert.Add(sizer_mid_row, 0, wx.EXPAND)
+        sizer_vert.Add(sizer_btm_row, 0, wx.EXPAND)
 
         sizer_main = wx.BoxSizer(wx.VERTICAL)
-        sizer_main.Add(sizer_vert, 1, wx.EXPAND)
+        sizer_main.Add(sizer_vert, 0, wx.SHAPED)
 
         self.SetSizer(sizer_main)
         self.SetAutoLayout(True)
