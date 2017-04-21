@@ -60,7 +60,8 @@ class StatusPanel(wx.Panel):
 
         sizer_mode_box = wx.BoxSizer(wx.HORIZONTAL)
         sizer_mode_box.Add(self.lbl_mode_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
-        sizer_mode_box.Add(sizer_mode_LED_box, 1, (wx.TOP | wx.BOTTOM) | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_mode_box.AddSpacer(19) # Add space so that LEDs line up with the rest
+        sizer_mode_box.Add(sizer_mode_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
 
         # AFE CONTROL REGISTER
         sizer_afe_ctrl_LED_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -86,6 +87,7 @@ class StatusPanel(wx.Panel):
 
         sizer_status_reg_box = wx.BoxSizer(wx.HORIZONTAL)
         sizer_status_reg_box.Add(self.lbl_status_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
+        sizer_status_reg_box.AddSpacer(9)
         sizer_status_reg_box.Add(sizer_status_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
 
         sizer_status_box.Add(self.btn_update_status, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
