@@ -619,13 +619,13 @@ class DataProcessor:
             self.evt_num = packet[1] & 0xFFFF
             self.current_time += 1
             # extract new data from packet
-            x = TCP.s16(packet[3] >> 16)
-            y = TCP.s16(packet[3] & 0xFFFF)
-            s = TCP.s16(packet[4] >> 16)
-            PA = self.int_to_float(packet[5])
-            PB = self.int_to_float(packet[6])
-            PC = self.int_to_float(packet[7])
-            PD = self.int_to_float(packet[8])
+            x = TCP.s16(packet[2] >> 16)
+            y = TCP.s16(packet[2] & 0xFFFF)
+            s = TCP.s16(packet[3] >> 16)
+            PA = self.int_to_float(packet[4])
+            PB = self.int_to_float(packet[5])
+            PC = self.int_to_float(packet[6])
+            PD = self.int_to_float(packet[7])
 
             # add new data to old data
             self.time_data.append(self.current_time)
