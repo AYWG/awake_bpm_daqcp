@@ -1,6 +1,9 @@
 import wx
 import threading
 import time
+import wx.lib.newevent
+
+new_val_event, EVT_NEW_VAL = wx.lib.newevent.NewEvent()
 
 
 class FIFOOccupancyPanel(wx.Panel):
@@ -61,7 +64,7 @@ class FIFOOccupancyPanel(wx.Panel):
         sizer_main.Fit(self)
 
     def __attach_events(self):
-        pass
+        self.Bind(EVT_NEW_VAL, self.on_new_val)
 
     def initialize_controls(self):
         self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB)))
@@ -85,10 +88,20 @@ class FIFOOccupancyPanel(wx.Panel):
         while True:
             with self.data_processor.get_gui_lock():
                 if not self.get_stop_flag():
-                    self.txt_ffifo_ab_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB)))
-                    self.txt_ffifo_cd_words.SetValue(str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChCD)))
-                    self.txt_sfifo_words.SetValue(str(self.data_processor.get_sfifo_words_cached()))
+                    # Read the new values
+                    ffifo_words_ab = str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChAB))
+                    ffifo_words_cd = str(self.data_processor.get_ffifo_words_cached(self.data_processor.ChCD))
+                    sfifo_words = str(self.data_processor.get_sfifo_words_cached())
+                    # Create the event
+                    event = new_val_event(ffifo_words_ab=ffifo_words_ab, ffifo_words_cd=ffifo_words_cd, sfifo_words=sfifo_words)
+                    # Post the event
+                    wx.PostEvent(self, event)
                 else:
                     break
 
             time.sleep(0.5)
+
+    def on_new_val(self, event):
+        self.txt_ffifo_ab_words.SetValue(event.ffifo_words_ab)
+        self.txt_ffifo_cd_words.SetValue(event.ffifo_words_cd)
+        self.txt_sfifo_words.SetValue(event.sfifo_words)

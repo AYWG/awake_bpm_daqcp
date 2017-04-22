@@ -1,6 +1,9 @@
 import wx
 import threading
 import time
+import wx.lib.newevent
+
+new_val_event, EVT_NEW_VAL = wx.lib.newevent.NewEvent()
 
 
 class EventNumPanel(wx.Panel):
@@ -46,8 +49,7 @@ class EventNumPanel(wx.Panel):
         sizer_main.Fit(self)
 
     def __attach_events(self):
-        # no events
-        pass
+        self.Bind(EVT_NEW_VAL, self.on_new_val)
 
     def initialize_controls(self):
         self.txt_event_num.SetValue(str(self.data_processor.get_evt_num_cached()))
@@ -69,9 +71,17 @@ class EventNumPanel(wx.Panel):
         while True:
             with self.data_processor.get_gui_lock():
                 if not self.get_stop_flag():
-                    self.txt_event_num.SetValue(str(self.data_processor.get_evt_num_cached()))
+                    # Read the new value
+                    evt_num = str(self.data_processor.get_evt_num_cached())
+                    # Create the event
+                    event = new_val_event(evt_num=evt_num)
+                    # Post the event
+                    wx.PostEvent(self, event)
                 else:
                     break
 
             time.sleep(0.5)
+
+    def on_new_val(self, event):
+        self.txt_event_num.SetValue(event.evt_num)
 
