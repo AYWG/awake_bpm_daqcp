@@ -1,11 +1,12 @@
-# Panel for editing parameters not included in the other panels (e.g. BPM Diameter)
-
 import wx
-import string
 import Validator
 
 
 class OtherParamPanel(wx.Panel):
+    """
+     Panel for editing parameters not included in the other panels (e.g. BPM Diameter)
+    """
+
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
@@ -57,6 +58,10 @@ class OtherParamPanel(wx.Panel):
 
 
 class OtherParamValidator(Validator.Validator):
+    """
+    Validator subclass for validating other parameters
+    """
+
     def __init__(self):
         Validator.Validator.__init__(self)
 

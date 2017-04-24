@@ -1,12 +1,10 @@
 import wx
-# import wx.lib.scrolledpanel as scrolled
 
 
 class ModePanel(wx.Panel):
     """
     Panel for setting the BPM mode
     """
-# class ModePanel(scrolled.ScrolledPanel):
     def __init__(self, parent, title, data_processor):
         # scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
@@ -41,7 +39,6 @@ class ModePanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
-        # self.SetupScrolling()
 
     def __set_properties(self):
         pass
@@ -128,6 +125,9 @@ class ModePanel(wx.Panel):
 
         mode = self.data_processor.get_mode()
 
+        # In order to determine which check boxes to set, we take the given register value
+        # and work "backwards" from the value of the most significant bit to the least significant bit of the register.
+        # E.g. the same logic can be used to determine that the value 135 is made up of 128 + 4 + 2 + 1
         if mode - 0x4000 >= 0:
             mode -= 0x4000
             self.chk_onfly_cal.SetValue(True)
@@ -157,6 +157,9 @@ class ModePanel(wx.Panel):
             self.chk_run.SetValue(True)
 
     def OnUpdate(self, event):
+        """
+        Event handler for the update button
+        """
         mode = 0x0
 
         # The value added represents in binary the number that must be written to the control register

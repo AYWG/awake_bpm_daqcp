@@ -1,7 +1,7 @@
-import wx
 import string
+import wx
 import Validator
-import Channels
+from Constants import Channels
 
 
 class ChGainPanel(wx.Panel):

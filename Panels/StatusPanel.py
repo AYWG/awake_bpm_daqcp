@@ -1,5 +1,4 @@
 import wx
-# import  wx.lib.scrolledpanel as scrolled
 import LED
 
 # LED states
@@ -8,14 +7,12 @@ ON = 1
 
 
 class StatusPanel(wx.Panel):
-# class StatusPanel(scrolled.ScrolledPanel):
     """
     Panel for showing what settings are currently enabled (akin to the LED indicators in the LabVIEW GUI)
     """
 
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, name=title)
-        # scrolled.ScrolledPanel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
         self.btn_update_status = wx.Button(self, wx.ID_ANY, 'Update')
 
@@ -39,7 +36,6 @@ class StatusPanel(wx.Panel):
         self.__do_layout()
         self.__attach_events()
         self.initialize_controls()
-        # self.SetupScrolling()
 
     def __set_properties(self):
         pass
@@ -90,6 +86,7 @@ class StatusPanel(wx.Panel):
         sizer_status_reg_box.AddSpacer(9)
         sizer_status_reg_box.Add(sizer_status_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
 
+        # Combine everything
         sizer_status_box.Add(self.btn_update_status, 0, wx.SHAPED | wx.ALIGN_CENTER, 0)
         sizer_status_box.Add(sizer_mode_box, 1, wx.EXPAND, 0)
         sizer_status_box.Add(sizer_afe_ctrl_box, 1, wx.EXPAND, 0)
@@ -106,7 +103,7 @@ class StatusPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_status)
 
     def initialize_controls(self):
-        # Read Mode, AFE Control, and Status Registers
+        # Read the Mode, AFE Control, and Status Registers
         self._clear_LEDs()
         self._update_mode_LEDs()
         self._update_afe_ctrl_LEDs()
@@ -181,5 +178,8 @@ class StatusPanel(wx.Panel):
                 self.status_LEDs[i].SetState(ON)
 
     def OnUpdate(self, event):
+        """
+        Event handler for the update button
+        """
         self.initialize_controls()
         wx.MessageBox("Status successfully updated", "Success")

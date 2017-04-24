@@ -1,16 +1,18 @@
 import wx
 import wx.lib.scrolledpanel as scrolled
-import AddressPanel
-import AFECtrlPanel
-import CalGainPanel
-import ChGainPanel
-import EventParamPanel
-import FlashReadWritePanel
-import ModePanel
-import OtherParamPanel
-import StatusPanel
-import FIFOOccupancyPanel
-import EventNumPanel
+from Panels import (
+    AFECtrlPanel,
+    AddressPanel,
+    CalGainPanel,
+    ChGainPanel,
+    EventNumPanel,
+    EventParamPanel,
+    FIFOOccupancyPanel,
+    FlashReadWritePanel,
+    ModePanel,
+    OtherParamPanel,
+    StatusPanel
+)
 
 
 class CtrlWindow(scrolled.ScrolledPanel):

@@ -51,6 +51,7 @@ class CtrlFrame(wx.Frame):
         while True:
             if self:
                 if not self.data_processor.get_ctrl_gui_state():
+                    # Post a close event
                     wx.PostEvent(self.GetEventHandler(), wx.PyCommandEvent(wx.EVT_CLOSE.typeId, self.GetId()))
                     break
                 time.sleep(0.5)
@@ -58,6 +59,10 @@ class CtrlFrame(wx.Frame):
                 break
 
     def OnClose(self, event):
+        """
+        Event handler for close events, which occur either programmatically from _check_for_close_signal or when
+        the user clicks the 'X' button.
+        """
         with self.data_processor.get_gui_lock():
             self.data_processor.set_ctrl_gui_state(False)
             self.ctrl_window.fifo_occupancy_panel.set_stop_flag(True)

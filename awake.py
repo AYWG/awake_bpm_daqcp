@@ -1,21 +1,20 @@
 #!/usr/bin/python 
 # This is a standalone DAQ/control program for AWAKE BPM SPU box, 
-# So far tested with Python 2.7.12 under Windows8/64 bit.
-# Oct.27,2016: text mode implemented. 
+# So far tested with Python 2.7.12 under Windows8/64 bit and Scientific Linux 6.7 32 bit
+# Oct.27,2016: text mode implemented.
+# Apr.21,2017: Plotting + GUI implemented
 # Version: 
-# awake.py  :  text mode, stable 
+# awake.py: plotting and control GUI, stable
 # awake1.py: add a seperate thread to detect key press, works, but not great. Nov.23,2016
 # awake2.py: text + chart plot mode, not stable
 
-import time
-import threading
-import multiprocessing
 import logging
-import DataProcessor
-import Commands
-import Modes
-import Plots
+import multiprocessing
+import threading
+import time
+from Constants import Commands, Modes, Plots
 import CtrlGUI
+import DataProcessor
 
 # configure logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
@@ -23,11 +22,10 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 def data_collector(data_processor, command_queue, lock):
     """
-    thread that reads from the FPGA and updates the plots
-    :param data_processor:
-    :param command_queue:
-    :param lock:
-    :return:
+    Continuously read from the FPGA and update the plots
+    :param data_processor: the DataProcessor instance that handles ethernet communication and plotting
+    :param command_queue: the Queue instance used to process commands
+    :param lock: the lock that controls access to the data_processor's op_mode
     """
     while True:
         # Roughly the same logic as in LabVIEW
@@ -60,9 +58,8 @@ def is_thread_active(name):
 
 def ctrl_gui_handler(data_processor):
     """
-    Creates the control GUI and keeps it running until the user closes it
-    :param data_processor:
-    :return:
+    Create the control GUI and keep it running until the user closes it
+    :param data_processor: the DataProcessor instance that handles ethernet communication and plotting
     """
     data_processor.set_ctrl_gui_state(True)
     gui = CtrlGUI.CtrlGUI(data_processor)
@@ -72,9 +69,9 @@ def ctrl_gui_handler(data_processor):
 def plot_refresher(data_processor, command_queue, lock):
     """
     Refreshes the plot while data is not being collected
-    :param data_processor:
-    :param command_queue:
-    :return:
+    :param data_processor: the DataProcessor instance that handles ethernet communication and plotting
+    :param command_queue: the Queue instance used to process commands
+    :param lock: the lock that controls access to the data_processor's op_mode
     """
     while True:
         with lock:
@@ -86,6 +83,13 @@ def plot_refresher(data_processor, command_queue, lock):
 
 
 def process_data(host, port, command_queue):
+    """
+    Initiates and manages the data processor (which handles ethernet communication and plots) based on commands
+    received from the user
+    :param host: the IP address of the BPM
+    :param port: the port of the BPM
+    :param command_queue: the Queue instance used to process commands
+    """
     data_processor = DataProcessor.DataProcessor(host, port)
     data_processor.init_config()
 
@@ -95,7 +99,7 @@ def process_data(host, port, command_queue):
 
     while True:
         try:
-            # Blocks until a command is available
+            # Block until a command is available
             command = command_queue.get()
 
             if command == Commands.START_MEASURING_DATA:

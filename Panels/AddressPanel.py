@@ -105,7 +105,7 @@ class AddressPanel(wx.Panel):
 
     def _format_mac_address(self):
         """
-        Formats the values currently in the MAC address text boxes to be 2-character hex strings.
+        Formats the values currently in the MAC address text boxes to be 2-character hex strings (uppercase letters).
         """
         mac_address = []
 
@@ -190,5 +190,4 @@ class AddressValidator(Validator.Validator):
             return
         if not wx.Validator_IsSilent():
             wx.Bell()
-
         return

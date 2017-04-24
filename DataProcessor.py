@@ -1,12 +1,11 @@
-import TCP
-import time
 import sys
+import time
 import matplotlib
+import TCP
 
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-import Modes
-import Plots
+from Constants import Plots, Modes
 import threading
 import warnings
 
@@ -39,13 +38,6 @@ class DataProcessor:
         self.cal_gain_b = 1.0
         self.cal_gain_c = 1.0
         self.cal_gain_d = 1.0
-
-        # self.MODE_INT_TRIG = 0x105  # mode reg bit = RUN + Internal trigger + BLR readout       0000 0001 0000 0101
-        # self.MODE_EXT_TRIG = 0x101  # mode reg bit = RUN + External trigger + BLR readout       0000 0001 0000 0001
-        # self.MODE_SEL_TRIG = 0x103  # mode reg bit = RUN + Self trigger + BLR readout           0000 0001 0000 0011
-        # self.MODE_CAL = 0x2105  # mode reg bit = RUN + Self trigger + BLR readout + AFE Cal.    0010 0001 0000 0101
-
-        # self.MODE_TEMP = 0x0020  # mode reg bit = Ena temperature reading                       0000 0000 0010 0000
 
         self.mode = 0x101  # mode reg bit = RUN + External trigger + BLR readout
 
@@ -169,6 +161,9 @@ class DataProcessor:
             return self.IO.read_reg('CR?')
 
     def set_mode(self, mode):
+        """
+        :param mode: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('CR', mode) is False: sys.exit()
         time.sleep(0.1)
@@ -178,6 +173,9 @@ class DataProcessor:
             return self.IO.read_reg('AFE:CTRL?')
 
     def set_afe_gain(self, gain):
+        """
+        :param gain: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('AFE:CTRL', gain) is False: sys.exit()
         time.sleep(0.1)
@@ -187,6 +185,9 @@ class DataProcessor:
             return self.IO.read_reg('BL:LEN?')
 
     def set_bl_len(self, bl_len):
+        """
+        :param bl_len: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('BL:LEN', bl_len) is False: sys.exit()
         time.sleep(0.1)
@@ -196,6 +197,9 @@ class DataProcessor:
             return self.IO.read_reg('EVT:LEN?')
 
     def set_evt_len(self, evt_len):
+        """
+        :param evt_len: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('EVT:LEN', evt_len) is False: sys.exit()
         time.sleep(0.1)
@@ -205,6 +209,9 @@ class DataProcessor:
             return self.IO.read_reg('EVT:TAIL?')
 
     def set_evt_tail(self, evt_tail):
+        """
+        :param evt_tail: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('EVT:TAIL', evt_tail) is False: sys.exit()
         time.sleep(0.1)
@@ -214,6 +221,9 @@ class DataProcessor:
             return self.IO.read_reg('TRIG:TH?')
 
     def set_trig_th(self, trig_th):
+        """
+        :param trig_th: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('TRIG:TH', trig_th) is False: sys.exit()
         time.sleep(0.1)
@@ -223,6 +233,9 @@ class DataProcessor:
             return self.IO.read_reg('TRIG:DT?')
 
     def set_trig_dt(self, trig_dt):
+        """
+        :param trig_dt: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('TRIG:DT', trig_dt) is False: sys.exit()
         time.sleep(0.1)
@@ -232,6 +245,9 @@ class DataProcessor:
             return self.IO.read_reg('TRIG:DL?')
 
     def set_trig_dl(self, trig_dl):
+        """
+        :param trig_dl: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('TRIG:DL', trig_dl) is False: sys.exit()
         time.sleep(0.1)
@@ -241,6 +257,9 @@ class DataProcessor:
             return self.IO.read_reg('BPM:DIA?')
 
     def set_bpm_dia(self, bpm_dia):
+        """
+        :param bpm_dia: non-negative integer
+        """
         with self.eth_lock:
             if self.IO.write_reg('BPM:DIA', bpm_dia) is False: sys.exit()
         time.sleep(0.1)
@@ -255,9 +274,8 @@ class DataProcessor:
 
     def set_cal_gain(self, channel, cal_gain):
         """
-
         :param channel: uppercase character corresponding to the appropriate channel, e.g. 'A'
-        :param cal_gain:
+        :param cal_gain: the cal gain value for channel in IEEE 754 SP floating format
         """
         with self.eth_lock:
             if self.IO.write_reg('CAL:GAIN:' + channel, cal_gain) is False: sys.exit()
@@ -265,18 +283,16 @@ class DataProcessor:
 
     def get_ch_gain(self, channel):
         """
-
         :param channel: uppercase character corresponding to the appropriate channel, e.g. 'A'
-        :return:
+        :return: the ch gain value for channel in IEEE 754 SP floating format
         """
         with self.eth_lock:
             return self.IO.read_reg('CH:GAIN:' + channel + '?')
 
     def set_ch_gain(self, channel, ch_gain):
         """
-
         :param channel: uppercase character corresponding to the appropriate channel, e.g. 'A'
-        :param ch_gain:
+        :param ch_gain: the ch gain value for channel in IEEE 754 SP floating format
         :return:
         """
         with self.eth_lock:
@@ -311,10 +327,24 @@ class DataProcessor:
         time.sleep(0.1)
 
     def get_mac_address(self, index):
+        """
+        Get the integer value at index of the MAC address stored in the MicroBlaze flash buffer (see set_mac_address)
+        :param index: which portion of the MAC address to read from
+        :return: the integer value of that portion [0-255]
+        """
         with self.eth_lock:
             return self.IO.read_reg('FL:BUF:MAC:' + str(index) + '?')
 
     def set_mac_address(self, index, value):
+        """
+        Writes a new value for the MAC address at position index to the MicroBlaze flash buffer, where index is an
+        integer in the range [0, 5] that corresponds to one of the 6 portions of an IP address.
+        E.g. for the MAC address 00.01.02.03.04.05, 00 corresponds to index 0, 01 corresponds to index 1, etc.
+        Value is an integer in the range [0, 255]
+
+        :param index: which portion of the MAC address to write to
+        :param value: the integer value to write
+        """
         with self.eth_lock:
             if self.IO.write_reg('FL:BUF:MAC:' + str(index), value) is False: sys.exit()
         time.sleep(0.1)
@@ -337,7 +367,6 @@ class DataProcessor:
 
         :param index: which portion of the IP address to write to
         :param value: the integer value to write
-        :return:
         """
         with self.eth_lock:
             if self.IO.write_reg('FL:BUF:IP:' + str(index), value) is False: sys.exit()

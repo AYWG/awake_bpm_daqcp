@@ -3,6 +3,7 @@ import threading
 import time
 import wx.lib.newevent
 
+# Custom event
 new_val_event, EVT_NEW_VAL = wx.lib.newevent.NewEvent()
 
 

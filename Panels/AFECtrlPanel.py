@@ -84,6 +84,10 @@ class AFECtrlPanel(wx.Panel):
         """
         gain = self.data_processor.get_afe_gain()
 
+        # In order to determine which check boxes to set, we take the given register value
+        # and work "backwards" from the value of the most significant bit to the least significant bit of the register.
+        # E.g. the same logic can be used to determine that the value 135 is made up of 128 + 4 + 2 + 1
+        # For the AFE Control Register, only bits 0-4 and 9-13 are used.
         for i in range(13, 8, -1):
             if gain - (1 << i) >= 0:
                 gain -= 1 << i

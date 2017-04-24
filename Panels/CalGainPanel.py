@@ -1,11 +1,14 @@
-# Panel for adjusting calibration gain
-
-import wx
 import string
+import wx
 import Validator
-import Channels
+from Constants import Channels
+
 
 class CalGainPanel(wx.Panel):
+    """
+    Panel for adjusting calibration gain
+    """
+
     def __init__(self, parent, title, data_processor):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.data_processor = data_processor
@@ -54,6 +57,9 @@ class CalGainPanel(wx.Panel):
             self.txt_cal_gain[i].SetValue(str(cal_gain))
 
     def OnUpdate(self, event):
+        """
+        Event handler for the update button
+        """
         if self.Validate():
             for i in range(len(self.txt_cal_gain)):
                 # Everything is validated, so convert the inputs to floats
@@ -69,6 +75,10 @@ class CalGainPanel(wx.Panel):
 
 
 class CalGainValidator(Validator.Validator):
+    """
+    Validator subclass for validating cal gain inputs
+    """
+
     def __init__(self):
         Validator.Validator.__init__(self)
 
@@ -100,23 +110,18 @@ class CalGainValidator(Validator.Validator):
             textCtrl.Refresh()
             return False
         else:
-            # Add a success message here
             textCtrl.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
             textCtrl.Refresh()
             return True
 
     def OnChar(self, event):
         key = event.GetKeyCode()
-
         if key < wx.WXK_SPACE or key == wx.WXK_DELETE or key > 255:
             event.Skip()
             return
-
         if chr(key) in string.digits or chr(key) == '.' or chr(key) == '-':
             event.Skip()
             return
-
         if not wx.Validator_IsSilent():
             wx.Bell()
-
         return
