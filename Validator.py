@@ -25,13 +25,13 @@ class Validator(wx.PyValidator):
 
     def TransferToWindow(self):
         """
-        Don't really need to worry about this
+        Don't need to worry about this
         """
         return True
 
     def TransferFromWindow(self):
         """
-        Don't really need to worry about this
+        Don't need to worry about this
         """
         return True
 
