@@ -58,7 +58,7 @@ class ChGainPanel(wx.Panel):
         """
         for i in range(len(self.txt_ch_gain)):
             ch_gain = self.data_processor.int_to_float(self.data_processor.get_ch_gain(Channels.channels[i]))
-            self.txt_ch_gain[i].SetValue(str(ch_gain))
+            self.txt_ch_gain[i].SetValue(format(ch_gain, '.4f')) # 4 decimal places
 
     def OnUpdate(self, event):
         if self.Validate():

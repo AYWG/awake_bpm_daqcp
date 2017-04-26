@@ -54,7 +54,7 @@ class CalGainPanel(wx.Panel):
     def initialize_controls(self):
         for i in range(len(self.txt_cal_gain)):
             cal_gain = self.data_processor.int_to_float(self.data_processor.get_cal_gain(Channels.channels[i]))
-            self.txt_cal_gain[i].SetValue(str(cal_gain))
+            self.txt_cal_gain[i].SetValue(format(cal_gain, '.4f')) # 4 decimal places
 
     def OnUpdate(self, event):
         """
