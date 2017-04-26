@@ -312,15 +312,6 @@ class DataProcessor:
             if self.IO.write_reg('CH:GAIN:' + channel, ch_gain) is False: sys.exit()
         time.sleep(0.1)
 
-    def wr_flash_buf(self):
-        """
-        Copies data currently in the FPGA to the MicroBlaze flash buffer. If data is to be written from the FPGA to
-        flash memory, then this method needs to be called before wr_flash.
-        """
-        with self.eth_lock:
-            if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
-        time.sleep(0.1)
-
     def rd_flash(self):
         """
         Copies data currently in the flash memory to the flash buffer as well as the FPGA
@@ -335,7 +326,14 @@ class DataProcessor:
         time.sleep(0.1)
 
     def wr_flash(self):
+        """
+        Copies data currently in the FPGA registers to the flash buffer as well as the flash memory
+        """
         with self.eth_lock:
+            # First, copy data currently in the FPGA to the MicroBlaze flash buffer.
+            # Then, copy the data from the flash buffer to the flash memory.
+            if self.IO.write_reg('FPGA:TO:FLASHBUF', 0) is False: sys.exit()  # the 0 is arbitrary
+            time.sleep(0.1)
             if self.IO.write_reg('FLASH:WRIT', 0) is False: sys.exit()  # the 0 is arbitrary
         time.sleep(0.1)
 

@@ -114,6 +114,5 @@ class AFECtrlPanel(wx.Panel):
                 gain += 1 << (9 + i)
 
         self.data_processor.set_afe_gain(gain)
-        self.data_processor.wr_flash_buf()
 
         wx.MessageBox("AFE Gain successfully updated", "Success")

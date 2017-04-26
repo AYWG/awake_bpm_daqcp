@@ -106,7 +106,7 @@ class EventParamPanel(wx.Panel):
             evt_tail = int(self.txt_evt_tail.GetValue())
             bl_len = int(self.txt_bl_len.GetValue())
 
-            # First load the relevant data to the FPGA
+            # Load the relevant data to the FPGA
             self.data_processor.set_trig_th(trig_th)
             self.data_processor.set_trig_dt(trig_dt)
             self.data_processor.set_trig_dl(trig_dl)
@@ -114,8 +114,6 @@ class EventParamPanel(wx.Panel):
             self.data_processor.set_evt_tail(evt_tail)
             self.data_processor.set_bl_len(bl_len)
 
-            # Then write to the flash buffer
-            self.data_processor.wr_flash_buf()
             wx.MessageBox("Event Parameters successfully updated", "Update Successful")
 
 

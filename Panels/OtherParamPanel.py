@@ -52,7 +52,6 @@ class OtherParamPanel(wx.Panel):
             bpm_dia = int(self.txt_bpm_dia.GetValue())
 
             self.data_processor.set_bpm_dia(bpm_dia)
-            self.data_processor.wr_flash_buf()
 
             wx.MessageBox("Other Parameters successfully updated", "Update Successful")
 

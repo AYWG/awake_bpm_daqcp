@@ -69,8 +69,6 @@ class CalGainPanel(wx.Panel):
                 # Load the relevant data to the FPGA
                 self.data_processor.set_cal_gain(Channels.channels[i], cal_gain)
 
-            # Finally, write to the flash buffer
-            self.data_processor.wr_flash_buf()
             wx.MessageBox("Ch Gain successfully updated", "Success")
 
 

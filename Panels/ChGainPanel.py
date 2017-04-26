@@ -70,8 +70,6 @@ class ChGainPanel(wx.Panel):
                 # Load the relevant data to the FPGA
                 self.data_processor.set_ch_gain(Channels.channels[i], ch_gain)
 
-            # Finally, write to the flash buffer
-            self.data_processor.wr_flash_buf()
             wx.MessageBox("Ch Gain successfully updated", "Success")
 
 
