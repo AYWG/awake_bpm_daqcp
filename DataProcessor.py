@@ -141,6 +141,13 @@ class DataProcessor:
             return self.IO.read_sfifo_wd()
 
     def get_ffifo_words_cached(self, channels):
+        """
+        Fulfils the same purpose as get_ffifo_words(), but returns a value that may not accurately reflect the value
+        stored in the FPGA at all times. This method serves the purpose of getting the most recently read value without
+        needing to send a new command over ethernet.
+        :param channels: 0 or 1, where 0 corresponds to Channels A & B and 1 corresponds to Channels C & D
+        :return: the # of words in the fast fifo corresponding to channels (cached)
+        """
 
         with self.data_lock:
             if channels == self.ChAB:
@@ -149,10 +156,16 @@ class DataProcessor:
                 return self.ffifo_cd_words
 
     def get_sfifo_words_cached(self):
+        """
+        See: get_ffifo_words_cached()
+        """
         with self.data_lock:
             return self.sfifo_words
 
     def get_evt_num_cached(self):
+        """
+        See: get_ffifo_words_cached()
+        """
         with self.data_lock:
             return self.evt_num
 
@@ -421,7 +434,6 @@ class DataProcessor:
         """
         Sets the current operation mode, which represents whether data is being collected or not
         :param op_mode: The new operation mode (PAUSED or RUNNING)
-        :return:
         """
         self.op_mode = op_mode
 
@@ -646,6 +658,7 @@ class DataProcessor:
 
         with self.data_lock:
             self.evt_num = packet[1] & 0xFFFF
+            # time increments with each data packet
             self.current_time += 1
             # extract new data from packet
             x = TCP.s16(packet[2] >> 16)
