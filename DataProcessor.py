@@ -677,8 +677,8 @@ class DataProcessor:
             self.power_c_data.append(PC)
             self.power_d_data.append(PD)
 
-            x_rms = int(TCP.rms(self.x_pos_data))
-            y_rms = int(TCP.rms(self.y_pos_data))
+            x_rms = TCP.rms(self.x_pos_data)
+            y_rms = TCP.rms(self.y_pos_data)
             self.x_rms_data.append(x_rms)
             self.y_rms_data.append(y_rms)
 

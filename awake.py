@@ -91,7 +91,8 @@ def process_data(host, port, command_queue):
     :param command_queue: the Queue instance used to process commands
     """
     data_processor = DataProcessor.DataProcessor(host, port)
-    data_processor.init_config()
+    # no longer needed with new firmware
+    # data_processor.init_config()
 
     op_mode_lock = threading.Lock()
 
