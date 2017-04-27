@@ -45,6 +45,9 @@ class OtherParamPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnUpdate, self.btn_update_other_param)
 
     def initialize_controls(self):
+        """
+        Load the current bpm dia value from the FPGA's register into the GUI
+        """
         self.txt_bpm_dia.SetValue(str(self.data_processor.get_bpm_dia()))
 
     def OnUpdate(self, event):

@@ -15,7 +15,7 @@ class ChGainPanel(wx.Panel):
         self.btn_update_ch_gain = wx.Button(self, wx.ID_ANY, 'Update')
         self.lbl_ch_gain = []
         self.txt_ch_gain = []
-        for i in range(4):
+        for i in range(len(Channels.channels)):
             self.lbl_ch_gain.append(wx.StaticText(self, wx.ID_ANY, 'CH:GAIN:' + Channels.channels[i]))
             self.txt_ch_gain.append(wx.TextCtrl(self, wx.ID_ANY, ''))
 
@@ -109,8 +109,7 @@ class ChGainValidator(Validator.Validator):
             textCtrl.Refresh()
             return False
         else:
-            textCtrl.SetBackgroundColour(
-                wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+            textCtrl.SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
             textCtrl.Refresh()
             return True
 

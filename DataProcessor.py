@@ -9,7 +9,7 @@ from Constants import Plots, Modes
 import threading
 import warnings
 
-warnings.filterwarnings("ignore")  # For suppressing a deprecating warning
+warnings.filterwarnings("ignore")  # For suppressing a deprecation warning
 
 
 class DataProcessor:
@@ -634,6 +634,7 @@ class DataProcessor:
         with self.data_lock:
             self.ffifo_ab_words = self.get_ffifo_words(self.ChAB)
             self.ffifo_cd_words = self.get_ffifo_words(self.ChCD)
+            # just like in LabVIEW, waveform data is ready based on occupancy of FFIFO AB
             return self.ffifo_ab_words > self.samples_to_read
 
     def is_new_data_rdy(self):
