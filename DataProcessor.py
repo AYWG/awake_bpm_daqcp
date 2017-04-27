@@ -157,6 +157,7 @@ class DataProcessor:
 
     def get_sfifo_words_cached(self):
         """
+        Gets cached occupancy of sfifo
         See: get_ffifo_words_cached()
         """
         with self.data_lock:
@@ -164,12 +165,16 @@ class DataProcessor:
 
     def get_evt_num_cached(self):
         """
+        Gets cached event #
         See: get_ffifo_words_cached()
         """
         with self.data_lock:
             return self.evt_num
 
     def get_mode(self):
+        """
+        :return: the Mode Register's value from the FPGA
+        """
         with self.eth_lock:
             return self.IO.read_reg('CR?')
 

@@ -29,19 +29,13 @@ class CtrlWindow(scrolled.ScrolledPanel):
 
         # Add panels
         self.address_panel = AddressPanel.AddressPanel(parent=self, title='Addresses', data_processor=data_processor)
-        self.afectrl_panel = AFECtrlPanel.AFECtrlPanel(parent=self, title='AFE Control Register',
-                                                       data_processor=data_processor)
-        self.calgain_panel = CalGainPanel.CalGainPanel(parent=self, title='Cal Gain Adj.',
-                                                       data_processor=data_processor)
-        self.chgain_panel = ChGainPanel.ChGainPanel(parent=self, title='Channel Gain Adj.',
-                                                    data_processor=data_processor)
-        self.eventparam_panel = EventParamPanel.EventParamPanel(parent=self, title='Event Parameters',
-                                                                data_processor=data_processor)
-        self.flashrdwr_panel = FlashReadWritePanel.FlashReadWritePanel(parent=self, title='Flash Read/Write',
-                                                                       data_processor=data_processor)
+        self.afectrl_panel = AFECtrlPanel.AFECtrlPanel(parent=self, title='AFE Control Register', data_processor=data_processor)
+        self.calgain_panel = CalGainPanel.CalGainPanel(parent=self, title='Cal Gain Adj.', data_processor=data_processor)
+        self.chgain_panel = ChGainPanel.ChGainPanel(parent=self, title='Channel Gain Adj.', data_processor=data_processor)
+        self.eventparam_panel = EventParamPanel.EventParamPanel(parent=self, title='Event Parameters', data_processor=data_processor)
+        self.flashrdwr_panel = FlashReadWritePanel.FlashReadWritePanel(parent=self, title='Flash Read/Write', data_processor=data_processor)
         self.mode_panel = ModePanel.ModePanel(parent=self, title='Mode Register', data_processor=data_processor)
-        self.otherparam_panel = OtherParamPanel.OtherParamPanel(parent=self, title='Other Parameters',
-                                                                data_processor=data_processor)
+        self.otherparam_panel = OtherParamPanel.OtherParamPanel(parent=self, title='Other Parameters', data_processor=data_processor)
         self.status_panel = StatusPanel.StatusPanel(parent=self, title='Status', data_processor=data_processor)
         self.fifo_occupancy_panel = FIFOOccupancyPanel.FIFOOccupancyPanel(parent=self, title='FIFO Occupancy', data_processor=data_processor)
         self.event_num_panel = EventNumPanel.EventNumPanel(parent=self, title='Event #', data_processor=data_processor)

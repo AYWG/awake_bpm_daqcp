@@ -83,7 +83,7 @@ class StatusPanel(wx.Panel):
 
         sizer_status_reg_box = wx.BoxSizer(wx.HORIZONTAL)
         sizer_status_reg_box.Add(self.lbl_status_LEDs, 0, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
-        sizer_status_reg_box.AddSpacer(9)
+        sizer_status_reg_box.AddSpacer(9) # Add space so that LEDs line up with the rest
         sizer_status_reg_box.Add(sizer_status_LED_box, 1, wx.ALL | wx.EXPAND, BOX_BORDER_WIDTH)
 
         # Combine everything
